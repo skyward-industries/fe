@@ -1,43 +1,115 @@
-import { Container, Typography } from "@mui/material";
-import Link from "next/link";
+import {
+  Container,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Box,
+} from "@mui/material";
+import { fetchProductById } from "@/services/fetchProductById";
+import SelectionButton from "@/components/Selection";
 
-// Fetch product details
-async function fetchProduct(groupId: string, productId: string) {
-  const res = await fetch(`http://localhost:3000/api/products/${groupId}/${productId}`);
-  if (!res.ok) throw new Error("Product not found");
-  return res.json();
-}
-
-export default async function ProductDetailPage(
-  props: { params?: Promise<{ groupId?: string; groupName?: string; productId?: string }> }
-) {
+export default async function ProductDetailPage(props: {
+  params: Promise<{ groupId: string; groupName: string; productId: string }>;
+}) {
   const params = await props.params;
-  // ✅ Ensure `params` is available before using it
-  if (!params?.groupId || !params?.groupName || !params?.productId) {
-    return (
-      <Container>
-        <Typography variant="h2">Invalid Product</Typography>
-        <Link href="/catalog">Back to Categories</Link>
-      </Container>
-    );
-  }
-
-  const { groupId, groupName, productId } = params;
-  const formattedGroupName = decodeURIComponent(groupName.replace("-", " "));
-
-  // ✅ Fetch product AFTER ensuring params exist
-  const product = await fetchProduct(groupId, productId);
-
+  const product = await fetchProductById(params.groupId, params.productId);
+  const formattedGroupName = decodeURIComponent(
+    params.groupName.replace("-", " ")
+  );
   return (
-    <Container>
-      <Typography variant="h2">{product.name}</Typography>
-      <Typography variant="h5">{product.price}</Typography>
-      <Typography>{product.description}</Typography>
+    <Container maxWidth="md" sx={{ my: 4 }}>
+      {/* Product Header */}
+      <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"}>
+      <Typography variant="h4" fontWeight="bold">
+        {product.name}
+      </Typography>
+      <SelectionButton item={product} />
+      </Box>
+      <Typography variant="subtitle1" color="textSecondary">
+        NSN: {product.nsn} | Part Number: {product.partNumber}
+      </Typography>
+      <Typography variant="subtitle2">Group: {formattedGroupName}</Typography>
+      <Typography sx={{ my: 2 }}>
+        Manufacturer: {product.manufacturer}
+      </Typography>
 
-      {/* ✅ Fix: Ensure params exist before using */}
-      <Link href={`/catalog/${groupId}/${groupName}`}>
-        Back to {formattedGroupName}
-      </Link>
+      {/* Specifications Table */}
+      <Typography variant="h6" sx={{ mt: 3 }}>
+        Specifications
+      </Typography>
+      <TableContainer component={Paper} sx={{ mt: 1 }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Characteristic</TableCell>
+              <TableCell>Value</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {product.specifications.map((spec, index) => (
+              <TableRow key={index}>
+                <TableCell>{spec.characteristic}</TableCell>
+                <TableCell>{spec.value}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Freight Information Table */}
+      <Typography variant="h6" sx={{ mt: 3 }}>
+        Freight Information
+      </Typography>
+      <TableContainer component={Paper} sx={{ mt: 1 }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Category</TableCell>
+              <TableCell>Code</TableCell>
+              <TableCell>Description</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {product.freightInfo.map((info, index) => (
+              <TableRow key={index}>
+                <TableCell>{info.category}</TableCell>
+                <TableCell>{info.code}</TableCell>
+                <TableCell>{info.description}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Cross Reference Table */}
+      <Typography variant="h6" sx={{ mt: 3 }}>
+        Cross Reference
+      </Typography>
+      <TableContainer component={Paper} sx={{ mt: 1 }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Part Number</TableCell>
+              <TableCell>CAGE Code</TableCell>
+              <TableCell>Manufacturer</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {product.manufacturers.map((manufacturer, index) => (
+              <TableRow key={index}>
+                <TableCell>{manufacturer.partNumber}</TableCell>
+                <TableCell>{manufacturer.cageCode}</TableCell>
+                <TableCell>{manufacturer.name}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Container>
   );
 }

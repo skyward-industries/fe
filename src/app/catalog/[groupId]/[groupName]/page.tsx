@@ -1,11 +1,7 @@
-import { Container, Typography, Card, CardContent } from "@mui/material";
+import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from "@mui/material";
 import Link from "next/link";
-
-async function fetchProducts(groupId: string) {
-  const res = await fetch(`http://localhost:3000/api/products/${groupId}`);
-  if (!res.ok) throw new Error("Failed to fetch products");
-  return res.json();
-}
+import { fetchProducts } from "@/services/fetchProducts";
+import { capitalizeWords } from "@/utils/capitalizeWords";
 
 export default async function ProductsPage(props: { params: Promise<{ groupId: string; groupName: string }> }) {
   const params = await props.params;
@@ -13,20 +9,64 @@ export default async function ProductsPage(props: { params: Promise<{ groupId: s
   const formattedGroupName = decodeURIComponent(params.groupName.replace("-", " "));
 
   return (
-    <Container>
-      <Typography variant="h2">{formattedGroupName} Products</Typography>
-      {products.map((product) => (
-        <Card key={product.id} sx={{ marginY: 2 }}>
-          <CardContent>
-            <Typography variant="h5">{product.name}</Typography>
-            <Typography>{product.price}</Typography>
-            <Link href={`/catalog/${params.groupId}/${params.groupName}/${product.id}`}>
-              View Details
-            </Link>
-          </CardContent>
-        </Card>
-      ))}
-      <Link href="/catalog">Back to Categories</Link>
+    <Container maxWidth="xl" sx={{ my: 4 }}>
+      {/* Page Title */}
+      <Typography variant="h3" fontWeight="bold" textAlign="center" gutterBottom>
+        {capitalizeWords(formattedGroupName)}
+      </Typography>
+
+      {/* Full-Screen Table */}
+      <TableContainer component={Paper} sx={{ maxHeight: "70vh", overflowY: "auto", borderRadius: 2 }}>
+        <Table stickyHeader>
+          <TableHead sx={{ backgroundColor: "primary.dark" }}>
+            <TableRow>
+              <TableCell sx={{ fontWeight: "bold" }}>Product Name</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>NSN</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Part Number</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Manufacturer</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Price</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Availability</TableCell>
+              <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {products.length > 0 ? (
+              products.map((product) => (
+                <TableRow key={product.id} hover>
+                  <TableCell>{product.name}</TableCell>
+                  <TableCell>{product.nsn || "N/A"}</TableCell>
+                  <TableCell>{product.partNumber || "N/A"}</TableCell>
+                  <TableCell>{product.manufacturer || "Unknown"}</TableCell>
+                  <TableCell>{product.price || "Contact for Quote"}</TableCell>
+                  <TableCell>{product.availability || "In Stock"}</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    <Button variant="contained" color="primary" size="small">
+                      <Link href={`/catalog/${params.groupId}/${params.groupName}/${product.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                        View Details
+                      </Link>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                  <Typography variant="h6" color="error">
+                    No products found.
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Back to Categories */}
+      <Button variant="outlined" sx={{ mt: 4, display: "block", mx: "auto" }}>
+        <Link href="/catalog" style={{ textDecoration: "none", color: "inherit" }}>
+          Back to Categories
+        </Link>
+      </Button>
     </Container>
   );
 }
