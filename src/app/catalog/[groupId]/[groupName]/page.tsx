@@ -5,10 +5,11 @@ import { fetchSubgroups } from "@/services/fetchSubgroups"; // Function to fetch
 import { Subgroup } from "@/types";
 
 interface SubgroupPageProps {
-  params: { groupId: string; groupName: string };
+  params: Promise<{ groupId: string; groupName: string }>;
 }
 
-export default async function SubgroupPage({ params }: SubgroupPageProps) {
+export default async function SubgroupPage(props: SubgroupPageProps) {
+  const params = await props.params;
   const { groupId, groupName } = params; // Extract groupId and groupName from URL
   const subgroups: Subgroup[] = await fetchSubgroups(groupId); // Fetch subgroups for this group
 
@@ -26,7 +27,6 @@ export default async function SubgroupPage({ params }: SubgroupPageProps) {
       <Typography variant="subtitle1" color="textSecondary" textAlign="center" gutterBottom>
         Explore the categories under {decodeURIComponent(groupName.replaceAll("-", " "))}.
       </Typography>
-
       {/* Table Display */}
       <TableContainer component={Paper} sx={{ maxHeight: "70vh", overflowY: "auto", borderRadius: 2 }}>
         <Table stickyHeader>

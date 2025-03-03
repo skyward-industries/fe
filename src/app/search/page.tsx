@@ -13,7 +13,8 @@ import {
   Typography,
 } from "@mui/material";
 
-export default async function PartInfoPage({ searchParams }: { searchParams: { nsn?: string } }) {
+export default async function PartInfoPage(props: { searchParams: Promise<{ nsn?: string }> }) {
+  const searchParams = await props.searchParams;
   if (!searchParams.nsn) {
     return (
       <Container maxWidth="md" sx={{ my: 4, textAlign: "center" }}>
