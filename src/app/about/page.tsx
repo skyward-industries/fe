@@ -62,7 +62,7 @@ export default function AboutPage() {
                 mission is straightforward: if you need a part, we are here to
                 help. We leverage our extensive network of manufacturers and
                 vendors, cultivated over several years, to source high-quality
-                aerospace parts tailored to our customers' specifications. Our
+                aerospace parts tailored to our customers specifications. Our
                 commitment to quality ensures that every part we provide meets
                 the highest standards of excellence.
               </Typography>
