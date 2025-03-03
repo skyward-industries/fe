@@ -153,6 +153,22 @@ export default function CartPage() {
                   />
                 </TableCell>
                 <TableCell>
+                  <Select
+                    displayEmpty
+                    value={condition[item.part_number] || ""}
+                    onChange={(e) =>
+                      handleConditionChange(item.part_number, e.target.value)
+                    }
+                  >
+                    <MenuItem value="">Select Condition</MenuItem>
+                    <MenuItem value="FN">FN</MenuItem>
+                    <MenuItem value="NS">NS</MenuItem>
+                    <MenuItem value="OH">OH</MenuItem>
+                    <MenuItem value="SD">SD</MenuItem>
+                    <MenuItem value="AR">AR</MenuItem>
+                  </Select>
+                </TableCell>
+                <TableCell>
                   <Button
                     variant="outlined"
                     color="error"
@@ -295,23 +311,6 @@ export default function CartPage() {
               fullWidth
               {...register("deliveryDate")}
               InputLabelProps={{ shrink: true }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <Controller
-              name="condition"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Select {...field} fullWidth displayEmpty>
-                  <MenuItem value="">Select Condition</MenuItem>
-                  <MenuItem value="FN">FN</MenuItem>
-                  <MenuItem value="NS">NS</MenuItem>
-                  <MenuItem value="OH">OH</MenuItem>
-                  <MenuItem value="SD">SD</MenuItem>
-                  <MenuItem value="AR">AR</MenuItem>
-                </Select>
-              )}
             />
           </Grid>
           <Grid item xs={12}>
