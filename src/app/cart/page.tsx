@@ -19,14 +19,14 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { Controller, FieldValues, useForm } from "react-hook-form";
+import { FieldValues, useForm } from "react-hook-form";
 
 export default function CartPage() {
   const { selectedItems, removeItem, clearSelection } = useSelection();
   const {
-    control,
     handleSubmit,
     register,
+    reset,
     formState: { errors },
   } = useForm();
 
@@ -97,15 +97,12 @@ export default function CartPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(submissionData),
       });
-      console.log(response);
       if (!response.ok) throw new Error("Submission failed");
-  
-      alert("Form submitted successfully! An email has been sent.");
+      reset();
       clearSelection();
       setCustomParts([{ part_number: "", cage_code: "", company_name: "", date_est: "" }]);
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert("Error submitting form.");
     } finally {
       setIsSubmitting(false);
     }
