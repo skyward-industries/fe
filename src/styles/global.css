@@ -3,9 +3,31 @@ html, body {
     margin: 0;
     padding: 0;
     overflow: hidden; /* Prevents extra scrollbars */
+    scroll-behavior: smooth;
+
   }
   
   main {
-    overflow-y: auto;
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
   }
+  /* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e1e1e; /* Dark track */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #007bff, #00c6ff); /* Gradient color */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #0056b3, #0094cc);
+}
+
+  

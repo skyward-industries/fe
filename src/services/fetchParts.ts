@@ -1,6 +1,12 @@
-export async function fetchProducts(groupId: string) {
+export interface Part {
+  id: string;
+  nsn: string;
+  fsg: string;
+  fsc: string;
+}
+export async function fetchParts(fsc: string) : Promise<Part> {
     try {
-      const res = await fetch(`http://localhost:3000/api/products/${groupId}`, { cache: "no-store" });
+      const res = await fetch(`http://localhost:5000/api/parts/${fsc}`, { cache: "no-store" });
   
       if (!res.ok) {
         throw new Error(`Failed to fetch products: ${res.statusText}`);

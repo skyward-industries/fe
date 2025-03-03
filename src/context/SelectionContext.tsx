@@ -1,17 +1,12 @@
 "use client";
 
+import { PartInfo } from "@/services/fetchPartInfo";
 import { createContext, useContext, useState, ReactNode } from "react";
 
-type Item = {
-  id: string;
-  name: string;
-  nsn?: string;
-  partNumber?: string;
-};
 
 type SelectionContextType = {
-  selectedItems: Item[];
-  addItem: (item: Item) => void;
+  selectedItems: PartInfo[];
+  addItem: (item: PartInfo) => void;
   removeItem: (id: string) => void;
   clearSelection: () => void;
 };
@@ -19,9 +14,9 @@ type SelectionContextType = {
 const SelectionContext = createContext<SelectionContextType | undefined>(undefined);
 
 export const SelectionProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedItems, setSelectedItems] = useState<Item[]>([]);
+  const [selectedItems, setSelectedItems] = useState<PartInfo[]>([]);
 
-  const addItem = (item: Item) => {
+  const addItem = (item: PartInfo) => {
     setSelectedItems((prev) => {
       if (!prev.find((i) => i.id === item.id)) {
         return [...prev, item];

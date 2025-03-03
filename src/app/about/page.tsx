@@ -4,7 +4,7 @@ export default function AboutPage() {
   return (
     <Container maxWidth="lg" sx={{ my: 4 }}>
       {/* Title Section */}
-      <Typography variant="h3" fontWeight="bold" textAlign="center" gutterBottom>
+      <Typography variant="h4" fontWeight="bold" textAlign="center" gutterBottom>
         About Skyward Industries
       </Typography>
       <Typography variant="subtitle1" color="textSecondary" textAlign="center" gutterBottom>

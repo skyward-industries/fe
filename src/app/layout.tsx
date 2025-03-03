@@ -20,7 +20,7 @@ export default function RootLayout({
         <MuiThemeProvider>
           <SelectionProvider>
             <Navbar />
-            <main style={{ flex: 1, overflowY: "auto" }}>{children}</main>
+            <main style={{ flex: 1, overflowY: "hidden" }}>{children}</main>
             <Footer />
           </SelectionProvider>
         </MuiThemeProvider>

@@ -1,72 +1,60 @@
+import { notFound } from "next/navigation";
 import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from "@mui/material";
 import Link from "next/link";
-import { fetchProducts } from "@/services/fetchProducts";
-import { capitalizeWords } from "@/utils/capitalizeWords";
+import { fetchSubgroups } from "@/services/fetchSubgroups"; // Function to fetch subgroups
+import { Subgroup } from "@/types";
 
-export default async function ProductsPage(props: { params: Promise<{ groupId: string; groupName: string }> }) {
-  const params = await props.params;
-  const products = await fetchProducts(params.groupId);
-  const formattedGroupName = decodeURIComponent(params.groupName.replace("-", " "));
+interface SubgroupPageProps {
+  params: { groupId: string; groupName: string };
+}
+
+export default async function SubgroupPage({ params }: SubgroupPageProps) {
+  const { groupId, groupName } = params; // Extract groupId and groupName from URL
+  const subgroups: Subgroup[] = await fetchSubgroups(groupId); // Fetch subgroups for this group
+
+  // If no subgroups are found, return a 404
+  if (!subgroups || subgroups.length === 0) {
+    notFound();
+  }
 
   return (
     <Container maxWidth="xl" sx={{ my: 4 }}>
       {/* Page Title */}
-      <Typography variant="h3" fontWeight="bold" textAlign="center" gutterBottom>
-        {capitalizeWords(formattedGroupName)}
+      <Typography variant="h4" fontWeight="bold" textAlign="center" gutterBottom>
+        {decodeURIComponent(groupName.replaceAll("-", " "))}
+      </Typography>
+      <Typography variant="subtitle1" color="textSecondary" textAlign="center" gutterBottom>
+        Explore the categories under {decodeURIComponent(groupName.replaceAll("-", " "))}.
       </Typography>
 
-      {/* Full-Screen Table */}
+      {/* Table Display */}
       <TableContainer component={Paper} sx={{ maxHeight: "70vh", overflowY: "auto", borderRadius: 2 }}>
         <Table stickyHeader>
           <TableHead sx={{ backgroundColor: "primary.dark" }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: "bold" }}>Product Name</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>NSN</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Part Number</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Manufacturer</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Price</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Availability</TableCell>
-              <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>Actions</TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: "white" }}>Subgroup Name</TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {products.length > 0 ? (
-              products.map((product) => (
-                <TableRow key={product.id} hover>
-                  <TableCell>{product.name}</TableCell>
-                  <TableCell>{product.nsn || "N/A"}</TableCell>
-                  <TableCell>{product.partNumber || "N/A"}</TableCell>
-                  <TableCell>{product.manufacturer || "Unknown"}</TableCell>
-                  <TableCell>{product.price || "Contact for Quote"}</TableCell>
-                  <TableCell>{product.availability || "In Stock"}</TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    <Button variant="contained" color="primary" size="small">
-                      <Link href={`/catalog/${params.groupId}/${params.groupName}/${product.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-                        View Details
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
-                  <Typography variant="h6" color="error">
-                    No products found.
-                  </Typography>
+            {subgroups.map((subgroup) => (
+              <TableRow key={subgroup.id} hover>
+                <TableCell>{subgroup.fsc_title}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>
+                  <Button variant="contained" color="primary" size="small" sx={{fontWeight: "bold"}}>
+                    <Link
+                      href={`/catalog/${groupId}/${encodeURIComponent(groupName)}/${subgroup.id}/${encodeURIComponent(subgroup.fsc_title.replace(/\s+/g, "-"))}`}
+                      style={{ textDecoration: "none", color: "inherit" }}
+                    >
+                      View NSN
+                    </Link>
+                  </Button>
                 </TableCell>
               </TableRow>
-            )}
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
-
-      {/* Back to Categories */}
-      <Button variant="outlined" sx={{ mt: 4, display: "block", mx: "auto" }}>
-        <Link href="/catalog" style={{ textDecoration: "none", color: "inherit" }}>
-          Back to Categories
-        </Link>
-      </Button>
     </Container>
   );
 }

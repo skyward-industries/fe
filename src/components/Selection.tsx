@@ -16,6 +16,7 @@ export default function SelectionButton({ item }: SelectionButtonProps) {
       variant="contained"
       color={isSelected ? "error" : "primary"}
       onClick={() => (isSelected ? removeItem(item.id) : addItem(item))}
+      sx={{ fontWeight: "bold" }}
     >
       {isSelected ? "Remove from Cart" : "Add to Cart"}
     </Button>

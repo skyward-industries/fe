@@ -1,4 +1,4 @@
-import { fetchProductById } from "./fetchProductById";
+import { fetchProductById } from "./fetchPartInfo";
 
 // Mock database of products and their corresponding groups
 const productGroups = {
