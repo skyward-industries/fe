@@ -2,6 +2,7 @@ import { Container, Typography, Button, Box } from "@mui/material";
 import Link from "next/link";
 
 export default function Home() {
+  console.log(process.env)
   return (
     <Container maxWidth="lg">
       {/* Hero Section */}

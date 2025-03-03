@@ -15,7 +15,7 @@ export interface PartInfo {
 export async function fetchPartInfo(nsn: string) : Promise<PartInfo[]> {
   console.log(nsn);
     try {
-      const res = await fetch(`http://localhost:5000/api/partInfo/${nsn}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/partInfo/${nsn}`);
       if (!res.ok) {
         throw new Error(`Part not found`);
       }

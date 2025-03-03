@@ -10,6 +10,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <title>Skyward Industries</title>
       <body
         style={{
           display: "flex",

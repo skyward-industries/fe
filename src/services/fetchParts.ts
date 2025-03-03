@@ -6,7 +6,7 @@ export interface Part {
 }
 export async function fetchParts(fsc: string) : Promise<Part> {
     try {
-      const res = await fetch(`http://localhost:5000/api/parts/${fsc}`, { cache: "no-store" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/parts/${fsc}`, { cache: "no-store" });
   
       if (!res.ok) {
         throw new Error(`Failed to fetch products: ${res.statusText}`);

@@ -14,7 +14,7 @@ export interface Subgroup {
 
 export async function fetchSubgroups(fsg: string): Promise<Subgroup[]> {
   try {
-    const response = await fetch(`http://localhost:5000/api/subgroups/${fsg}`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/subgroups/${fsg}`);
     if (!response.ok) {
       throw new Error("Failed to fetch subgroups");
     }
