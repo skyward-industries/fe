@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
 import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from "@mui/material";
 import Link from "next/link";
-import { fetchSubgroups } from "@/services/fetchSubgroups"; // Function to fetch subgroups
-import { Subgroup } from "@/types";
+import { fetchSubgroups, Subgroup } from "@/services/fetchSubgroups"; // Function to fetch subgroups
 
 interface SubgroupPageProps {
   params: Promise<{ groupId: string; groupName: string }>;

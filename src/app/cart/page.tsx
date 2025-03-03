@@ -1,25 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useSelection } from "@/context/SelectionContext";
+import { PartInfo } from "@/services/fetchPartInfo";
 import {
+  Button,
   Container,
-  Typography,
+  Grid,
+  MenuItem,
+  Paper,
+  Select,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  Button,
   TextField,
-  Select,
-  MenuItem,
-  Grid,
+  Typography,
 } from "@mui/material";
-import { useSelection } from "@/context/SelectionContext";
-import { PartInfo } from "@/types/PartInfo";
+import { useState } from "react";
+import { Controller, FieldValues, useForm } from "react-hook-form";
 
 export default function CartPage() {
   const { selectedItems, removeItem, clearSelection } = useSelection();
@@ -31,7 +31,7 @@ export default function CartPage() {
   } = useForm();
 
   const [customParts, setCustomParts] = useState<PartInfo[]>([
-    { part_number: "", cage_code: "", company_name: "" },
+    { part_number: "", cage_code: "", company_name: "", date_est: "" },
   ]);
 
   const [quantities, setQuantities] = useState<{ [key: string]: number }>(
@@ -71,7 +71,7 @@ export default function CartPage() {
   const addCustomPart = () => {
     setCustomParts([
       ...customParts,
-      { part_number: "", cage_code: "", company_name: "" },
+      { part_number: "", cage_code: "", company_name: "", date_est: "" },
     ]);
   };
 
@@ -79,7 +79,7 @@ export default function CartPage() {
     setCustomParts(customParts.filter((_, i) => i !== index));
   };
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (data: FieldValues) => {
     setIsSubmitting(true);
   
     const submissionData = {
@@ -102,7 +102,7 @@ export default function CartPage() {
   
       alert("Form submitted successfully! An email has been sent.");
       clearSelection();
-      setCustomParts([{ part_number: "", cage_code: "", company_name: "" }]);
+      setCustomParts([{ part_number: "", cage_code: "", company_name: "", date_est: "" }]);
     } catch (error) {
       console.error("Error submitting form:", error);
       alert("Error submitting form.");
@@ -273,7 +273,6 @@ export default function CartPage() {
               fullWidth
               {...register("email", { required: "Email is required" })}
               error={!!errors.email}
-              helperText={errors.email?.message}
             />
           </Grid>
           <Grid item xs={12} sm={6}>

@@ -2,14 +2,11 @@
 
 import { Button } from "@mui/material";
 import { useSelection } from "@/context/SelectionContext";
+import { PartInfo } from "@/services/fetchPartInfo";
 
-type SelectionButtonProps = {
-  item: { id: string; name: string; nsn?: string; partNumber?: string };
-};
-
-export default function SelectionButton({ item }: SelectionButtonProps) {
+export default function SelectionButton({ item }: { item: PartInfo }) {
   const { addItem, removeItem, selectedItems } = useSelection();
-  const isSelected = selectedItems.some((selected) => selected.id === item.id);
+  const isSelected = selectedItems.some((selected) => selected.part_number === item.part_number);
 
   return (
     <Button

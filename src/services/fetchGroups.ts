@@ -13,7 +13,7 @@ export interface Group {
 
 export async function fetchGroups(): Promise<Group[]> {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/groups`, { cache: "no-store" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/groups`);
   
       if (!res.ok) {
         throw new Error(`Failed to fetch categories: ${res.statusText}`);

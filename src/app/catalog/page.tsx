@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"; // Ensures SSR (Server-Side Rendering)
+
 import {
   Container,
   Typography,
@@ -11,8 +13,7 @@ import {
   Button,
 } from "@mui/material";
 import Link from "next/link";
-import { fetchGroups } from "@/services/fetchGroups"; // Function to fetch groups
-import { Group } from "@/types"; // Import Group model
+import { fetchGroups, Group } from "@/services/fetchGroups"; // Function to fetch groups
 
 export default async function CatalogPage() {
   const groups: Group[] = await fetchGroups(); // Fetch groups dynamically

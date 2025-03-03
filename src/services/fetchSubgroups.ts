@@ -1,5 +1,3 @@
-import { Subgroup } from "@/types";
-
 export interface Subgroup {
   id: string;
   fsg: string;
