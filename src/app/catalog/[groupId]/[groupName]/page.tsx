@@ -11,7 +11,7 @@ export default async function SubgroupPage(props: SubgroupPageProps) {
   const params = await props.params;
   const { groupId, groupName } = params; // Extract groupId and groupName from URL
   const subgroups: Subgroup[] = await fetchSubgroups(groupId); // Fetch subgroups for this group
-
+  console.log(subgroups, "subgroups")
   // If no subgroups are found, return a 404
   if (!subgroups || subgroups.length === 0) {
     notFound();
@@ -42,7 +42,7 @@ export default async function SubgroupPage(props: SubgroupPageProps) {
                 <TableCell sx={{ textAlign: "center" }}>
                   <Button variant="contained" color="primary" size="small" sx={{fontWeight: "bold"}}>
                     <Link
-                      href={`/catalog/${groupId}/${encodeURIComponent(groupName)}/${subgroup.id}/${encodeURIComponent(subgroup.fsc_title.replace(/\s+/g, "-"))}`}
+                      href={`/catalog/${groupId}/${encodeURIComponent(groupName)}/${subgroup.fsc}/${encodeURIComponent(subgroup.fsc_title.replace(/\s+/g, "-"))}`}
                       style={{ textDecoration: "none", color: "inherit" }}
                     >
                       View NSN
