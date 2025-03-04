@@ -81,7 +81,7 @@ export default function CartPage() {
 
   const onSubmit = async (data: FieldValues) => {
     setIsSubmitting(true);
-  
+
     const submissionData = {
       items: [...selectedItems, ...customParts].map((item) => ({
         ...item,
@@ -90,17 +90,22 @@ export default function CartPage() {
       })),
       form: data,
     };
-  
+
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/send-email`, { 
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(submissionData),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/send-email`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(submissionData),
+        }
+      );
       if (!response.ok) throw new Error("Submission failed");
       reset();
       clearSelection();
-      setCustomParts([{ part_number: "", cage_code: "", company_name: "", date_est: "" }]);
+      setCustomParts([
+        { part_number: "", cage_code: "", company_name: "", date_est: "" },
+      ]);
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {
@@ -300,15 +305,6 @@ export default function CartPage() {
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField label="Lead Time" fullWidth {...register("leadTime")} />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              type="date"
-              label="Delivery Date"
-              fullWidth
-              {...register("deliveryDate")}
-              InputLabelProps={{ shrink: true }}
-            />
           </Grid>
           <Grid item xs={12}>
             <Button
