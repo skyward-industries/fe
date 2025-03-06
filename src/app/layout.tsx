@@ -1,8 +1,10 @@
+import Head from "next/head";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/NavBar";
 import MuiThemeProvider from "@/providers/ThemeProvider";
 import { SelectionProvider } from "@/context/SelectionContext";
 import "@/styles/global.css";
+
 export default function RootLayout({
   children,
 }: {
@@ -10,7 +12,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <title>Skyward Industries</title>
+      <Head>
+        <title>Skyward Industries</title>
+        {/* Google Analytics */}
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-939P68W607"
+        ></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-939P68W607');
+            `,
+          }}
+        />
+      </Head>
       <body
         style={{
           display: "flex",
