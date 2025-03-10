@@ -14,7 +14,7 @@ export async function fetchSubgroups(fsg: string): Promise<Subgroup[]> {
   try {
     // Sanitize fsg to remove unwanted characters
     const sanitizedFsg = fsg.replace(/,|%2C/g, ''); // Removing commas and encoded commas
-
+    console.log(sanitizedFsg)
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/subgroups/${sanitizedFsg}`);
     if (!response.ok) {
       throw new Error("Failed to fetch subgroups");
