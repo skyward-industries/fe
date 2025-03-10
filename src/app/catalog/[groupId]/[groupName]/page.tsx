@@ -35,21 +35,28 @@ export default async function SubgroupPage(props: SubgroupPageProps) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {subgroups.map((subgroup) => (
-              <TableRow key={subgroup.id} hover>
-                <TableCell>{subgroup.fsc_title}</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
-                  <Button variant="contained" color="primary" size="small" sx={{fontWeight: "bold"}}>
-                    <Link
-                      href={`/catalog/${groupId}/${encodeURIComponent(groupName)}/${subgroup.fsc}/${encodeURIComponent(subgroup.fsc_title.replace(/\s+/g, "-"))}`}
-                      style={{ textDecoration: "none", color: "inherit" }}
-                    >
-                      View NSN
-                    </Link>
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+          {subgroups.map((subgroup) => {
+            console.log("🔗 Constructed URL:", 
+          `/catalog/${groupId}/${groupName}/${subgroup.fsc}/${subgroup.fsc_title.replace(/\s+/g, "-").replace(/,/g, "")}`
+          );
+
+  return (
+    <TableRow key={subgroup.id} hover>
+      <TableCell>{subgroup.fsc_title}</TableCell>
+      <TableCell sx={{ textAlign: "center" }}>
+        <Button variant="contained" color="primary" size="small" sx={{ fontWeight: "bold" }}>
+          <Link
+            href={`/catalog/${groupId}/${encodeURIComponent(groupName)}/${subgroup.fsc}/${encodeURIComponent(subgroup.fsc_title.replace(/\s+/g, "-").replace(/,/g, ""))}`}
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
+            View NSN
+          </Link>
+        </Button>
+      </TableCell>
+    </TableRow>
+  );
+})}
+
           </TableBody>
         </Table>
       </TableContainer>
