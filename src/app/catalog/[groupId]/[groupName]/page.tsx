@@ -46,7 +46,7 @@ export default async function SubgroupPage(props: SubgroupPageProps) {
       <TableCell sx={{ textAlign: "center" }}>
         <Button variant="contained" color="primary" size="small" sx={{ fontWeight: "bold" }}>
           <Link
-            href={`/catalog/${groupId}/${encodeURIComponent(groupName)}/${subgroup.fsc}/${encodeURIComponent(subgroup.fsc_title.replace(/\s+/g, "-").replace(/,/g, ""))}`}
+            href={`/catalog/${groupId}/${encodeURIComponent(groupName)}/${subgroup.fsc}/${encodeURIComponent(subgroup.fsc_title.replace(/,/g, "").replace(/\s+/g, "-"))}`}
             style={{ textDecoration: "none", color: "inherit" }}
           >
             View NSN
