@@ -1,4 +1,4 @@
-console.log("🚀 SubgroupPage loaded");
+
 import { notFound } from "next/navigation";
 import {
   Container,
