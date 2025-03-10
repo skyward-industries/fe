@@ -12,7 +12,10 @@ export interface Subgroup {
 
 export async function fetchSubgroups(fsg: string): Promise<Subgroup[]> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/subgroups/${fsg}`);
+    // Sanitize fsg to remove unwanted characters
+    const sanitizedFsg = fsg.replace(/,|%2C/g, ''); // Removing commas and encoded commas
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/subgroups/${sanitizedFsg}`);
     if (!response.ok) {
       throw new Error("Failed to fetch subgroups");
     }
@@ -22,3 +25,4 @@ export async function fetchSubgroups(fsg: string): Promise<Subgroup[]> {
     return [];
   }
 }
+
