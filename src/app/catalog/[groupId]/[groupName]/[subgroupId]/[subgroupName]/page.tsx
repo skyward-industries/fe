@@ -44,7 +44,7 @@ export default function PartsPage(props: {
     loadParts();
   }, [subgroupId, page]);
 
-  const formattedGroupName = decodeURIComponent(subgroupName.replaceAll("-", " "));
+  const formattedGroupName = decodeURIComponent(subgroupName.replace("NSN-", "").replaceAll("-", " "));
 
   return (
     <Container maxWidth="xl" sx={{ my: 4 }}>
@@ -81,7 +81,7 @@ export default function PartsPage(props: {
                       <TableCell sx={{ textAlign: "center" }}>
                         <Button variant="contained" color="primary" size="small" sx={{ fontWeight: "bold" }}>
                           <Link
-                            href={`/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}/${part.nsn}`}
+                            href={`/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}/NSN-${part.nsn}`}
                             style={{ textDecoration: "none", color: "inherit" }}
                           >
                             View Details

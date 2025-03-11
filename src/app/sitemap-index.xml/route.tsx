@@ -11,7 +11,7 @@ export async function GET() {
   groups.forEach((group) => {
     sitemapIndex += `
       <sitemap>
-        <loc>https://skywardparts.com/sitemap-group-${group.fsg}.xml</loc>
+        <loc>https://skywardparts.com/catalog</loc>
         <title>FSG -${group.fsg_title} (${group.fsg}) - FSC ${group.fsc_title} (${group.fsc})</title>
       </sitemap>
     `;

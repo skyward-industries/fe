@@ -9,23 +9,20 @@ interface SubgroupPageProps {
 
 export default async function SubgroupPage(props: SubgroupPageProps) {
   const params = await props.params;
-  const { groupId, groupName } = params; // Extract groupId and groupName from URL
-  const subgroups: Subgroup[] = await fetchSubgroups(groupId); // Fetch subgroups for this group
-  // If no subgroups are found, return a 404
+  const { groupId, groupName } = params;
+  const subgroups: Subgroup[] = await fetchSubgroups(groupId);
   if (!subgroups || subgroups.length === 0) {
     notFound();
   }
 
   return (
     <Container maxWidth="xl" sx={{ my: 4 }}>
-      {/* Page Title */}
       <Typography variant="h4" fontWeight="bold" textAlign="center" gutterBottom>
         {decodeURIComponent(groupName.replaceAll("-", " "))}
       </Typography>
       <Typography variant="subtitle1" color="textSecondary" textAlign="center" gutterBottom>
         Explore the categories under {decodeURIComponent(groupName.replaceAll("-", " "))}.
       </Typography>
-      {/* Table Display */}
       <TableContainer component={Paper} sx={{ maxHeight: "70vh", overflowY: "auto", borderRadius: 2 }}>
         <Table stickyHeader>
           <TableHead sx={{ backgroundColor: "primary.dark" }}>
@@ -41,7 +38,7 @@ export default async function SubgroupPage(props: SubgroupPageProps) {
                 <TableCell sx={{ textAlign: "center" }}>
                   <Button variant="contained" color="primary" size="small" sx={{fontWeight: "bold"}}>
                     <Link
-                      href={`/catalog/${groupId}/${encodeURIComponent(groupName)}/${subgroup.fsc}/${encodeURIComponent(subgroup.fsc_title.replace(/\s+/g, "-"))}`}
+                      href={`/catalog/${groupId}/${encodeURIComponent(groupName)}/${subgroup.fsc}/NSN-${encodeURIComponent(subgroup.fsc_title.replace(/\s+/g, "-").replace(/,/g, ""))}`}
                       style={{ textDecoration: "none", color: "inherit" }}
                     >
                       View NSN

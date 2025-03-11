@@ -17,7 +17,9 @@ export default async function PartInfoPage(props: {
   params: Promise<{ nsn: string }>;
 }) {
   const params = await props.params;
-  const parts = await fetchPartInfo(params.nsn);
+  const cleanNSN = params.nsn.replace("NSN-", "");
+
+  const parts = await fetchPartInfo(cleanNSN);
 
   return (
     <Container maxWidth="md" sx={{ my: 4 }}>
@@ -27,7 +29,7 @@ export default async function PartInfoPage(props: {
         textAlign="center"
         gutterBottom
       >
-        NSN: {params.nsn}
+        NSN: {cleanNSN}
       </Typography>
 
       {parts.length === 0 ? (

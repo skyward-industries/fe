@@ -3,6 +3,8 @@ export interface Part {
   nsn: string;
   fsg: string;
   fsc: string;
+  fsc_title: string;
+  fsg_title: string;
 }
 
 export interface Pagination {

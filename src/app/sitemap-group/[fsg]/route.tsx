@@ -18,8 +18,8 @@ export async function GET(
   subgroups.forEach((subgroup) => {
     sitemap += `
       <sitemap>
-        <loc>https://skywardparts.com/sitemap-subgroup-${subgroup.fsc}.xml</loc>
-        <title>${subgroup.fsc_title} - FSC ${subgroup.fsc_title}</title>
+        <loc>https://skywardparts.com/catalog/${subgroup.fsg}/${encodeURIComponent(subgroup.fsc_title.replace(/\s+/g, "-").replace(/,/g, ""))}</loc>
+        <title>FSC ${subgroup.fsc_title} - ${subgroup.fsc}</title>
       </sitemap>
     `;
   });
