@@ -19,7 +19,7 @@ import {
 import Link from "next/link";
 
 export default function PartsPage(props: {
-  params: { groupId: string; groupName: string; subgroupId: string; subgroupName: string };
+  params: Promise<{ groupId: string; groupName: string; subgroupId: string; subgroupName: string }>;
 }) {
   const { groupId, groupName, subgroupId, subgroupName } = use(props.params);
   const [parts, setParts] = useState<Part[]>([]);

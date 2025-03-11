@@ -1,7 +1,7 @@
 import { fetchGroups } from "@/services/fetchGroups";
-import { GetServerSideProps } from "next";
+import { NextResponse } from "next/server";
 
-export const getServerSideProps: GetServerSideProps = async ({ res }) => {
+export async function GET() {
   const groups = await fetchGroups();
 
   let sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
@@ -11,20 +11,15 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   groups.forEach((group) => {
     sitemapIndex += `
       <sitemap>
-        <loc>https://skywardparts.com/sitemap-group-${group.id}.xml</loc>
+        <loc>https://skywardparts.com/sitemap-group-${group.fsg}.xml</loc>
+        <title>FSG -${group.fsg_title} (${group.fsg}) - FSC ${group.fsc_title} (${group.fsc})</title>
       </sitemap>
     `;
   });
 
   sitemapIndex += `</sitemapindex>`;
 
-  res.setHeader("Content-Type", "text/xml");
-  res.write(sitemapIndex);
-  res.end();
-
-  return { props: {} };
-};
-
-export default function SitemapIndex() {
-  return null;
-};
+  return new NextResponse(sitemapIndex, {
+    headers: { "Content-Type": "application/xml" },
+  });
+}
