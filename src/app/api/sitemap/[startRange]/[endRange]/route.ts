@@ -1,31 +1,32 @@
 import { fetchSitemapParts } from "@/services/fetchSitemapParts";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request, props: { params: Promise<{ index: string }> }) {
+export async function GET(
+  req: Request,
+  props: { params: Promise<{ startRange: string; endRange: string }> }
+) {
   const params = await props.params;
-  console.log("📝 Generating sitemap for index:", params.index);
-
+  const startRange = parseInt(params.startRange, 10);
+  const endRange = parseInt(params.endRange, 10);
   const batchSize = 50000;
-  const index = parseInt(params.index, 10); // Convert to integer
 
-  if (isNaN(index) || index < 1) {
-    console.error("❌ Invalid sitemap index:", params.index);
-    return new NextResponse("Invalid sitemap index", { status: 400 });
+  console.log(`📝 Generating sitemap for range ${startRange}-${endRange} (batch size: ${batchSize})`);
+
+  if (isNaN(startRange) || startRange < 1 || isNaN(endRange) || endRange < startRange) {
+    console.error("❌ Invalid sitemap parameters:", params);
+    return new NextResponse("Invalid sitemap parameters", { status: 400 });
   }
 
-  const offset = (index - 1) * batchSize;
-
-  // Fetch parts for this index (batch)
+  const offset = startRange - 1;
   const parts = await fetchSitemapParts(batchSize, offset);
 
   if (parts.length === 0) {
-    console.warn("⚠️ No data for sitemap index:", index);
+    console.warn("⚠️ No data for sitemap range:", `${startRange}-${endRange}`);
     return new NextResponse("No data for this sitemap", { status: 404 });
   }
 
   let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-  <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  `;
+  <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
 
   parts.forEach((part) => {
     const url = `https://skywardparts.com/catalog/${part.fsg}/${encodeURIComponent(part.fsg_title)}/${part.fsc}/NSN-${encodeURIComponent(part.fsc_title?.replace(/\s+/g, "-")?.replace(/,/g, ""))}/NSN-${part.nsn}`;
@@ -42,7 +43,7 @@ export async function GET(req: Request, props: { params: Promise<{ index: string
 
   sitemap += `</urlset>`;
 
-  console.log(`✅ Successfully generated sitemap-${index}.xml`);
+  console.log(`✅ Successfully generated sitemap-${startRange}-${endRange}.xml`);
 
   return new NextResponse(sitemap, {
     headers: { "Content-Type": "application/xml" },
