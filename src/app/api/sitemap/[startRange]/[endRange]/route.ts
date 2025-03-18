@@ -3,17 +3,15 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   req: Request,
-  props: { params: Promise<{ startRange: string; endRange: string }> }
+  { params }: { params: { startRange: string; endRange: string } }
 ) {
-  const params = await props.params;
   const startRange = parseInt(params.startRange, 10);
   const endRange = parseInt(params.endRange, 10);
   const batchSize = 50000;
 
-  console.log(`📝 Generating sitemap for range ${startRange}-${endRange} (batch size: ${batchSize})`);
+  console.log(`📝 Generating sitemap for range ${startRange}-${endRange}`);
 
   if (isNaN(startRange) || startRange < 1 || isNaN(endRange) || endRange < startRange) {
-    console.error("❌ Invalid sitemap parameters:", params);
     return new NextResponse("Invalid sitemap parameters", { status: 400 });
   }
 
@@ -21,31 +19,25 @@ export async function GET(
   const parts = await fetchSitemapParts(batchSize, offset);
 
   if (parts.length === 0) {
-    console.warn("⚠️ No data for sitemap range:", `${startRange}-${endRange}`);
     return new NextResponse("No data for this sitemap", { status: 404 });
   }
 
-  let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-  <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+  let sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+  sitemap += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
 
   parts.forEach((part) => {
-    const url = `https://skywardparts.com/catalog/${part.fsg}/${encodeURIComponent(part.fsg_title)}/${part.fsc}/NSN-${encodeURIComponent(part.fsc_title?.replace(/\s+/g, "-")?.replace(/,/g, ""))}/NSN-${part.nsn}`;
-
-    sitemap += `
-      <url>
-        <loc>${url}</loc>
-        <lastmod>${new Date().toISOString()}</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-      </url>
-    `;
+    const url = `https://skywardparts.com/catalog/${part.fsg}/${encodeURIComponent(part.fsg_title)}/${part.fsc}/NSN-${encodeURIComponent(part.fsc_title)}/NSN-${part.nsn}`;
+    sitemap += `<url><loc>${url}</loc><lastmod>${new Date().toISOString()}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>\n`;
   });
 
   sitemap += `</urlset>`;
 
-  console.log(`✅ Successfully generated sitemap-${startRange}-${endRange}.xml`);
-
   return new NextResponse(sitemap, {
-    headers: { "Content-Type": "application/xml" },
+    status: 200,
+    headers: {
+      "Content-Type": "application/xml; charset=utf-8",
+      "Cache-Control": "public, max-age=86400", // Cache for 24 hours
+      "X-Content-Type-Options": "nosniff",
+    },
   });
 }

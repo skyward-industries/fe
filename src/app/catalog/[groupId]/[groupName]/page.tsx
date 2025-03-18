@@ -1,5 +1,16 @@
 import { notFound } from "next/navigation";
-import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from "@mui/material";
+import {
+  Container,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+} from "@mui/material";
 import Link from "next/link";
 import { fetchSubgroups, Subgroup } from "@/services/fetchSubgroups"; // Function to fetch subgroups
 
@@ -17,18 +28,38 @@ export default async function SubgroupPage(props: SubgroupPageProps) {
 
   return (
     <Container maxWidth="xl" sx={{ my: 4 }}>
-      <Typography variant="h4" fontWeight="bold" textAlign="center" gutterBottom>
+      <Typography
+        variant="h4"
+        fontWeight="bold"
+        textAlign="center"
+        gutterBottom
+      >
         {decodeURIComponent(groupName.replaceAll("-", " "))}
       </Typography>
-      <Typography variant="subtitle1" color="textSecondary" textAlign="center" gutterBottom>
-        Explore the categories under {decodeURIComponent(groupName.replaceAll("-", " "))}.
+      <Typography
+        variant="subtitle1"
+        color="textSecondary"
+        textAlign="center"
+        gutterBottom
+      >
+        Explore the categories under{" "}
+        {decodeURIComponent(groupName.replaceAll("-", " "))}.
       </Typography>
-      <TableContainer component={Paper} sx={{ maxHeight: "70vh", overflowY: "auto", borderRadius: 2 }}>
+      <TableContainer
+        component={Paper}
+        sx={{ maxHeight: "70vh", overflowY: "auto", borderRadius: 2 }}
+      >
         <Table stickyHeader>
           <TableHead sx={{ backgroundColor: "primary.dark" }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: "bold", color: "white" }}>Subgroup Name</TableCell>
-              <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Actions</TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: "white" }}>
+                Subgroup Name
+              </TableCell>
+              <TableCell
+                sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}
+              >
+                Actions
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -36,9 +67,22 @@ export default async function SubgroupPage(props: SubgroupPageProps) {
               <TableRow key={subgroup.id} hover>
                 <TableCell>{subgroup.fsc_title}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
-                  <Button variant="contained" color="primary" size="small" sx={{fontWeight: "bold"}}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    sx={{ fontWeight: "bold" }}
+                  >
                     <Link
-                      href={`/catalog/${groupId}/${encodeURIComponent(groupName)}/${subgroup.fsc}/NSN-${encodeURIComponent(subgroup.fsc_title.replace(/\s+/g, "-").replace(/,/g, ""))}`}
+                      href={`/catalog/${groupId}/${encodeURIComponent(groupName)
+                        .replace(/\s+/g, "-")
+                        ?.replace(/,/g, "")}/${
+                        subgroup.fsc
+                      }/NSN-${encodeURIComponent(
+                        subgroup.fsc_title
+                          .replace(/\s+/g, "-")
+                          .replace(/,/g, "")
+                      )}`}
                       style={{ textDecoration: "none", color: "inherit" }}
                     >
                       View NSN

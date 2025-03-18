@@ -21,7 +21,7 @@ Sitemap: https://skywardparts.com/api/sitemap-index.xml
   for (let i = 0; i < totalSitemaps; i++) {
     const start = i * batchSize + 1;
     const end = (i + 1) * batchSize;
-    robotsTxt += `Sitemap: https://skywardparts.com/sitemap-${start}-${end}.xml\n`;
+    robotsTxt += `Sitemap: https://skywardparts.com/api/sitemap/${start}/${end}.xml\n`;
   }
 
   return new NextResponse(robotsTxt, {

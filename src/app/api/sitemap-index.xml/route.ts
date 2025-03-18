@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const totalParts = 14_000_000;
+  const totalParts = 7_200_000;
   const batchSize = 50_000;
   const totalSitemaps = Math.ceil(totalParts / batchSize);
 
@@ -15,7 +15,7 @@ export async function GET() {
     
     sitemapIndex += `
       <sitemap>
-        <loc>https://skywardparts.com/sitemap-${startRange}-${endRange}.xml</loc>
+        <loc>https://skywardparts.com/api/sitemap/${startRange}/${endRange}.xml</loc>
       </sitemap>
     `;
   }
