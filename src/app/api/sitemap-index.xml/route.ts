@@ -15,7 +15,7 @@ export async function GET() {
     
     sitemapIndex += `
       <sitemap>
-        <loc>https://skywardparts.com/api/sitemap/${startRange}/${endRange}.xml</loc>
+        <loc>https://skywardparts.com/sitemap-${startRange}-${endRange}.xml</loc>
       </sitemap>
     `;
   }

@@ -10,16 +10,9 @@ export async function GET(
   const endRange = parseInt(params.endRange, 10);
   const batchSize = 50000;
 
-  console.log(
-    `📝 Generating sitemap for range ${startRange}-${endRange} (batch size: ${batchSize})`
-  );
+  console.log(`📝 Generating sitemap for range ${startRange}-${endRange} (batch size: ${batchSize})`);
 
-  if (
-    isNaN(startRange) ||
-    startRange < 1 ||
-    isNaN(endRange) ||
-    endRange < startRange
-  ) {
+  if (isNaN(startRange) || startRange < 1 || isNaN(endRange) || endRange < startRange) {
     console.error("❌ Invalid sitemap parameters:", params);
     return new NextResponse("Invalid sitemap parameters", { status: 400 });
   }
@@ -36,13 +29,7 @@ export async function GET(
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
 
   parts.forEach((part) => {
-    const url = `https://skywardparts.com/catalog/${
-      part.fsg
-    }/${encodeURIComponent(part.fsg_title)
-      .replace(/\s+/g, "-")
-      ?.replace(/,/g, "")}/${part.fsc}/NSN-${encodeURIComponent(
-      part.fsc_title?.replace(/\s+/g, "-")?.replace(/,/g, "")
-    )}/NSN-${part.nsn}`;
+    const url = `https://skywardparts.com/catalog/${part.fsg}/${encodeURIComponent(part.fsg_title)}/${part.fsc}/NSN-${encodeURIComponent(part.fsc_title?.replace(/\s+/g, "-")?.replace(/,/g, ""))}/NSN-${part.nsn}`;
 
     sitemap += `
       <url>
@@ -56,9 +43,7 @@ export async function GET(
 
   sitemap += `</urlset>`;
 
-  console.log(
-    `✅ Successfully generated sitemap-${startRange}-${endRange}.xml`
-  );
+  console.log(`✅ Successfully generated sitemap-${startRange}-${endRange}.xml`);
 
   return new NextResponse(sitemap, {
     headers: { "Content-Type": "application/xml" },
