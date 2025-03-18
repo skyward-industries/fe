@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const totalParts = 14000000; // Replace with a DB query if needed
+  const totalParts = 7200000; // Replace with a DB query if needed
   const batchSize = 50000;
   const totalSitemaps = Math.ceil(totalParts / batchSize);
 
