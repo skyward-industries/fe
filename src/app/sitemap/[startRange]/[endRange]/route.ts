@@ -39,7 +39,7 @@ export async function GET(
     const url = `https://skywardparts.com/catalog/${
       part.fsg
     }/${encodeURIComponent(
-      part.fsg_title.replace(/\s+/g, "-")?.replace(/,/g, "")
+      part.fsg_title?.replace(/\s+/g, "-")?.replace(/,/g, "")
     )}/${part.fsc}/NSN-${encodeURIComponent(
       part.fsc_title?.replace(/\s+/g, "-")?.replace(/,/g, "")
     )}/NSN-${part.nsn}`;
