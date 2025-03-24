@@ -10,10 +10,10 @@ function generateSiteMap(parts: SitemapPart[]) {
         return `
       <url>
         <loc>https://skywardparts.com/catalog/${part.fsg}/${encodeURIComponent(
-          part.fsg_title?.replace(/\s+/g, "-")?.replace(/,/g, "")
-        )}/${part.fsc}/NSN-${encodeURIComponent(
-          part.fsc_title?.replace(/\s+/g, "-")?.replace(/,/g, "")
-        )}/NSN-${part.nsn}</loc>
+          part.fsg_title?.replace(/\s+/g, "-")?.replace(/,/g, "")?.toLocaleLowerCase()
+        )}/${part.fsc}/nsn-${encodeURIComponent(
+          part.fsc_title?.replace(/\s+/g, "-")?.replace(/,/g, "")?.toLowerCase()
+        )}/nsn-${part.nsn}</loc>
         <lastmod>${new Date().toISOString()}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>

@@ -34,7 +34,7 @@ export default async function SubgroupPage(props: SubgroupPageProps) {
         textAlign="center"
         gutterBottom
       >
-        {decodeURIComponent(groupName.replaceAll("-", " "))}
+        {decodeURIComponent(groupName.replaceAll("-", " ").replace(/\b\w/g, (char) => char.toUpperCase()))}
       </Typography>
       <Typography
         variant="subtitle1"
@@ -76,12 +76,14 @@ export default async function SubgroupPage(props: SubgroupPageProps) {
                     <Link
                       href={`/catalog/${groupId}/${encodeURIComponent(groupName)
                         .replace(/\s+/g, "-")
-                        ?.replace(/,/g, "")}/${
+                        ?.replace(/,/g, "")
+                        ?.toLowerCase()}/${
                         subgroup.fsc
-                      }/NSN-${encodeURIComponent(
+                      }/nsn-${encodeURIComponent(
                         subgroup.fsc_title
-                          .replace(/\s+/g, "-")
-                          .replace(/,/g, "")
+                          ?.replace(/\s+/g, "-")
+                          ?.replace(/,/g, "")
+                          ?.toLowerCase()
                       )}`}
                       style={{ textDecoration: "none", color: "inherit" }}
                     >

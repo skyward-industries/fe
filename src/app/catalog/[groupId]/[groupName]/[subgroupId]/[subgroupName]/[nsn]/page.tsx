@@ -17,7 +17,7 @@ export default async function PartInfoPage(props: {
   params: Promise<{ nsn: string }>;
 }) {
   const params = await props.params;
-  const cleanNSN = params.nsn.replace("NSN-", "");
+  const cleanNSN = params.nsn.replace("nsn-", "");
 
   const parts = await fetchPartInfo(cleanNSN);
 

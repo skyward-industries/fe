@@ -78,7 +78,7 @@ export default async function CatalogPage() {
                     >
                       <Link
                         href={`/catalog/${group.fsg}/${encodeURIComponent(
-                          group.fsg_title.replace(/\s+/g, "-")
+                          group.fsg_title?.replace(/\s+/g, "-")?.toLowerCase()
                         )}`}
                         style={{ textDecoration: "none", color: "inherit" }}
                       >
