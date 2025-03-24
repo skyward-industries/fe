@@ -13,4 +13,13 @@ module.exports = {
   eslint: {
     ignoreDuringBuilds: true, // Skip ESLint during build
   },
+  async redirects() {
+    return [
+      {
+        source: '/product/:path*',
+        destination: '/',
+        permanent: true,
+      },
+    ];
+  },
 };
