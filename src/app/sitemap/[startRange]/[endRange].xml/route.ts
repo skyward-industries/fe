@@ -10,7 +10,7 @@ function generateSiteMap(parts: SitemapPart[]) {
         return `
       <url>
         <loc>https://skywardparts.com/catalog/${part.fsg}/${encodeURIComponent(
-          part.fsg_title?.replace(/\s+/g, "-")?.replace(/,/g, "")?.toLocaleLowerCase()
+          part.fsg_title?.replace(/\s+/g, "-")?.replace(/,/g, "")?.toLowerCase()
         )}/${part.fsc}/nsn-${encodeURIComponent(
           part.fsc_title?.replace(/\s+/g, "-")?.replace(/,/g, "")?.toLowerCase()
         )}/nsn-${part.nsn}</loc>
