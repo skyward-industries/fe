@@ -1,11 +1,11 @@
-# *
-User-agent: *
-Allow: /
 
-# Host
+User-agent: *
+Disallow:
+
+
 Host: https://skywardparts.com
 
-# Sitemap Index
+
 Sitemap: https://skywardparts.com/sitemap-index.xml
 
 # Generated Sitemaps
