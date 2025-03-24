@@ -13,7 +13,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <Head>
-        <title>Skyward Industries</title>
+        <title>Skyward Parts</title>
         {/* Google Analytics */}
         <script
           async
