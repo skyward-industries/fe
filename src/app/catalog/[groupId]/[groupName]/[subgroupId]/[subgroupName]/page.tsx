@@ -1,5 +1,6 @@
 "use client"; // Ensures this runs on the client-side
 import { useState, useEffect, use } from "react";
+import Head from "next/head";
 import { fetchParts, Part } from "@/services/fetchParts";
 import {
   Button,
@@ -44,79 +45,95 @@ export default function PartsPage(props: {
     loadParts();
   }, [subgroupId, page]);
 
-  const formattedGroupName = decodeURIComponent(subgroupName.replace("nsn-", "")?.replace("NSN-")?.replaceAll("-", " "))
-  .replace(/\b\w/g, (char) => char.toUpperCase());
-  return (
-    <Container maxWidth="xl" sx={{ my: 4 }}>
-      {/* Page Title */}
-      <Typography variant="h4" fontWeight="bold" textAlign="center" gutterBottom>
-        {formattedGroupName}
-      </Typography>
+  const formattedGroupName = decodeURIComponent(
+    subgroupName.replace("nsn-", "").replace("NSN-")?.replaceAll("-", " ")
+  ).replace(/\b\w/g, (char) => char.toUpperCase());
 
-      {/* Loading Indicator */}
-      {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
-          <CircularProgress color="primary" />
-        </Box>
-      ) : (
-        <>
-          {/* Full-Screen Table */}
-          <TableContainer component={Paper} sx={{ maxHeight: "70vh", overflowY: "auto", borderRadius: 2 }}>
-            <Table stickyHeader>
-              <TableHead sx={{ backgroundColor: "primary.dark" }}>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: "bold" }}>NSN</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>FSG</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>FSC</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {parts.length > 0 ? (
-                  parts.map((part) => (
-                    <TableRow key={part.id} hover>
-                      <TableCell>{part.nsn}</TableCell>
-                      <TableCell>{part.fsg}</TableCell>
-                      <TableCell>{part.fsc}</TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>
-                        <Button variant="contained" color="primary" size="small" sx={{ fontWeight: "bold" }}>
-                          <Link
-                            href={`/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}/nsn-${part.nsn}`}
-                            style={{ textDecoration: "none", color: "inherit" }}
-                          >
-                            View Details
-                          </Link>
-                        </Button>
+  return (
+    <>
+      <Head>
+        <title>{formattedGroupName} | Parts List</title>
+        <meta
+          name="description"
+          content={`Browse parts under ${formattedGroupName} at Skyward Industries.`}
+        />
+        <link
+          rel="canonical"
+          href={`https://www.skywardparts.com/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}`}
+        />
+      </Head>
+
+      <Container maxWidth="xl" sx={{ my: 4 }}>
+        {/* Page Title */}
+        <Typography variant="h4" fontWeight="bold" textAlign="center" gutterBottom>
+          {formattedGroupName}
+        </Typography>
+
+        {/* Loading Indicator */}
+        {loading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+            <CircularProgress color="primary" />
+          </Box>
+        ) : (
+          <>
+            {/* Full-Screen Table */}
+            <TableContainer component={Paper} sx={{ maxHeight: "70vh", overflowY: "auto", borderRadius: 2 }}>
+              <Table stickyHeader>
+                <TableHead sx={{ backgroundColor: "primary.dark" }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: "bold" }}>NSN</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>FSG</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>FSC</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {parts.length > 0 ? (
+                    parts.map((part) => (
+                      <TableRow key={part.id} hover>
+                        <TableCell>{part.nsn}</TableCell>
+                        <TableCell>{part.fsg}</TableCell>
+                        <TableCell>{part.fsc}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>
+                          <Button variant="contained" color="primary" size="small" sx={{ fontWeight: "bold" }}>
+                            <Link
+                              href={`/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}/nsn-${part.nsn}`}
+                              style={{ textDecoration: "none", color: "inherit" }}
+                            >
+                              View Details
+                            </Link>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                        <Typography variant="h6" color="error">
+                          No parts found.
+                        </Typography>
                       </TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
-                      <Typography variant="h6" color="error">
-                        No parts found.
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <Pagination
-            count={totalPages}
-            page={page}
-            onChange={(event, value) => setPage(value)}
-            color="primary"
-            sx={{ mt: 3, display: "flex", justifyContent: "center" }}
-          />
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={(event, value) => setPage(value)}
+              color="primary"
+              sx={{ mt: 3, display: "flex", justifyContent: "center" }}
+            />
 
-          <Button variant="outlined" sx={{ mt: 4, display: "block", mx: "auto" }}>
-            <Link href="/catalog" style={{ textDecoration: "none", color: "inherit" }}>
-              Back to Categories
-            </Link>
-          </Button>
-        </>
-      )}
-    </Container>
+            <Button variant="outlined" sx={{ mt: 4, display: "block", mx: "auto" }}>
+              <Link href="/catalog" style={{ textDecoration: "none", color: "inherit" }}>
+                Back to Categories
+              </Link>
+            </Button>
+          </>
+        )}
+      </Container>
+    </>
   );
 }
