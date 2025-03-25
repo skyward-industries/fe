@@ -17,6 +17,43 @@ import { fetchSubgroups, Subgroup } from "@/services/fetchSubgroups"; // Functio
 interface SubgroupPageProps {
   params: Promise<{ groupId: string; groupName: string }>;
 }
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { groupId: string; groupName: string };
+}): Promise<Metadata> {
+  const decodedName = decodeURIComponent(params.groupName.replaceAll("-", " "));
+  const title = `${decodedName} Categories | Skyward Industries`;
+  const description = `Explore NSN subcategories under ${decodedName}. Find FSC groups related to ${decodedName} in the Skyward Industries catalog.`;
+
+  const canonicalUrl = `https://skywardparts.com/catalog/${params.groupId}/${params.groupName}`;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonicalUrl,
+      siteName: "Skyward Parts",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 export default async function SubgroupPage(props: SubgroupPageProps) {
   const params = await props.params;
