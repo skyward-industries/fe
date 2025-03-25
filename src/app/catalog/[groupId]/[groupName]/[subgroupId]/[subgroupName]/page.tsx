@@ -44,7 +44,7 @@ export default function PartsPage(props: {
     loadParts();
   }, [subgroupId, page]);
 
-  const formattedGroupName = decodeURIComponent(subgroupName.replace("nsn-", "").replaceAll("-", " "))
+  const formattedGroupName = decodeURIComponent(subgroupName.replace("nsn-", "")?.replace("NSN-")?.replaceAll("-", " "))
   .replace(/\b\w/g, (char) => char.toUpperCase());
   return (
     <Container maxWidth="xl" sx={{ my: 4 }}>
