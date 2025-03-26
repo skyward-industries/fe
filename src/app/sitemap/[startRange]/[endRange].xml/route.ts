@@ -25,8 +25,9 @@ function generateSiteMap(parts: SitemapPart[]) {
 
 export async function GET(
   req: Request,
-  { params }: { params: { startRange: string; endRange: string } }
+  props: { params: Promise<{ startRange: string; endRange: string }> }
 ) {
+  const params = await props.params;
   const startRange = parseInt(params.startRange, 10);
   const endRange = parseInt(params.endRange, 10);
   const batchSize = 50000;

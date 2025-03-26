@@ -1,26 +1,16 @@
-import Head from "next/head";
 import {
-  Container,
-  Typography,
-  Grid,
+  Box,
   Card,
   CardContent,
-  Box,
+  Container,
   Divider,
+  Grid,
+  Typography,
 } from "@mui/material";
 
 export default function ContactPage() {
   return (
     <>
-      <Head>
-        <title>Contact Skyward Parts | Aerospace & Industrial Supply</title>
-        <meta
-          name="description"
-          content="Get in touch with Skyward Parts for aerospace, defense, and industrial supply solutions. Contact us today."
-        />
-        <link rel="canonical" href="https://www.skywardparts.com/contact" />
-      </Head>
-
       <Container maxWidth="lg" sx={{ my: 4 }}>
         <Typography
           variant="h4"
@@ -36,7 +26,8 @@ export default function ContactPage() {
           textAlign="center"
           gutterBottom
         >
-          Leading the way in aerospace, defense, and industrial supply solutions.
+          Leading the way in aerospace, defense, and industrial supply
+          solutions.
         </Typography>
         <Divider sx={{ my: 4 }} />
         <Grid container spacing={4}>
@@ -48,13 +39,13 @@ export default function ContactPage() {
                 </Typography>
                 <Typography color="textSecondary">
                   Skyward Industries was founded by three friends who share a
-                  passion for aerospace and a deep-rooted connection to the Space
-                  Coast. Recognizing a gap in the industry for a modern and
-                  seamless approach to sourcing aerospace parts, we began our
-                  company to revolutionize how businesses obtain the components
-                  they need. As a small business with a vast network, we pride
-                  ourselves on our customer-first approach, ensuring quick
-                  turnaround times on quotes and exceptional service that
+                  passion for aerospace and a deep-rooted connection to the
+                  Space Coast. Recognizing a gap in the industry for a modern
+                  and seamless approach to sourcing aerospace parts, we began
+                  our company to revolutionize how businesses obtain the
+                  components they need. As a small business with a vast network,
+                  we pride ourselves on our customer-first approach, ensuring
+                  quick turnaround times on quotes and exceptional service that
                   distinguishes us from our competitors.
                 </Typography>
               </CardContent>
@@ -103,8 +94,8 @@ export default function ContactPage() {
             paramount in the aerospace industry. Our vision is to foster strong
             connections with our customers, ensuring that we are their trusted
             partner from RFQ all the way to delivery. We aim to be a dependable
-            resource in the aerospace sector, committed to exceeding expectations
-            at every turn.
+            resource in the aerospace sector, committed to exceeding
+            expectations at every turn.
           </Typography>
         </Box>
 

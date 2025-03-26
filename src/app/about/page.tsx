@@ -1,4 +1,3 @@
-import Head from "next/head";
 import {
   Box,
   Card,
@@ -9,23 +8,32 @@ import {
   Typography,
 } from "@mui/material";
 
+export const metadata = {
+  title: "About Skyward Industries | Aerospace & Defense Supply",
+  description:
+    "Skyward Industries is a trusted aerospace, defense, and industrial supply company. We provide high-quality parts with a commitment to rapid service and reliability.",
+  keywords: ["aerospace", "defense", "industrial supply", "NSN parts"],
+  openGraph: {
+    title: "About Skyward Industries | Aerospace & Defense Supply",
+    description:
+      "Skyward Industries is a trusted aerospace, defense, and industrial supply company.",
+    url: "https://skywardparts.com/about",
+    siteName: "Skyward Industries",
+    images: [
+      {
+        url: "/logo.png",
+        width: 800,
+        height: 600,
+        alt: "Skyward Industries Logo",
+      },
+    ],
+    type: "website",
+  },
+};
+
 export default function AboutPage() {
   return (
     <>
-      <Head>
-        <title>About Skyward Industries | Aerospace & Defense Supply</title>
-        <meta
-          name="description"
-          content="Skyward Industries is a trusted aerospace, defense, and industrial supply company. We provide high-quality parts with a commitment to rapid service and reliability."
-        />
-        <link rel="canonical" href="https://www.skywardparts.com/about" />
-        <meta property="og:title" content="About Skyward Industries" />
-        <meta
-          property="og:description"
-          content="Skyward Industries is a trusted aerospace, defense, and industrial supply company."
-        />
-      </Head>
-
       <Container maxWidth="lg" sx={{ my: 4 }}>
         <Typography
           variant="h4"
@@ -41,7 +49,8 @@ export default function AboutPage() {
           textAlign="center"
           gutterBottom
         >
-          Leading the way in aerospace, defense, and industrial supply solutions.
+          Leading the way in aerospace, defense, and industrial supply
+          solutions.
         </Typography>
         <Divider sx={{ my: 4 }} />
         <Grid container spacing={4}>
