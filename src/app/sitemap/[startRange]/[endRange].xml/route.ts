@@ -6,14 +6,18 @@ function generateSiteMap(parts: SitemapPart[]) {
   return `<?xml version="1.0" encoding="UTF-8"?>
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     ${parts
+      .filter((part) => part.fsg_title && part.fsc_title && part.nsn)
       .map((part) => {
+        const fsgSlug = encodeURIComponent(
+          part.fsg_title.replace(/\s+/g, "-").replace(/,/g, "").toLowerCase()
+        );
+        const fscSlug = encodeURIComponent(
+          part.fsc_title.replace(/\s+/g, "-").replace(/,/g, "").toLowerCase()
+        );
+
         return `
       <url>
-        <loc>https://skywardparts.com/catalog/${part.fsg}/${encodeURIComponent(
-          part.fsg_title?.replace(/\s+/g, "-")?.replace(/,/g, "")?.toLowerCase()
-        )}/${part.fsc}/nsn-${encodeURIComponent(
-          part.fsc_title?.replace(/\s+/g, "-")?.replace(/,/g, "")?.toLowerCase()
-        )}/nsn-${part.nsn}</loc>
+        <loc>https://skywardparts.com/catalog/${part.fsg}/${fsgSlug}/${part.fsc}/nsn-${fscSlug}/nsn-${part.nsn}</loc>
         <lastmod>${new Date().toISOString()}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>

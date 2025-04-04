@@ -18,15 +18,15 @@ export const SelectionProvider = ({ children }: { children: ReactNode }) => {
 
   const addItem = (item: PartInfo) => {
     setSelectedItems((prev) => {
-      if (!prev.find((i) => i.id === item.id)) {
+      if (!prev.find((i) => i.part_number === item.part_number)) {
         return [...prev, item];
       }
-      return prev; // Avoid duplicates
+      return prev;
     });
   };
 
-  const removeItem = (id: string) => {
-    setSelectedItems((prev) => prev.filter((item) => item.id !== id));
+  const removeItem = (part_number: string) => {
+    setSelectedItems((prev) => prev.filter((item) => item.part_number !== part_number));
   };
 
   const clearSelection = () => {

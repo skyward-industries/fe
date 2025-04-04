@@ -12,7 +12,7 @@ export default function SelectionButton({ item }: { item: PartInfo }) {
     <Button
       variant="contained"
       color={isSelected ? "error" : "primary"}
-      onClick={() => (isSelected ? removeItem(item.id) : addItem(item))}
+      onClick={() => (isSelected ? removeItem(item.part_number) : addItem(item))}
       sx={{ fontWeight: "bold" }}
     >
       {isSelected ? "Remove from Cart" : "Add to Cart"}

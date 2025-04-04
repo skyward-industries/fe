@@ -31,12 +31,19 @@ export default function CartPage() {
   } = useForm();
 
   const [customParts, setCustomParts] = useState<PartInfo[]>([
-    { part_number: "", cage_code: "", company_name: "", date_est: "" },
+    { part_number: "", description: "", date_est: "" },
   ]);
 
   const [quantities, setQuantities] = useState<{ [key: string]: number }>(
     [...selectedItems, ...customParts].reduce((acc, item) => {
       acc[item.part_number] = 1;
+      return acc;
+    }, {} as { [key: string]: number })
+  );
+
+  const [description, setDescription] = useState<{ [key: string]: string }>(
+    [...selectedItems, ...customParts].reduce((acc, item) => {
+      acc[item.part_number] = "";
       return acc;
     }, {} as { [key: string]: number })
   );
@@ -52,6 +59,10 @@ export default function CartPage() {
 
   const handleQuantityChange = (partNumber: string, value: string) => {
     setQuantities((prev) => ({ ...prev, [partNumber]: Number(value) }));
+  };
+
+  const handleDescriptionChange = (partNumber: string, value: string) => {
+    setDescription((prev) => ({ ...prev, [partNumber]: value }));
   };
 
   const handleConditionChange = (partNumber: string, value: string) => {
@@ -71,7 +82,13 @@ export default function CartPage() {
   const addCustomPart = () => {
     setCustomParts([
       ...customParts,
-      { part_number: "", cage_code: "", company_name: "", date_est: "" },
+      {
+        part_number: null,
+        description: null,
+        date_est: null,
+        condition: null,
+        quantity: 1,
+      },
     ]);
   };
 
@@ -103,9 +120,7 @@ export default function CartPage() {
       if (!response.ok) throw new Error("Submission failed");
       reset();
       clearSelection();
-      setCustomParts([
-        { part_number: "", cage_code: "", company_name: "", date_est: "" },
-      ]);
+      setCustomParts([{ part_number: "", description: "", date_est: "" }]);
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {
@@ -124,25 +139,34 @@ export default function CartPage() {
         Selected Parts
       </Typography>
 
-      <TableContainer component={Paper} sx={{ mt: 2 }}>
+      <TableContainer
+        component={Paper}
+        sx={{ mt: 2, maxHeight: "40vh", overflowY: "scroll" }}
+      >
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>Part Number</TableCell>
-              <TableCell>CAGE Code</TableCell>
-              <TableCell>Company Name</TableCell>
+              <TableCell>Description</TableCell>
               <TableCell>Quantity</TableCell>
               <TableCell>Condition</TableCell>
               <TableCell>Remove</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {/* Selected Items */}
             {selectedItems.map((item: PartInfo) => (
               <TableRow key={item.part_number}>
                 <TableCell>{item.part_number}</TableCell>
-                <TableCell>{item.cage_code || "N/A"}</TableCell>
-                <TableCell>{item.company_name || "N/A"}</TableCell>
+                <TableCell>
+                  <TextField
+                    value={description[item.part_number]}
+                    onChange={(e) =>
+                      handleDescriptionChange(item.part_number, e.target.value)
+                    }
+                    placeholder="Description"
+                    fullWidth
+                  />
+                </TableCell>
                 <TableCell>
                   <TextField
                     type="number"
@@ -162,11 +186,11 @@ export default function CartPage() {
                       handleConditionChange(item.part_number, e.target.value)
                     }
                   >
-                    <MenuItem value="">Select Condition</MenuItem>
+                    <MenuItem value="">Select</MenuItem>
                     <MenuItem value="FN">FN</MenuItem>
                     <MenuItem value="NS">NS</MenuItem>
                     <MenuItem value="OH">OH</MenuItem>
-                    <MenuItem value="SD">SD</MenuItem>
+                    <MenuItem value="SV">SV</MenuItem>
                     <MenuItem value="AR">AR</MenuItem>
                   </Select>
                 </TableCell>
@@ -182,8 +206,6 @@ export default function CartPage() {
                 </TableCell>
               </TableRow>
             ))}
-
-            {/* Custom User-Added Parts */}
             {customParts.map((part, index) => (
               <TableRow key={`custom-${index}`}>
                 <TableCell>
@@ -202,25 +224,11 @@ export default function CartPage() {
                 </TableCell>
                 <TableCell>
                   <TextField
-                    value={part.cage_code}
+                    value={description[part.part_number] || ""}
                     onChange={(e) =>
-                      handleCustomPartChange(index, "cage_code", e.target.value)
+                      handleDescriptionChange(part.part_number, e.target.value)
                     }
-                    placeholder="Enter CAGE Code"
-                    fullWidth
-                  />
-                </TableCell>
-                <TableCell>
-                  <TextField
-                    value={part.company_name}
-                    onChange={(e) =>
-                      handleCustomPartChange(
-                        index,
-                        "company_name",
-                        e.target.value
-                      )
-                    }
-                    placeholder="Enter Company Name"
+                    placeholder="Description"
                     fullWidth
                   />
                 </TableCell>
@@ -305,6 +313,13 @@ export default function CartPage() {
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField label="Lead Time" fullWidth {...register("leadTime")} />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Company Name"
+              fullWidth
+              {...register("companyName")}
+            />
           </Grid>
           <Grid item xs={12}>
             <Button

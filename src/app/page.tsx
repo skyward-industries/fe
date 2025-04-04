@@ -42,8 +42,8 @@ export default function Home() {
                 View Cart
               </Link>
             </Button>
-            <Button component={Link} href="/cart" variant="outlined" color="success">
-              Submit RFQ
+            <Button component={Link} href="/cart" variant="outlined" color="error">
+              Create RFQ
             </Button>
           </Box>
         </Box>

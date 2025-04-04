@@ -50,19 +50,15 @@ export default function PartsPage(props: {
 
   return (
     <Container maxWidth="xl" sx={{ my: 4 }}>
-      {/* Page Title */}
       <Typography variant="h4" fontWeight="bold" textAlign="center" gutterBottom>
         {formattedGroupName}
       </Typography>
-
-      {/* Loading Indicator */}
       {loading ? (
         <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
           <CircularProgress color="primary" />
         </Box>
       ) : (
         <>
-          {/* Full-Screen Table */}
           <TableContainer component={Paper} sx={{ maxHeight: "70vh", overflowY: "auto", borderRadius: 2 }}>
             <Table stickyHeader>
               <TableHead sx={{ backgroundColor: "primary.dark" }}>

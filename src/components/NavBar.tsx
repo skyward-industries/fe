@@ -27,29 +27,62 @@ export default function Navbar() {
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Link href="/" passHref>
             <Box sx={{ display: "flex", alignItems: "center", mr: 3 }}>
-              <Image src="/logo.png" alt="Logo" width={200} height={50} priority />
+              <Image
+                src="/logo.png"
+                alt="Logo"
+                width={200}
+                height={50}
+                priority
+              />
             </Box>
           </Link>
-          <Button color="inherit" component={Link} href="/" sx={{ fontWeight: "bold" }}>
+          <Button
+            color="inherit"
+            component={Link}
+            href="/"
+            sx={{ fontWeight: "bold" }}
+          >
             Home
           </Button>
-          <Button color="inherit" component={Link} href="/about" sx={{ fontWeight: "bold" }}>
+          <Button
+            color="inherit"
+            component={Link}
+            href="/about"
+            sx={{ fontWeight: "bold" }}
+          >
             About
           </Button>
-          <Button color="inherit" component={Link} href="/catalog" sx={{ fontWeight: "bold" }}>
+          <Button
+            color="inherit"
+            component={Link}
+            href="/catalog"
+            sx={{ fontWeight: "bold" }}
+          >
             Catalog
+          </Button>
+          <Button
+            component={Link}
+            href="/cart"
+            variant="outlined"
+            color="error"
+          >
+            Create RFQ
           </Button>
         </Box>
 
         {/* Search Bar */}
-        <Box component="form" onSubmit={handleSearch} sx={{ display: "flex", gap: 1 }}>
+        <Box
+          component="form"
+          onSubmit={handleSearch}
+          sx={{ display: "flex", gap: 1 }}
+        >
           <TextField
             variant="outlined"
             size="small"
             placeholder="Search by NSN"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{borderRadius: 1 }}
+            sx={{ borderRadius: 1 }}
           />
           <Button type="submit" variant="contained" color="primary">
             Search

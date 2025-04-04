@@ -20,6 +20,11 @@ module.exports = {
         destination: '/',
         permanent: true,
       },
+      {
+        source: '/cage_code/:path*',
+        destination: '/',
+        permanent: true,
+      },
     ];
   },
 };

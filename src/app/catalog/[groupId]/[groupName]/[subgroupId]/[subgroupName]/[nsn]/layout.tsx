@@ -6,37 +6,32 @@ interface LayoutProps {
   params: Promise<{ nsn: string }>;
 }
 
-// Function to generate dynamic metadata with API data
 export async function generateMetadata(props: LayoutProps): Promise<Metadata> {
   const params = await props.params;
   const cleanNSN = params.nsn?.replace("nsn-", "").replace("NSN-", "");
   const parts = await fetchPartInfo(cleanNSN);
 
-  // If no parts are found, return default metadata
   if (!parts || parts.length === 0) {
     return {
       title: `NSN ${cleanNSN} | Part Details`,
       description: `View details about NSN ${cleanNSN}, including manufacturer information, CAGE codes, and establishment details.`,
       alternates: {
-        canonical: `https://www.skywardparts.com/catalog/nsn-${cleanNSN}`,
+        canonical: `https://www.skywardparts.com/catalog/nsn-${cleanNSN || params.nsn}`,
       },
     };
   }
 
-  // Extract relevant data from the first part found
-  const part = parts[0]; // Assuming first part is the most relevant
+  const part = parts[0];
   const partNumber = part.part_number || "Unknown Part";
   const manufacturer = part.company_name || "Unknown Manufacturer";
+  const cageCode = part.cage_code || "Unknown Cage Code";
 
   return {
     title: `NSN ${cleanNSN} - ${partNumber} | Part Details`,
     description: `Learn about NSN ${cleanNSN}: ${partNumber} by ${manufacturer}. Find manufacturer details, CAGE codes, and more at Skyward Industries.`,
-    alternates: {
-      canonical: `https://www.skywardparts.com/catalog/nsn-${cleanNSN}`,
-    },
     openGraph: {
       title: `NSN ${cleanNSN} - ${partNumber} | Part Details`,
-      description: `Detailed information about NSN ${cleanNSN}, including ${partNumber} by ${manufacturer}.`,
+      description: `Detailed information about NSN ${cleanNSN}, including ${partNumber} by ${manufacturer}. Cage Code: ${cageCode}.`,
       url: `https://www.skywardparts.com/catalog/nsn-${cleanNSN}`,
       siteName: "Skyward Industries",
       type: "article",

@@ -13,13 +13,29 @@ import {
   Typography,
 } from "@mui/material";
 
-export default async function PartInfoPage(props: { params: Promise<{ nsn: string }> }) {
-  const cleanNSN = (await props.params).nsn?.replace("nsn-", "").replace("NSN-", "");
+export default async function PartInfoPage(props: {
+  params: Promise<{ nsn: string }>;
+}) {
+  const cleanNSN = (await props.params).nsn
+    ?.replace("nsn-", "")
+    ?.replace("NSN-", "");
   const parts = await fetchPartInfo(cleanNSN);
-
+  const uniqueParts = parts.filter(
+    (part, index, self) =>
+      index ===
+      self.findIndex(
+        (p) =>
+          p.part_number?.toLowerCase() === part.part_number?.toLowerCase()
+      )
+  );
   return (
-    <Container maxWidth="md" sx={{ my: 4 }}>
-      <Typography variant="h4" fontWeight="bold" textAlign="center" gutterBottom>
+    <Container maxWidth="md" sx={{ my: 4, maxHeight: "80vh", overflow: "scroll" }}>
+      <Typography
+        variant="h4"
+        fontWeight="bold"
+        textAlign="center"
+        gutterBottom
+      >
         NSN: {cleanNSN}
       </Typography>
 
@@ -28,20 +44,25 @@ export default async function PartInfoPage(props: { params: Promise<{ nsn: strin
           No parts found for this NSN.
         </Typography>
       ) : (
-        parts.map((part, index) => (
+        uniqueParts.map((part, index) => (
           <Box key={index} sx={{ mb: 5 }}>
-            {/* Part Header */}
-            <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
               <Typography variant="h5" fontWeight="bold">
-                {part.part_number}
+                {part.part_number.toUpperCase()}
               </Typography>
-              {index === 0 && <SelectionButton item={part} />}
+              <SelectionButton item={part} />
             </Box>
-            <Typography variant="subtitle1" color="textSecondary" sx={{ mt: 1 }}>
+            <Typography
+              variant="subtitle1"
+              color="textSecondary"
+              sx={{ mt: 1 }}
+            >
               <strong>CAGE Code:</strong> {part.cage_code}
             </Typography>
-
-            {/* Manufacturer Info */}
             <Typography variant="h6" sx={{ mt: 3 }}>
               Manufacturer Details
             </Typography>
@@ -59,7 +80,8 @@ export default async function PartInfoPage(props: { params: Promise<{ nsn: strin
                       <strong>Address</strong>
                     </TableCell>
                     <TableCell>
-                      {part.street_address_1 || ""} {part.street_address_2 || ""} {part.po_box || ""}
+                      {part.street_address_1 || ""}{" "}
+                      {part.street_address_2 || ""} {part.po_box || ""}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -81,8 +103,6 @@ export default async function PartInfoPage(props: { params: Promise<{ nsn: strin
                 </TableBody>
               </Table>
             </TableContainer>
-
-            {/* Add a divider between multiple parts */}
             {index < parts.length - 1 && <Divider sx={{ my: 4 }} />}
           </Box>
         ))
