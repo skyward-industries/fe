@@ -69,8 +69,8 @@ export default function Navbar() {
           >
             Create RFQ
           </Button>
+          <FSCDropdown />
         </Box>
-        <FSCDropdown/>
         <Box
           component="form"
           onSubmit={handleSearch}
