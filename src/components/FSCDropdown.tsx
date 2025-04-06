@@ -2,7 +2,7 @@
 
 import { fetchGroups } from "@/services/fetchGroups";
 import { fetchSubgroups } from "@/services/fetchSubgroups";
-import { KeyboardArrowDown } from "@mui/icons-material";
+import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -55,19 +55,18 @@ export default function FSCDropdown() {
   };
 
   return (
-    <Box sx={{ position: "relative", p: 2 }}>
-      <Button onClick={handleFSCClick} sx={{ cursor: "pointer" }}>
-        <Typography
-          sx={{
-            px: 2,
-            py: 1,
-            fontWeight: "bold",
-            color: "white",
-          }}
-        >
-          FSC
-        </Typography>
-        <KeyboardArrowDown sx={{ color: "white" }} />
+    <Box sx={{ position: "relative" }}>
+      <Button
+        onClick={handleFSCClick}
+        sx={{ cursor: "pointer" }}
+        variant="filled"
+      >
+        FSC
+        {open ? (
+          <KeyboardArrowUp sx={{ color: "white" }} />
+        ) : (
+          <KeyboardArrowDown sx={{ color: "white" }} />
+        )}
       </Button>
 
       <Popper
@@ -118,28 +117,30 @@ export default function FSCDropdown() {
                 <List dense sx={{ maxHeight: "70vh", overflowY: "scroll" }}>
                   {subgroups.map((sub) => (
                     <>
-                    <ListItem
-                      key={sub.id}
-                      sx={{
-                        cursor: "pointer",
-                        whiteSpace: "normal",
-                        "&:hover": { bgcolor: "grey.800" },
-                      }}
-                    >
-                      <Link
-                        href={`/catalog/${selectedGroupId}/${encodeURIComponent(
-                          sub.fsc_title.replace(/\s+/g, "-").toLowerCase()
-                        )}`}
-                        onClick={() => {
-                          setAnchorEl(null);
-                          setSelectedGroupId(null);
+                      <ListItem
+                        key={sub.id}
+                        sx={{
+                          cursor: "pointer",
+                          whiteSpace: "normal",
+                          "&:hover": { bgcolor: "grey.800" },
                         }}
-                        style={{ textDecoration: "none", color: "inherit" }}
                       >
-                        <Typography variant="body2">{sub.fsc_title}</Typography>
-                      </Link>
-                    </ListItem>
-                    <Divider/>
+                        <Link
+                          href={`/catalog/${selectedGroupId}/${encodeURIComponent(
+                            sub.fsc_title.replace(/\s+/g, "-").toLowerCase()
+                          )}`}
+                          onClick={() => {
+                            setAnchorEl(null);
+                            setSelectedGroupId(null);
+                          }}
+                          style={{ textDecoration: "none", color: "inherit" }}
+                        >
+                          <Typography variant="body2">
+                            {sub.fsc_title}
+                          </Typography>
+                        </Link>
+                      </ListItem>
+                      <Divider />
                     </>
                   ))}
                 </List>
