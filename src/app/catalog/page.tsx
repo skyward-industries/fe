@@ -44,7 +44,6 @@ export default async function CatalogPage() {
 
   return (
     <Container maxWidth="xl" sx={{ my: 4 }}>
-      {/* Page Title */}
       <Typography
         variant="h4"
         fontWeight="bold"
@@ -61,8 +60,6 @@ export default async function CatalogPage() {
       >
         Explore our diverse range of industry-leading product groups.
       </Typography>
-
-      {/* Full-Screen Table */}
       <TableContainer
         component={Paper}
         sx={{ maxHeight: "70vh", overflowY: "auto", borderRadius: 2 }}

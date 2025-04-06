@@ -7,6 +7,7 @@ import Image from "next/image";
 import { AppBar, Toolbar, Button, TextField, Box, Badge } from "@mui/material";
 import { useSelection } from "@/context/SelectionContext";
 import { ShoppingCart } from "@mui/icons-material";
+import FSCDropdown from "./FSCDropdown";
 
 export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,7 +23,7 @@ export default function Navbar() {
   };
 
   return (
-    <AppBar position="static" sx={{ padding: "0.5rem" }}>
+    <AppBar position="static" sx={{ padding: "0.5rem", mb: 2 }}>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Link href="/" passHref>
@@ -69,8 +70,7 @@ export default function Navbar() {
             Create RFQ
           </Button>
         </Box>
-
-        {/* Search Bar */}
+        <FSCDropdown/>
         <Box
           component="form"
           onSubmit={handleSearch}
@@ -79,10 +79,10 @@ export default function Navbar() {
           <TextField
             variant="outlined"
             size="small"
-            placeholder="Search by NSN"
+            placeholder="NSN or Part Number Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{ borderRadius: 1 }}
+            sx={{ borderRadius: 1, width: 300 }}
           />
           <Button type="submit" variant="contained" color="primary">
             Search

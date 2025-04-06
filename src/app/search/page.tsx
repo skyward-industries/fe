@@ -41,7 +41,6 @@ export default async function PartInfoPage(props: { searchParams: Promise<{ nsn?
       ) : (
         parts.map((part, index) => (
           <Box key={index} sx={{ mb: 5 }}>
-            {/* Part Header */}
             <Box display="flex" justifyContent="space-between" alignItems="center">
               <Typography variant="h5" fontWeight="bold">
                 {part.part_number}
@@ -51,8 +50,6 @@ export default async function PartInfoPage(props: { searchParams: Promise<{ nsn?
             <Typography variant="subtitle1" color="textSecondary" sx={{ mt: 1 }}>
               <strong>CAGE Code:</strong> {part.cage_code}
             </Typography>
-
-            {/* Manufacturer Info */}
             <Typography variant="h6" sx={{ mt: 3 }}>
               Manufacturer Details
             </Typography>
@@ -82,8 +79,6 @@ export default async function PartInfoPage(props: { searchParams: Promise<{ nsn?
                 </TableBody>
               </Table>
             </TableContainer>
-
-            {/* Add a divider between multiple parts */}
             {index < parts.length - 1 && <Divider sx={{ my: 4 }} />}
           </Box>
         ))
