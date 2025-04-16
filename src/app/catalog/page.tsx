@@ -1,20 +1,21 @@
 export const dynamic = "force-dynamic"; // Ensures SSR (Server-Side Rendering)
 
+import { fetchGroups, Group } from "@/services/fetchGroups";
+import { slugify } from "@/utils/slugify";
 import {
+  Button,
   Container,
-  Typography,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  Button,
+  Typography,
 } from "@mui/material";
-import Link from "next/link";
-import { fetchGroups, Group } from "@/services/fetchGroups";
 import { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Product Groups | Skyward Industries",
@@ -102,8 +103,8 @@ export default async function CatalogPage() {
                       sx={{ fontWeight: "bold" }}
                     >
                       <Link
-                        href={`/catalog/${group.fsg}/${encodeURIComponent(
-                          group.fsg_title?.replace(/\s+/g, "-")?.toLowerCase()
+                        href={`/catalog/${group.fsg}/${slugify(
+                          group.fsg_title
                         )}`}
                         style={{ textDecoration: "none", color: "inherit" }}
                       >

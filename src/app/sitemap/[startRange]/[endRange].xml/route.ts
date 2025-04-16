@@ -1,4 +1,5 @@
 import { fetchSitemapParts, SitemapPart } from "@/services/fetchSitemapParts";
+import { slugify } from "@/utils/slugify";
 
 export const dynamic = "force-dynamic"; // Ensures fresh data on every request
 
@@ -8,16 +9,14 @@ function generateSiteMap(parts: SitemapPart[]) {
     ${parts
       .filter((part) => part.fsg_title && part.fsc_title && part.nsn)
       .map((part) => {
-        const fsgSlug = encodeURIComponent(
-          part.fsg_title.replace(/\s+/g, "-").replace(/,/g, "").toLowerCase()
-        );
-        const fscSlug = encodeURIComponent(
-          part.fsc_title.replace(/\s+/g, "-").replace(/,/g, "").toLowerCase()
-        );
+        const fsgSlug = slugify(part.fsg_title);
+        const fscSlug = slugify(part.fsc_title);
 
         return `
       <url>
-        <loc>https://skywardparts.com/catalog/${part.fsg}/${fsgSlug}/${part.fsc}/nsn-${fscSlug}/nsn-${part.nsn}</loc>
+        <loc>https://skywardparts.com/catalog/${part.fsg}/${fsgSlug}/${
+          part.fsc
+        }/nsn-${fscSlug}/nsn-${part.nsn}</loc>
         <lastmod>${new Date().toISOString()}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
@@ -36,7 +35,12 @@ export async function GET(
   const endRange = parseInt(params.endRange, 10);
   const batchSize = 50000;
 
-  if (isNaN(startRange) || isNaN(endRange) || startRange < 1 || endRange < startRange) {
+  if (
+    isNaN(startRange) ||
+    isNaN(endRange) ||
+    startRange < 1 ||
+    endRange < startRange
+  ) {
     return new Response("Invalid sitemap parameters", { status: 400 });
   }
 

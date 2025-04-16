@@ -1,4 +1,5 @@
 import { fetchGroups, Group } from "@/services/fetchGroups";
+import { slugify } from "@/utils/slugify";
 
 export const dynamic = "force-dynamic"; // Ensures fresh data on every request
 
@@ -7,14 +8,10 @@ function generateSiteMap(groups: Group[]) {
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     ${groups
       .map((group) => {
+        const slug = slugify(group.fsg_title);
         return `
       <url>
-        <loc>https://skywardparts.com/catalog/${group.fsg}/${encodeURIComponent(
-          group.fsg_title
-            ?.replace(/\s+/g, "-")
-            ?.replace(/,/g, "")
-            ?.toLowerCase()
-        )}</loc>
+        <loc>https://skywardparts.com/catalog/${group.fsg}/${slug}</loc>
         <lastmod>${new Date().toISOString()}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>

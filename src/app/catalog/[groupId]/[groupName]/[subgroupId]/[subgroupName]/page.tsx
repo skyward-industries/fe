@@ -19,7 +19,12 @@ import {
 import Link from "next/link";
 
 export default function PartsPage(props: {
-  params: Promise<{ groupId: string; groupName: string; subgroupId: string; subgroupName: string }>;
+  params: Promise<{
+    groupId: string;
+    groupName: string;
+    subgroupId: string;
+    subgroupName: string;
+  }>;
 }) {
   const { groupId, groupName, subgroupId, subgroupName } = use(props.params);
   const [parts, setParts] = useState<Part[]>([]);
@@ -44,29 +49,46 @@ export default function PartsPage(props: {
     loadParts();
   }, [subgroupId, page]);
 
-  const formattedGroupName = decodeURIComponent(
-    subgroupName.replace("nsn-", "").replace("NSN-")?.replaceAll("-", " ")
-  ).replace(/\b\w/g, (char) => char.toUpperCase());
+  const formattedGroupName = subgroupName
+    .replace("nsn-", "")
+    .replace("NSN-")
+    ?.replaceAll("-", " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 
   return (
     <Container maxWidth="xl" sx={{ my: 4 }}>
-      <Typography variant="h4" fontWeight="bold" textAlign="center" gutterBottom>
+      <Typography
+        variant="h4"
+        fontWeight="bold"
+        textAlign="center"
+        gutterBottom
+      >
         {formattedGroupName}
       </Typography>
       {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="50vh"
+        >
           <CircularProgress color="primary" />
         </Box>
       ) : (
         <>
-          <TableContainer component={Paper} sx={{ maxHeight: "70vh", overflowY: "auto", borderRadius: 2 }}>
+          <TableContainer
+            component={Paper}
+            sx={{ maxHeight: "70vh", overflowY: "auto", borderRadius: 2 }}
+          >
             <Table stickyHeader>
               <TableHead sx={{ backgroundColor: "primary.dark" }}>
                 <TableRow>
                   <TableCell sx={{ fontWeight: "bold" }}>NSN</TableCell>
                   <TableCell sx={{ fontWeight: "bold" }}>FSG</TableCell>
                   <TableCell sx={{ fontWeight: "bold" }}>FSC</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>Actions</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>
+                    Actions
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -77,7 +99,12 @@ export default function PartsPage(props: {
                       <TableCell>{part.fsg}</TableCell>
                       <TableCell>{part.fsc}</TableCell>
                       <TableCell sx={{ textAlign: "center" }}>
-                        <Button variant="contained" color="primary" size="small" sx={{ fontWeight: "bold" }}>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          sx={{ fontWeight: "bold" }}
+                        >
                           <Link
                             href={`/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}/nsn-${part.nsn}`}
                             style={{ textDecoration: "none", color: "inherit" }}
@@ -108,8 +135,14 @@ export default function PartsPage(props: {
             sx={{ mt: 3, display: "flex", justifyContent: "center" }}
           />
 
-          <Button variant="outlined" sx={{ mt: 4, display: "block", mx: "auto" }}>
-            <Link href="/catalog" style={{ textDecoration: "none", color: "inherit" }}>
+          <Button
+            variant="outlined"
+            sx={{ mt: 4, display: "block", mx: "auto" }}
+          >
+            <Link
+              href="/catalog"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
               Back to Categories
             </Link>
           </Button>

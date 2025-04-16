@@ -1,4 +1,8 @@
-import { fetchSitemapSubgroups, Subgroup } from "@/services/fetchSitemapSubgroups";
+import {
+  fetchSitemapSubgroups,
+  Subgroup,
+} from "@/services/fetchSitemapSubgroups";
+import { slugify } from "@/utils/slugify";
 
 export const dynamic = "force-dynamic"; // Ensures fresh data on every request
 
@@ -7,21 +11,13 @@ function generateSiteMap(subgroups: Subgroup[]) {
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     ${subgroups
       .map((subgroup) => {
+        const fsgTitle = slugify(subgroup.fsg_title);
+        const fscTitle = slugify(subgroup.fsc_title);
         return `
       <url>
-        <loc>https://skywardparts.com/catalog/${
-          subgroup.fsg
-        }/${encodeURIComponent(
-          subgroup.fsg_title
-            ?.replace(/\s+/g, "-")
-            ?.replace(/,/g, "")
-            ?.toLowerCase()
-        )}/${subgroup.fsc}/nsn-${encodeURIComponent(
-          subgroup.fsc_title
-            ?.replace(/\s+/g, "-")
-            ?.replace(/,/g, "")
-            ?.toLowerCase()
-        )}</loc>
+        <loc>https://skywardparts.com/catalog/${subgroup.fsg}/${fsgTitle}/${
+          subgroup.fsc
+        }/nsn-${fscTitle}</loc>
         <lastmod>${new Date().toISOString()}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
@@ -32,14 +28,11 @@ function generateSiteMap(subgroups: Subgroup[]) {
 }
 
 export async function GET() {
-    const subgroups = await fetchSitemapSubgroups();
-
+  const subgroups = await fetchSitemapSubgroups();
 
   if (subgroups.length === 0) {
     return new Response("No data for this sitemap", { status: 404 });
   }
-
-
 
   const sitemap = generateSiteMap(subgroups);
 

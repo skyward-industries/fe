@@ -2,6 +2,7 @@
 
 import { fetchGroups } from "@/services/fetchGroups";
 import { fetchSubgroups } from "@/services/fetchSubgroups";
+import { slugify } from "@/utils/slugify";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import {
   Box,
@@ -126,8 +127,8 @@ export default function FSCDropdown() {
                         }}
                       >
                         <Link
-                          href={`/catalog/${selectedGroupId}/${encodeURIComponent(
-                            sub.fsc_title.replace(/\s+/g, "-").toLowerCase()
+                          href={`/catalog/${selectedGroupId}/${slugify(
+                            sub.fsc_title
                           )}`}
                           onClick={() => {
                             setAnchorEl(null);
