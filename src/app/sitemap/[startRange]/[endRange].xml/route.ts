@@ -33,7 +33,7 @@ export async function GET(
   const params = await props.params;
   const startRange = parseInt(params.startRange, 10);
   const endRange = parseInt(params.endRange, 10);
-  const batchSize = 50000;
+  const batchSize = 3000;
 
   if (
     isNaN(startRange) ||

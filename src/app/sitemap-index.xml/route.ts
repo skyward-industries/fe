@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   const totalParts = 7_200_000;
-  const batchSize = 50_000;
+  const batchSize = 3_000;
   const totalSitemaps = Math.ceil(totalParts / batchSize);
 
   let sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
