@@ -1,7 +1,9 @@
 import SelectionButton from "@/components/Selection";
 import { fetchPartInfo } from "@/services/fetchPartInfo";
+import { ArrowLeft } from "@mui/icons-material";
 import {
   Box,
+  Button,
   Container,
   Divider,
   Paper,
@@ -12,9 +14,16 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import Link from "next/link";
 
 export default async function PartInfoPage(props: {
-  params: Promise<{ nsn: string }>;
+  params: Promise<{
+    nsn: string;
+    groupId: string;
+    groupName: string;
+    subgroupId: string;
+    subgroupName: string;
+  }>;
 }) {
   const cleanNSN = (await props.params).nsn
     ?.replace("nsn-", "")
@@ -24,12 +33,26 @@ export default async function PartInfoPage(props: {
     (part, index, self) =>
       index ===
       self.findIndex(
-        (p) =>
-          p.part_number?.toLowerCase() === part.part_number?.toLowerCase()
+        (p) => p.part_number?.toLowerCase() === part.part_number?.toLowerCase()
       )
   );
   return (
-    <Container maxWidth="md" sx={{ my: 4, maxHeight: "80vh", overflow: "scroll" }}>
+    <Container
+      maxWidth="md"
+      sx={{ my: 4, maxHeight: "80vh", overflow: "scroll" }}
+    >
+      <Button
+        variant="outlined"
+        sx={{ mb: 2, fontWeight: "bold" }}
+        startIcon={<ArrowLeft />}
+      >
+        <Link
+          href={`/catalog/${props.params.groupId}/${props.params.groupName}/${props.params.subgroupId}/${props.params.subgroupName}/`}
+          style={{ textDecoration: "none", color: "inherit" }}
+        >
+          Back to Subgroups
+        </Link>
+      </Button>
       <Typography
         variant="h4"
         fontWeight="bold"

@@ -17,6 +17,7 @@ import {
   Box,
 } from "@mui/material";
 import Link from "next/link";
+import { ArrowLeft } from "@mui/icons-material";
 
 export default function PartsPage(props: {
   params: Promise<{
@@ -57,6 +58,18 @@ export default function PartsPage(props: {
 
   return (
     <Container maxWidth="xl" sx={{ my: 4 }}>
+      <Button
+        variant="outlined"
+        sx={{ mb: 2, fontWeight: "bold" }}
+        startIcon={<ArrowLeft />}
+      >
+        <Link
+          href={`/catalog/${groupId}/${groupName}/`}
+          style={{ textDecoration: "none", color: "inherit" }}
+        >
+          Back to Groups
+        </Link>
+      </Button>
       <Typography
         variant="h4"
         fontWeight="bold"

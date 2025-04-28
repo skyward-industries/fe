@@ -1,5 +1,6 @@
 import { fetchSubgroups, Subgroup } from "@/services/fetchSubgroups";
 import { slugify } from "@/utils/slugify";
+import { ArrowLeft } from "@mui/icons-material";
 import {
   Button,
   Container,
@@ -53,6 +54,18 @@ export default async function SubgroupPage(props: SubgroupPageProps) {
 
   return (
     <Container maxWidth="xl" sx={{ my: 4 }}>
+      <Button
+        variant="outlined"
+        sx={{ mb: 2, fontWeight: "bold" }}
+        startIcon={<ArrowLeft />}
+      >
+        <Link
+          href={`/catalog/`}
+          style={{ textDecoration: "none", color: "inherit" }}
+        >
+          Back to Catalog
+        </Link>
+      </Button>
       <Typography
         variant="h4"
         fontWeight="bold"
@@ -98,7 +111,9 @@ export default async function SubgroupPage(props: SubgroupPageProps) {
                     sx={{ fontWeight: "bold" }}
                   >
                     <Link
-                      href={`/catalog/${groupId}/${slugify(groupName)}/${subgroup.fsc}/nsn-${slugify(subgroup.fsc_title)}`}
+                      href={`/catalog/${groupId}/${slugify(groupName)}/${
+                        subgroup.fsc
+                      }/nsn-${slugify(subgroup.fsc_title)}`}
                       style={{ textDecoration: "none", color: "inherit" }}
                     >
                       View NSN
