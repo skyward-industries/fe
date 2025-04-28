@@ -63,7 +63,7 @@ export default async function SubgroupPage(props: SubgroupPageProps) {
           href={`/catalog/`}
           style={{ textDecoration: "none", color: "inherit" }}
         >
-          Back to Catalog
+          Back
         </Link>
       </Button>
       <Typography

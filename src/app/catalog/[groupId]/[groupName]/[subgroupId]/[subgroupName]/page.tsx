@@ -67,7 +67,7 @@ export default function PartsPage(props: {
           href={`/catalog/${groupId}/${groupName}/`}
           style={{ textDecoration: "none", color: "inherit" }}
         >
-          Back to Groups
+          Back
         </Link>
       </Button>
       <Typography

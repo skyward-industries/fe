@@ -50,7 +50,7 @@ export default async function PartInfoPage(props: {
           href={`/catalog/${props.params.groupId}/${props.params.groupName}/${props.params.subgroupId}/${props.params.subgroupName}/`}
           style={{ textDecoration: "none", color: "inherit" }}
         >
-          Back to Subgroups
+          Back
         </Link>
       </Button>
       <Typography
