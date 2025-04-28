@@ -7,12 +7,6 @@ export async function GET() {
 
   let sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
   <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap>
-        <loc>https://skywardparts.com/sitemap-groups.xml</loc>
-  </sitemap>
-  <sitemap>
-        <loc>https://skywardparts.com/sitemap-subgroups.xml</loc>
-  </sitemap>
   `;
 
   for (let i = 0; i < totalSitemaps; i++) {
