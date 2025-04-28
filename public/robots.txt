@@ -5,4 +5,4 @@ Disallow:
 Host: https://skywardparts.com
 
 # Sitemap Index
-Sitemap: https://skywardparts.com/sitemaps.xml
+Sitemap: https://skywardparts.com/sitemap-index.xml
