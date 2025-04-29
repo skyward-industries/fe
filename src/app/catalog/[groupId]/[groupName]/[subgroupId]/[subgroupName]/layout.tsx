@@ -1,3 +1,4 @@
+import { slugify } from "@/utils/slugify";
 import { Metadata } from "next";
 
 interface LayoutProps {
@@ -23,7 +24,7 @@ export async function generateMetadata(props: LayoutProps): Promise<Metadata> {
     title: `${formattedGroupName} | Parts List`,
     description: `Browse parts under ${formattedGroupName} at Skyward Industries.`,
     alternates: {
-      canonical: `https://www.skywardparts.com/catalog/${params.groupId}/${params.groupName}/${params.subgroupId}/${params.subgroupName}`,
+      canonical: `https://www.skywardparts.com/catalog/${params.groupId}/${slugify(params.groupName)}/${params.subgroupId}/${slugify(params.subgroupName)}`,
     },
   };
 }

@@ -1,9 +1,16 @@
 import { Metadata } from "next";
 import { fetchPartInfo } from "@/services/fetchPartInfo";
+import { slugify } from "@/utils/slugify";
 
 interface LayoutProps {
   children: React.ReactNode;
-  params: Promise<{ nsn: string }>;
+  params: Promise<{
+    nsn: string;
+    groupId: string;
+    groupName: string;
+    subgroupId: string;
+    subgroupName: string;
+  }>;
 }
 
 export async function generateMetadata(props: LayoutProps): Promise<Metadata> {
@@ -16,7 +23,11 @@ export async function generateMetadata(props: LayoutProps): Promise<Metadata> {
       title: `NSN ${cleanNSN} | Part Details`,
       description: `View details about NSN ${cleanNSN}, including manufacturer information, CAGE codes, and establishment details.`,
       alternates: {
-        canonical: `https://www.skywardparts.com/catalog/nsn-${cleanNSN || params.nsn}`,
+        canonical: `https://www.skywardparts.com/catalog/${
+          params.groupId
+        }/${slugify(params.groupName)}/${params.subgroupId}/${slugify(
+          params.subgroupName
+        )}/nsn-${cleanNSN}`,
       },
     };
   }
@@ -32,8 +43,10 @@ export async function generateMetadata(props: LayoutProps): Promise<Metadata> {
     openGraph: {
       title: `NSN ${cleanNSN} - ${partNumber} | Part Details`,
       description: `Detailed information about NSN ${cleanNSN}, including ${partNumber} by ${manufacturer}. Cage Code: ${cageCode}.`,
-      url: `https://www.skywardparts.com/catalog/nsn-${cleanNSN}`,
-      siteName: "Skyward Industries",
+      url: `https://www.skywardparts.com/catalog/${params.groupId}/${slugify(
+        params.groupName
+      )}/${params.subgroupId}/${slugify(params.subgroupName)}/nsn-${cleanNSN}`,
+      siteName: "Skyward Parts",
       type: "article",
     },
     twitter: {
