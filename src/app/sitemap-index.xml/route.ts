@@ -5,19 +5,22 @@ export async function GET() {
   const batchSize = 3_000;
   const totalSitemaps = Math.ceil(totalParts / batchSize);
 
+  const today = new Date().toISOString(); // <- current date in ISO format
+
   let sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
-  <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  `;
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+`;
 
   for (let i = 0; i < totalSitemaps; i++) {
     const startRange = i * batchSize + 1;
     const endRange = (i + 1) * batchSize;
 
     sitemapIndex += `
-      <sitemap>
-        <loc>https://skywardparts.com/sitemap/${startRange}/${endRange}.xml</loc>
-      </sitemap>
-    `;
+  <sitemap>
+    <loc>https://skywardparts.com/sitemap/${startRange}/${endRange}.xml</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>
+`;
   }
 
   sitemapIndex += `</sitemapindex>`;
