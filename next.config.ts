@@ -1,17 +1,10 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
-};
-
-export default nextConfig;
-
-module.exports = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   typescript: {
-    ignoreBuildErrors: true, // Skip TypeScript type validity checks
+    ignoreBuildErrors: true,
   },
   eslint: {
-    ignoreDuringBuilds: true, // Skip ESLint during build
+    ignoreDuringBuilds: true,
   },
   async redirects() {
     return [
@@ -25,6 +18,18 @@ module.exports = {
         destination: '/',
         permanent: true,
       },
+      {
+        source: '/catalog/nsn-:nsn',
+        destination: '/catalog/',
+        permanent: true,
+      },
+      {
+        source: '/cage-code/:path',
+        destination: '/',
+        permanent: true,
+      },
     ];
   },
 };
+
+module.exports = nextConfig;
