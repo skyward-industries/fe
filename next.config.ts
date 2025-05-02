@@ -28,6 +28,11 @@ const nextConfig = {
         destination: '/',
         permanent: true,
       },
+      {
+        source: '/cage-code-details/:path',
+        destination: '/',
+        permanent: true,
+      },
     ];
   },
 };
