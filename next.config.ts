@@ -9,13 +9,24 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        source: '/:path*/',
+        destination: '/:path*',
+        permanent: true,
+      },
+      {
         source: '/product/:path*',
         destination: '/',
         permanent: true,
       },
       {
-        source: '/cage_code/:path*',
+        source: '/cage-code-details',
         destination: '/',
+        has: [
+          {
+            type: 'query',
+            key: 'cage-code',
+          },
+        ],
         permanent: true,
       },
       {
