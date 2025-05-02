@@ -29,9 +29,6 @@ export default async function PartInfoPage(props: {
     ?.replace("nsn-", "")
     ?.replace("NSN-", "");
   const parts = await fetchPartInfo(cleanNSN);
-  if (!parts || parts.length === 0) {
-    notFound();
-  }
   const uniqueParts = parts.filter(
     (part, index, self) =>
       index ===
