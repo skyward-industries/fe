@@ -1,5 +1,9 @@
 User-agent: *
 Disallow: /?s=
+Disallow: /cage-code
+Disallow: /cage-code/
+Disallow: /cage-code-details
+Disallow: /cage-code-details/
 
 # Host
 Host: https://skywardparts.com
