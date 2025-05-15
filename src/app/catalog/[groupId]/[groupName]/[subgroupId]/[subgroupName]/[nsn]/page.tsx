@@ -6,6 +6,7 @@ import {
   Button,
   Container,
   Divider,
+  Grid,
   Paper,
   Table,
   TableBody,
@@ -25,9 +26,9 @@ export default async function PartInfoPage(props: {
     subgroupName: string;
   }>;
 }) {
-  const cleanNSN = (await props.params).nsn
-    ?.replace("nsn-", "")
-    ?.replace("NSN-", "");
+  const { nsn, groupId, groupName, subgroupId, subgroupName } =
+    await props.params;
+  const cleanNSN = nsn?.replace("nsn-", "").replace("NSN-", "");
   const parts = await fetchPartInfo(cleanNSN);
   const uniqueParts = parts.filter(
     (part, index, self) =>
@@ -36,89 +37,243 @@ export default async function PartInfoPage(props: {
         (p) => p.part_number?.toLowerCase() === part.part_number?.toLowerCase()
       )
   );
+
   return (
-    <Container
-      maxWidth="md"
-      sx={{ my: 4, maxHeight: "80vh", overflow: "scroll" }}
-    >
+    <Container maxWidth="lg" sx={{ my: 4 }}>
       <Button
         variant="outlined"
         sx={{ mb: 2, fontWeight: "bold" }}
         startIcon={<ArrowLeft />}
       >
         <Link
-          href={`/catalog/${(await props.params).groupId}/${(await props.params).groupName}/${(await props.params).subgroupId}/${(await props.params).subgroupName}/`}
+          href={`/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}/`}
           style={{ textDecoration: "none", color: "inherit" }}
         >
           Back
         </Link>
       </Button>
-      <h1>NSN: {cleanNSN}</h1>
+
+      <Typography variant="h4" fontWeight="bold" gutterBottom>
+        NSN: {cleanNSN}
+      </Typography>
+
       {parts.length === 0 ? (
         <Typography textAlign="center" sx={{ mt: 3 }}>
           No parts found for this NSN.
         </Typography>
       ) : (
         uniqueParts.map((part, index) => (
-          <Box key={index} sx={{ mb: 5 }}>
+          <Box key={index} sx={{ mb: 8 }}>
             <Box
               display="flex"
               justifyContent="space-between"
               alignItems="center"
+              mb={2}
             >
               <Typography variant="h5" fontWeight="bold">
-                {part.part_number.toUpperCase()}
+                Part Number: {part.part_number.toUpperCase()}
               </Typography>
               <SelectionButton item={part} />
             </Box>
+
             <Typography
               variant="subtitle1"
               color="textSecondary"
-              sx={{ mt: 1 }}
+              sx={{ mb: 2 }}
             >
               <strong>CAGE Code:</strong> {part.cage_code}
             </Typography>
-            <Typography variant="h6" sx={{ mt: 3 }}>
-              Manufacturer Details
-            </Typography>
-            <TableContainer component={Paper} sx={{ mt: 1 }}>
-              <Table>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>
-                      <strong>Company Name</strong>
-                    </TableCell>
-                    <TableCell>{part.company_name || "N/A"}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <strong>Address</strong>
-                    </TableCell>
-                    <TableCell>
-                      {part.street_address_1 || ""}{" "}
-                      {part.street_address_2 || ""} {part.po_box || ""}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <strong>Location</strong>
-                    </TableCell>
-                    <TableCell>
-                      {part.city
-                        ? `${part.city}, ${part.state} ${part.zip}, ${part.country}`
-                        : "N/A"}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <strong>Establishment Date</strong>
-                    </TableCell>
-                    <TableCell>{part.date_est || "N/A"}</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
-            {index < parts.length - 1 && <Divider sx={{ my: 4 }} />}
+
+            <Grid container spacing={4}>
+              {/* Main Table */}
+              <Grid item xs={12} md={8}>
+                <Paper
+                  variant="outlined"
+                  sx={{ backgroundColor: "#1a1a1a", color: "white" }}
+                >
+                  <Box sx={{ px: 2, py: 1 }}>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      Manufacturer & NSN Info
+                    </Typography>
+                  </Box>
+                  <TableContainer>
+                    <Table>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>
+                            <strong>Company Name</strong>
+                          </TableCell>
+                          <TableCell>{part.company_name || "N/A"}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>
+                            <strong>Address</strong>
+                          </TableCell>
+                          <TableCell>
+                            {[
+                              part.street_address_1,
+                              part.street_address_2,
+                              part.po_box,
+                            ]
+                              .filter(Boolean)
+                              .join(", ") || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>
+                            <strong>Location</strong>
+                          </TableCell>
+                          <TableCell>
+                            {part.city
+                              ? `${part.city}, ${part.state} ${part.zip}, ${part.country}`
+                              : "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>
+                            <strong>Establishment Date</strong>
+                          </TableCell>
+                          <TableCell>{part.date_est || "N/A"}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>
+                            <strong>INC</strong>
+                          </TableCell>
+                          <TableCell>{part.inc ?? "N/A"}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>
+                            <strong>Item Name</strong>
+                          </TableCell>
+                          <TableCell>{part.item_name || "N/A"}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>
+                            <strong>End Item</strong>
+                          </TableCell>
+                          <TableCell>{part.end_item_name || "N/A"}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>
+                            <strong>SOS</strong>
+                          </TableCell>
+                          <TableCell>{part.sos || "N/A"}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>
+                            <strong>Cancelled NIIN</strong>
+                          </TableCell>
+                          <TableCell>{part.cancelled_niin || "N/A"}</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Paper>
+              </Grid>
+
+              {/* Sidebar Tables */}
+              <Grid item xs={12} md={4}>
+                <Box display="flex" flexDirection="column" gap={4}>
+                  {/* Classification Info */}
+                  <Paper
+                    variant="outlined"
+                    sx={{ backgroundColor: "#1a1a1a", color: "white" }}
+                  >
+                    <Box sx={{ px: 2, py: 1 }}>
+                      <Typography variant="subtitle1" fontWeight="bold">
+                        Classification Info
+                      </Typography>
+                    </Box>
+                    <TableContainer>
+                      <Table>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>
+                              <strong>Code</strong>
+                            </TableCell>
+                            <TableCell>{part.code || "N/A"}</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>
+                              <strong>Literal</strong>
+                            </TableCell>
+                            <TableCell>{part.literal || "N/A"}</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>
+                              <strong>Description</strong>
+                            </TableCell>
+                            <TableCell>{part.description || "N/A"}</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>
+                              <strong>Regs</strong>
+                            </TableCell>
+                            <TableCell>{part.regs || "N/A"}</TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Paper>
+
+                  {/* Freight Info */}
+                  <Paper
+                    variant="outlined"
+                    sx={{ backgroundColor: "#1a1a1a", color: "white" }}
+                  >
+                    <Box sx={{ px: 2, py: 1 }}>
+                      <Typography variant="subtitle1" fontWeight="bold">
+                        Freight Info
+                      </Typography>
+                    </Box>
+                    <TableContainer>
+                      <Table>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>
+                              <strong>Uniform Freight Class</strong>
+                            </TableCell>
+                            <TableCell>
+                              {part.uniform_freight_class ?? "N/A"}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>
+                              <strong>LTL Class</strong>
+                            </TableCell>
+                            <TableCell>{part.ltl_class || "N/A"}</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>
+                              <strong>LCL Class</strong>
+                            </TableCell>
+                            <TableCell>{part.lcl_class || "N/A"}</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>
+                              <strong>NMFC Description</strong>
+                            </TableCell>
+                            <TableCell>
+                              {part.nmfc_description || "N/A"}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>
+                              <strong>Special Handling</strong>
+                            </TableCell>
+                            <TableCell>
+                              {part.special_handling_code || "N/A"}
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Paper>
+                </Box>
+              </Grid>
+            </Grid>
+
+            {index < parts.length - 1 && <Divider sx={{ my: 6 }} />}
           </Box>
         ))
       )}

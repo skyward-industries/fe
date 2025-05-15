@@ -14,21 +14,44 @@ export default function Home() {
         <link rel="canonical" href="https://www.skywardparts.com/" />
       </Head>
 
-      <Container maxWidth="lg">
+      <Box
+        sx={{
+          backgroundImage: "url('/plane.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          minHeight: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+          color: "white",
+          position: "relative",
+          px: 2,
+        }}
+      >
         <Box
           sx={{
+            position: "absolute",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+          }}
+        />
+
+        <Container
+          maxWidth="lg"
+          sx={{
+            position: "relative",
+            zIndex: 1,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            justifyContent: "center",
-            minHeight: "85vh",
-            textAlign: "center",
           }}
         >
-          <Typography variant="h2" color="primary" fontWeight="bold" gutterBottom>
+          <Typography variant="h2" fontWeight="bold" gutterBottom>
             Welcome to Skyward Industries
           </Typography>
-          <Typography variant="h5" color="text.secondary" gutterBottom>
+          <Typography variant="h5" sx={{ color: "#ccc" }} gutterBottom>
             Discover cutting-edge products built for the future.
           </Typography>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 3 }}>
@@ -46,8 +69,8 @@ export default function Home() {
               Create RFQ
             </Button>
           </Box>
-        </Box>
-      </Container>
+        </Container>
+      </Box>
     </>
   );
 }

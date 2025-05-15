@@ -23,7 +23,7 @@ export default function Navbar() {
   };
 
   return (
-    <AppBar position="static" sx={{ padding: "0.5rem", mb: 2 }}>
+    <AppBar position="static" sx={{ padding: "0.5rem"}}>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Link href="/" passHref>
