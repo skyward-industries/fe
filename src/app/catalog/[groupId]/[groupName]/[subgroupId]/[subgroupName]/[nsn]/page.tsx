@@ -47,22 +47,13 @@ export default async function PartInfoPage(props: {
         startIcon={<ArrowLeft />}
       >
         <Link
-          href={`/catalog/${props.params.groupId}/${props.params.groupName}/${props.params.subgroupId}/${props.params.subgroupName}/`}
+          href={`/catalog/${(await props.params).groupId}/${(await props.params).groupName}/${(await props.params).subgroupId}/${(await props.params).subgroupName}/`}
           style={{ textDecoration: "none", color: "inherit" }}
         >
           Back
         </Link>
       </Button>
-      <Typography
-        variant="h4"
-        fontWeight="bold"
-        textAlign="center"
-        gutterBottom
-        component="h1"
-      >
-        NSN: {cleanNSN}
-      </Typography>
-
+      <h1>NSN: {cleanNSN}</h1>
       {parts.length === 0 ? (
         <Typography textAlign="center" sx={{ mt: 3 }}>
           No parts found for this NSN.

@@ -255,7 +255,7 @@ export default function CartPage() {
                     <MenuItem value="FN">FN</MenuItem>
                     <MenuItem value="NS">NS</MenuItem>
                     <MenuItem value="OH">OH</MenuItem>
-                    <MenuItem value="SD">SD</MenuItem>
+                    <MenuItem value="SV">SV</MenuItem>
                     <MenuItem value="AR">AR</MenuItem>
                   </Select>
                 </TableCell>
@@ -305,11 +305,12 @@ export default function CartPage() {
             <TextField
               label="First Name"
               fullWidth
-              {...register("firstName")}
+              {...(register("firstName"),
+              { required: "First Name is required" })}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField label="Last Name" fullWidth {...register("lastName")} />
+            {...(register("lastName"), { required: "Last Name is required" })}
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField label="Lead Time" fullWidth {...register("leadTime")} />
@@ -318,7 +319,8 @@ export default function CartPage() {
             <TextField
               label="Company Name"
               fullWidth
-              {...register("companyName")}
+              {...(register("companyName"),
+              { required: "Company Name is required" })}
             />
           </Grid>
           <Grid item xs={12}>
