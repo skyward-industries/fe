@@ -294,23 +294,31 @@ export default function CartPage() {
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
-              type="email"
               label="Email *"
+              type="email"
               fullWidth
               {...register("email", { required: "Email is required" })}
               error={!!errors.email}
+              helperText={errors.email?.message}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
               label="First Name"
               fullWidth
-              {...(register("firstName"),
-              { required: "First Name is required" })}
+              {...register("firstName", { required: "First Name is required" })}
+              error={!!errors.firstName}
+              helperText={errors.firstName?.message}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
-            {...(register("lastName"), { required: "Last Name is required" })}
+            <TextField
+              label="Last Name"
+              fullWidth
+              {...register("lastName", { required: "Last Name is required" })}
+              error={!!errors.lastName}
+              helperText={errors.lastName?.message}
+            />{" "}
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField label="Lead Time" fullWidth {...register("leadTime")} />
@@ -319,8 +327,11 @@ export default function CartPage() {
             <TextField
               label="Company Name"
               fullWidth
-              {...(register("companyName"),
-              { required: "Company Name is required" })}
+              {...register("companyName", {
+                required: "Company Name is required",
+              })}
+              error={!!errors.companyName}
+              helperText={errors.companyName?.message}
             />
           </Grid>
           <Grid item xs={12}>
