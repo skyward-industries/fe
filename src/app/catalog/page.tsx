@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { fetchGroups, Group } from "@/services/fetchGroups";
+import { capitalizeWords } from "@/utils/capitalizeWords";
 import { slugify } from "@/utils/slugify";
 import {
+  Box,
   Button,
+  Card,
+  CardContent,
   Container,
   Paper,
   Table,
@@ -14,13 +17,11 @@ import {
   TableHead,
   TableRow,
   Typography,
-  Card,
-  CardContent,
   useMediaQuery,
   useTheme,
-  Box,
 } from "@mui/material";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function CatalogPage() {
   const [groups, setGroups] = useState<Group[]>([]);
@@ -61,42 +62,35 @@ export default function CatalogPage() {
             overflowY: "scroll",
           }}
         >
-          {groups.length > 0 ? (
-            groups.map((group) => (
-              <Card key={group.id} variant="outlined" sx={{ borderRadius: 2, minHeight: "240px" }}>
-                <CardContent>
-                  <Typography variant="h6" fontWeight="bold">
-                    {group.fsg_title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    sx={{ my: 1 }}
-                  >
-                    {group.fsc_inclusions || "No description available"}
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    color="primary"
-                    component={Link}
-                    href={`/catalog/${group.fsg}/${slugify(group.fsg_title)}`}
-                  >
-                    View Subgroups
-                  </Button>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <Typography
-              variant="h6"
-              color="error"
-              textAlign="center"
-              sx={{ mt: 4 }}
+          {groups.map((group) => (
+            <Card
+              key={group.id}
+              variant="outlined"
+              sx={{ borderRadius: 2, minHeight: "240px" }}
             >
-              No groups found.
-            </Typography>
-          )}
+              <CardContent>
+                <Typography variant="h6" fontWeight="bold">
+                  {group.fsg_title}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  sx={{ my: 1 }}
+                >
+                  {group.fsc_inclusions || ""}
+                </Typography>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  color="primary"
+                  component={Link}
+                  href={`/catalog/${group.fsg}/${slugify(group.fsg_title)}`}
+                >
+                  View Subgroups
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
         </Box>
       ) : (
         <TableContainer
@@ -124,38 +118,26 @@ export default function CatalogPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {groups.length > 0 ? (
-                groups.map((group) => (
-                  <TableRow key={group.id} hover>
-                    <TableCell>{group.fsg_title}</TableCell>
-                    <TableCell>
-                      {group.fsc_inclusions || "No description available"}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        sx={{ fontWeight: "bold" }}
-                        component={Link}
-                        href={`/catalog/${group.fsg}/${slugify(
-                          group.fsg_title
-                        )}`}
-                      >
-                        View Subgroups
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={3} align="center" sx={{ py: 3 }}>
-                    <Typography variant="h6" color="error">
-                      No groups found.
-                    </Typography>
+              {groups.map((group) => (
+                <TableRow key={group.id} hover>
+                  <TableCell>{capitalizeWords(group.fsg_title)}</TableCell>
+                  <TableCell>
+                    {capitalizeWords(group.fsc_inclusions || "")}
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      sx={{ fontWeight: "bold" }}
+                      component={Link}
+                      href={`/catalog/${group.fsg}/${slugify(group.fsg_title)}`}
+                    >
+                      View Subgroups
+                    </Button>
                   </TableCell>
                 </TableRow>
-              )}
+              ))}
             </TableBody>
           </Table>
         </TableContainer>

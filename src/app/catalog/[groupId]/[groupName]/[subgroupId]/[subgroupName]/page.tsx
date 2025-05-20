@@ -15,9 +15,11 @@ import {
   Pagination,
   CircularProgress,
   Box,
+  capitalize,
 } from "@mui/material";
 import Link from "next/link";
 import { ArrowLeft } from "@mui/icons-material";
+import { capitalizeWords } from "@/utils/capitalizeWords";
 
 export default function PartsPage(props: {
   params: Promise<{
@@ -109,8 +111,8 @@ export default function PartsPage(props: {
                   parts.map((part) => (
                     <TableRow key={part.id} hover>
                       <TableCell>{part.nsn}</TableCell>
-                      <TableCell>{part.fsg}</TableCell>
-                      <TableCell>{part.fsc}</TableCell>
+                      <TableCell>{capitalizeWords(part.fsg)}</TableCell>
+                      <TableCell>{capitalize(part.fsc)}</TableCell>
                       <TableCell sx={{ textAlign: "center" }}>
                         <Button
                           variant="contained"

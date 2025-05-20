@@ -1,4 +1,5 @@
 import { fetchSubgroups, Subgroup } from "@/services/fetchSubgroups";
+import { capitalizeWords } from "@/utils/capitalizeWords";
 import { slugify } from "@/utils/slugify";
 import { ArrowLeft } from "@mui/icons-material";
 import {
@@ -102,7 +103,7 @@ export default async function SubgroupPage(props: SubgroupPageProps) {
           <TableBody>
             {subgroups.map((subgroup) => (
               <TableRow key={subgroup.id} hover>
-                <TableCell>{subgroup.fsc_title}</TableCell>
+                <TableCell>{capitalizeWords(subgroup.fsc_title)}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
                   <Button
                     variant="contained"

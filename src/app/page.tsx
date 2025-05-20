@@ -171,7 +171,7 @@ export default function Home() {
                       color="textSecondary"
                       sx={{ my: 1 }}
                     >
-                      {group.fsc_inclusions || "No description available"}
+                      {group.fsc_inclusions || ""}
                     </Typography>
                     <Button
                       variant="contained"
