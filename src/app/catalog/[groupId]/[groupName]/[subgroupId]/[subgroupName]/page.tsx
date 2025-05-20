@@ -91,7 +91,7 @@ export default function PartsPage(props: {
         <>
           <TableContainer
             component={Paper}
-            sx={{ maxHeight: "70vh", overflowY: "auto", borderRadius: 2 }}
+            sx={{ maxHeight: "60vh", overflowY: "auto", borderRadius: 2 }}
           >
             <Table stickyHeader>
               <TableHead sx={{ backgroundColor: "primary.dark" }}>
