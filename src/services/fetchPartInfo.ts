@@ -15,7 +15,7 @@ export interface PartInfo {
   // From p_help
   code?: string;
   literal?: string;
-  description?: string; // aliased as help_description in SQL
+  description?: string; // aliased as help_description
   regs?: string;
 
   // From nsn_with_inc
@@ -38,7 +38,28 @@ export interface PartInfo {
   integration_code?: string;
   nmfc_description?: string;
   hmc?: string;
+
+  // From standardized_parts
+  item_standardization_code?: string;
+  origin_stdzn_decision_code?: string;
+  decision_date?: string;
+  niin_status_code?: number;
+
+  // From v_moe_rule
+  moe_rule_vmr?: string;
+  acquisition_method_code?: string;
+  inventory_management_activity?: string;
+  date_assigned?: string;
+  submitter?: string;
+
+  // From v_flis_management
+  moe_rule_vfm?: string;
+  unit_of_issue?: string;
+  shelf_life_code?: string;
+  replenishment_code?: string;
+  use_status_code?: string;
 }
+
 
 export async function fetchPartInfo(nsn: string): Promise<PartInfo[]> {
   try {

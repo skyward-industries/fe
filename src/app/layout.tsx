@@ -14,7 +14,6 @@ export default function RootLayout({
     <html lang="en">
       <Head>
         <title>Skyward Parts</title>
-        {/* Google Analytics */}
         <script
           async
           src="https://www.googletagmanager.com/gtag/js?id=G-939P68W607"

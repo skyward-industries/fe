@@ -34,7 +34,7 @@ export const metadata = {
 export default function AboutPage() {
   return (
     <>
-      <Container maxWidth="lg" sx={{ my: 4 }}>
+      <Container maxWidth="lg" sx={{ py: 2, height: "100%", overflowY: "scroll" }}>
         <Typography
           variant="h4"
           fontWeight="bold"

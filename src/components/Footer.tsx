@@ -3,10 +3,17 @@ import NextLink from "next/link";
 
 export default function Footer() {
   return (
-    <Box sx={{ textAlign: "center", py: 4,  borderTop: "1px solid grey" }}>
+    <Box
+      sx={{
+        display: { xs: "none", md: "block" },
+        textAlign: "center",
+        py: 1,
+        borderTop: "1px solid grey",
+      }}
+    >
       <Stack
         direction={{ xs: "column", sm: "row" }}
-        spacing={2}
+        spacing={1}
         justifyContent="center"
         alignItems="center"
         sx={{ mb: 1 }}
