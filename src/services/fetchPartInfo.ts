@@ -12,7 +12,7 @@ export interface PartInfo {
   country?: string;
   date_est: string;
 
-  // From p_help
+  // From p_help (if used elsewhere)
   code?: string;
   literal?: string;
   description?: string; // aliased as help_description
@@ -26,39 +26,61 @@ export interface PartInfo {
   cancelled_niin?: string;
 
   // From freight_info
-  uniform_freight_class?: number;
+  activity_code?: string;
+  nmfc_number?: number;
+  nmfc_subcode?: string;
+  uniform_freight_class?: string;
   ltl_class?: string;
-  lcl_class?: string;
-  rate_value_code?: number;
-  weight_computation_code?: string;
-  type_container_code?: string;
-  special_handling_code?: string;
-  air_dimension_code?: string;
-  air_commodity_code?: string;
-  integration_code?: string;
-  nmfc_description?: string;
-  hmc?: string;
+  rate_value_code?: string; // mapped from fi.wcc
+  weight_computation_code?: string; // fi.tcc
+  special_handling_code?: string; // fi.shc
+  air_dimension_code?: string; // fi.adc
+  air_commodity_code?: string; // fi.acc
+  nmfc_description?: string; // fi.nmf_desc
 
-  // From standardized_parts
+  // From standardized_parts (if still used)
   item_standardization_code?: string;
   origin_stdzn_decision_code?: string;
   decision_date?: string;
   niin_status_code?: number;
 
-  // From v_moe_rule
-  moe_rule_vmr?: string;
-  acquisition_method_code?: string;
-  inventory_management_activity?: string;
-  date_assigned?: string;
-  submitter?: string;
-
   // From v_flis_management
   moe_rule_vfm?: string;
+  aac?: string;
+  sosm?: string;
   unit_of_issue?: string;
+  controlled_inventory_code?: string;
   shelf_life_code?: string;
   replenishment_code?: string;
+  management_control_code?: string;
   use_status_code?: string;
+  row_effective_date?: string;
+  row_obs_date_fm?: string;
+
+  // From v_moe_rule
+  moe_rule_vmr?: string;
+  moe_code?: string;
+  acquisition_method_code?: string;
+  amsc_suffix_code?: string;
+  inventory_management_strategy_code?: string;
+  date_assigned?: string;
+  item_management_code?: string;
+  item_management_activity?: string;
+  acquisition_advice_code?: string;
+  primary_inventory_control_activity?: string;
+  pica_level_of_authority?: string;
+  secondary_inventory_control_activity?: string;
+  sica_level_of_authority?: string;
+  submitter?: string;
+  authorized_collaborator?: string;
+  supporting_collaborator?: string;
+  authorized_receiver?: string;
+  supporting_receiver?: string;
+  designated_support_point?: string;
+  former_moe_rule?: string;
+  row_obs_date_mr?: string;
 }
+
 
 
 export async function fetchPartInfo(nsn: string): Promise<PartInfo[]> {

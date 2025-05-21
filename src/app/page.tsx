@@ -1,20 +1,22 @@
 "use client";
 
-import Head from "next/head";
-import { useEffect, useState } from "react";
 import { fetchGroups, Group } from "@/services/fetchGroups";
+import { capitalizeWords } from "@/utils/capitalizeWords";
 import { slugify } from "@/utils/slugify";
 import {
   Box,
   Button,
   Card,
   CardContent,
+  CardMedia,
   Container,
-  Typography,
-  Grid,
   Divider,
+  Grid,
+  Typography,
 } from "@mui/material";
+import Head from "next/head";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [groups, setGroups] = useState<Group[]>([]);
@@ -22,6 +24,19 @@ export default function Home() {
   useEffect(() => {
     fetchGroups().then(setGroups);
   }, []);
+
+  const includedFsgs = ["61", "16", "27"];
+
+  const imageGenerator = (fsg) => {
+    switch (fsg) {
+      case "61":
+        return "/electrical_wire.png";
+      case "16":
+        return "/aerospace_craft_components.png";
+      case "27":
+        return "/hardware_abrasives.png";
+    }
+  };
 
   return (
     <Box sx={{ height: "100vh", overflowY: "scroll" }}>
@@ -108,7 +123,6 @@ export default function Home() {
             </Box>
           </Container>
         </Box>
-
         <Container maxWidth="md" sx={{ py: 2 }}>
           <Typography
             variant="h4"
@@ -152,40 +166,49 @@ export default function Home() {
             Explore a few of our most popular product categories below.
           </Typography>
           <Grid container spacing={3}>
-            {groups.slice(0, 6).map((group) => (
-              <Grid item xs={12} sm={6} md={4} key={group.id}>
-                <Card variant="outlined" sx={{ height: "100%" }}>
-                  <CardContent
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      flexDirection: "column",
-                      height: "100%",
-                    }}
-                  >
-                    <Typography variant="h6" fontWeight="bold">
-                      {group.fsg_title}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="textSecondary"
-                      sx={{ my: 1 }}
+            {groups
+              .filter((g) => includedFsgs.includes(g.fsg))
+              .map((group) => (
+                <Grid item xs={12} sm={6} md={4} key={group.id}>
+                  <Card variant="outlined" sx={{ height: "100%" }}>
+                    <CardContent
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        flexDirection: "column",
+                        height: "100%",
+                      }}
                     >
-                      {group.fsc_inclusions || ""}
-                    </Typography>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      fullWidth
-                      component={Link}
-                      href={`/catalog/${group.fsg}/${slugify(group.fsg_title)}`}
-                    >
-                      View Subgroups
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
+                      <Typography fontWeight="bold">
+                        {capitalizeWords(group.fsc_title)}
+                      </Typography>
+                      <CardMedia
+                        component="img"
+                        height="150px"
+                        image={imageGenerator(group.fsg)}
+                      />
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        sx={{ my: 1, height: 100, overflowY: "scroll" }}
+                      >
+                        {capitalizeWords(group.fsc_inclusions || "")}
+                      </Typography>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        component={Link}
+                        href={`/catalog/${group.fsg}/${slugify(
+                          group.fsg_title
+                        )}/${group.fsc}/${slugify(group.fsc)}`}
+                      >
+                        View Subgroups
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
           </Grid>
           <Box textAlign="center" py={2}>
             <Button variant="outlined" component={Link} href="/catalog">

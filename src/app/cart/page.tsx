@@ -187,6 +187,7 @@ export default function CartPage() {
                     }
                   >
                     <MenuItem value="">Select</MenuItem>
+                    <MenuItem value="Any">Any</MenuItem>
                     <MenuItem value="FN">FN</MenuItem>
                     <MenuItem value="NS">NS</MenuItem>
                     <MenuItem value="OH">OH</MenuItem>
@@ -252,6 +253,7 @@ export default function CartPage() {
                     }
                   >
                     <MenuItem value="">Select Condition</MenuItem>
+                    <MenuItem value="Any">Any</MenuItem>
                     <MenuItem value="FN">FN</MenuItem>
                     <MenuItem value="NS">NS</MenuItem>
                     <MenuItem value="OH">OH</MenuItem>

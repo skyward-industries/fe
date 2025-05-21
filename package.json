@@ -13,6 +13,7 @@
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^6.4.6",
     "@mui/material": "^6.4.6",
+    "moment": "^2.30.1",
     "next": "^15.2.4",
     "next-seo": "^6.6.0",
     "next-sitemap": "^4.2.3",
