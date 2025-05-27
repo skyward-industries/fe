@@ -29,6 +29,15 @@ export async function generateMetadata(props: LayoutProps): Promise<Metadata> {
           params.subgroupName
         )}/nsn-${cleanNSN}`,
       },
+      keywords: [
+        cleanNSN,
+        partNumber,
+        manufacturer,
+        cageCode,
+        "National Stock Number",
+        "NSN Lookup",
+        "NSN " + cleanNSN,
+      ],
     };
   }
 
@@ -40,6 +49,22 @@ export async function generateMetadata(props: LayoutProps): Promise<Metadata> {
   return {
     title: `NSN ${cleanNSN} - ${partNumber} | Part Details`,
     description: `Learn about NSN ${cleanNSN}: ${partNumber} by ${manufacturer}. Find manufacturer details, CAGE codes, and more at Skyward Industries.`,
+    alternates: {
+      canonical: `https://www.skywardparts.com/catalog/${
+        params.groupId
+      }/${slugify(params.groupName)}/${params.subgroupId}/${slugify(
+        params.subgroupName
+      )}/nsn-${cleanNSN}`,
+    },
+    keywords: [
+      cleanNSN,
+      partNumber,
+      manufacturer,
+      cageCode,
+      "National Stock Number",
+      "NSN Lookup",
+      "NSN " + cleanNSN,
+    ],
     openGraph: {
       title: `NSN ${cleanNSN} - ${partNumber} | Part Details`,
       description: `Detailed information about NSN ${cleanNSN}, including ${partNumber} by ${manufacturer}. Cage Code: ${cageCode}.`,
