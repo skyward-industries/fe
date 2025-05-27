@@ -11,7 +11,6 @@ interface LayoutProps {
   }>;
 }
 
-// Function to dynamically generate metadata
 export async function generateMetadata(props: LayoutProps): Promise<Metadata> {
   const params = await props.params;
   const formattedGroupName = params.subgroupName
@@ -23,9 +22,6 @@ export async function generateMetadata(props: LayoutProps): Promise<Metadata> {
   return {
     title: `${formattedGroupName} | Parts List`,
     description: `Browse parts under ${formattedGroupName} at Skyward Industries.`,
-    alternates: {
-      canonical: `https://www.skywardparts.com/catalog/${params.groupId}/${slugify(params.groupName)}/${params.subgroupId}/${slugify(params.subgroupName)}`,
-    },
   };
 }
 
