@@ -73,7 +73,7 @@ export default async function PartInfoPage(props: {
         </Link>
       </Button>
 
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
+      <Typography component="h1" variant="h4" fontWeight="bold" gutterBottom>
         NSN: {cleanNSN}
       </Typography>
 

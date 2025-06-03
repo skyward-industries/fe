@@ -62,7 +62,7 @@ export default function FSCDropdown() {
         sx={{ cursor: "pointer" }}
         variant="filled"
       >
-        FSC
+        Product Groups
         {open ? (
           <KeyboardArrowUp sx={{ color: "white" }} />
         ) : (

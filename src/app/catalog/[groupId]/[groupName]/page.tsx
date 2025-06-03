@@ -52,6 +52,9 @@ export default async function SubgroupPage(props: SubgroupPageProps) {
   if (!subgroups || subgroups.length === 0) {
     notFound();
   }
+  const uniqueSubgroups = Array.from(
+  new Map(subgroups.map((sg) => [sg.id, sg])).values()
+);
 
   return (
     <Container maxWidth="xl" sx={{ my: 4 }}>
@@ -101,7 +104,7 @@ export default async function SubgroupPage(props: SubgroupPageProps) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {subgroups.map((subgroup) => (
+            {uniqueSubgroups.map((subgroup) => (
               <TableRow key={subgroup.id} hover>
                 <TableCell>{capitalizeWords(subgroup.fsc_title)}</TableCell>
                 <TableCell sx={{ textAlign: "center" }}>

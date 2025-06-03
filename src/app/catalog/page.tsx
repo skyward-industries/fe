@@ -27,7 +27,9 @@ export default function CatalogPage() {
   const [groups, setGroups] = useState<Group[]>([]);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
+  const uniqueGroups = Array.from(
+  new Map(groups.map((group) => [group.id, group])).values()
+);
   useEffect(() => {
     fetchGroups().then(setGroups);
   }, []);
@@ -118,7 +120,7 @@ export default function CatalogPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {groups.map((group) => (
+              {uniqueGroups.map((group) => (
                 <TableRow key={group.id} hover>
                   <TableCell>{capitalizeWords(group.fsg_title)}</TableCell>
                   <TableCell>

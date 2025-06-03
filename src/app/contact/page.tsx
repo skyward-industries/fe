@@ -111,7 +111,7 @@ export default function ContactPage() {
             ✉️ Email: admin@skywardparts.com
           </Typography>
           <Typography variant="body1" color="textSecondary">
-            📞 Phone: +1 (321) 427-9292
+            📞 Phone: +1 (321) 351-2875
           </Typography>
         </Box>
       </Container>

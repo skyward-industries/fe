@@ -4,6 +4,8 @@ import Navbar from "@/components/NavBar";
 import MuiThemeProvider from "@/providers/ThemeProvider";
 import { SelectionProvider } from "@/context/SelectionContext";
 import "@/styles/global.css";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 export default function RootLayout({
   children,
