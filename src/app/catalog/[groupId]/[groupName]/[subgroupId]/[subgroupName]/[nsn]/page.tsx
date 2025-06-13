@@ -294,6 +294,42 @@ export default async function PartInfoPage(props: {
                         value: capitalizeWords(part.description),
                       },
                       { label: "Regs", value: capitalizeWords(part.regs) },
+                      { label: "MRC", value: part.mrc },
+                      {
+                        label: "Requirements Statement",
+                        value: part.requirements_statement,
+                      },
+                      {
+                        label: "Clear Text Reply",
+                        value: part.clear_text_reply,
+                      },
+                      { label: "NIIN Formatted", value: part.niin_formatted },
+
+                      // v_h6_name_inc
+                      { label: "INC Status", value: part.inc_status },
+                      { label: "Concept No", value: part.concept_no },
+                      { label: "FIIG", value: part.fiig },
+                      { label: "APP Key", value: part.app_key },
+                      { label: "Condition Code", value: part.cond_code },
+                      { label: "Type Code", value: part.type_code },
+                      {
+                        label: "Establish/Cancel Date",
+                        value: part.dt_estb_canc
+                          ? moment(new Date(part.dt_estb_canc)).format(
+                              "M/DD/YYYY"
+                            )
+                          : undefined,
+                      },
+                      {
+                        label: "Definition",
+                        value: capitalizeWords(part.definition),
+                      },
+
+                      { label: "Related INC", value: part.related_inc },
+                      {
+                        label: "Related Item Name",
+                        value: capitalizeWords(part.related_item_name),
+                      },
                     ]
                       .filter((row) => isDefined(row.value))
                       .map((row, i) => (

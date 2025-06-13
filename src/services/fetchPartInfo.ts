@@ -1,5 +1,5 @@
 export interface PartInfo {
-  // Base part data
+  // part_numbers + wp_cage_addresses
   part_number: string;
   cage_code: string;
   company_name: string;
@@ -12,39 +12,27 @@ export interface PartInfo {
   country?: string;
   date_est: string;
 
-  // From p_help (if used elsewhere)
-  code?: string;
-  literal?: string;
-  description?: string; // aliased as help_description
-  regs?: string;
-
-  // From nsn_with_inc
+  // nsn_with_inc
   inc?: number;
   item_name?: string;
   sos?: string;
   end_item_name?: string;
   cancelled_niin?: string;
 
-  // From freight_info
+  // freight_info
   activity_code?: string;
   nmfc_number?: number;
   nmfc_subcode?: string;
   uniform_freight_class?: string;
   ltl_class?: string;
-  rate_value_code?: string; // mapped from fi.wcc
-  weight_computation_code?: string; // fi.tcc
-  special_handling_code?: string; // fi.shc
-  air_dimension_code?: string; // fi.adc
-  air_commodity_code?: string; // fi.acc
-  nmfc_description?: string; // fi.nmf_desc
+  rate_value_code?: string;
+  weight_computation_code?: string;
+  special_handling_code?: string;
+  air_dimension_code?: string;
+  air_commodity_code?: string;
+  nmfc_description?: string;
 
-  // From standardized_parts (if still used)
-  item_standardization_code?: string;
-  origin_stdzn_decision_code?: string;
-  decision_date?: string;
-  niin_status_code?: number;
-
-  // From v_flis_management
+  // v_flis_management
   moe_rule_vfm?: string;
   aac?: string;
   sosm?: string;
@@ -57,7 +45,7 @@ export interface PartInfo {
   row_effective_date?: string;
   row_obs_date_fm?: string;
 
-  // From v_moe_rule
+  // v_moe_rule
   moe_rule_vmr?: string;
   moe_code?: string;
   acquisition_method_code?: string;
@@ -79,6 +67,26 @@ export interface PartInfo {
   designated_support_point?: string;
   former_moe_rule?: string;
   row_obs_date_mr?: string;
+
+  // char_data
+  mrc?: string;
+  requirements_statement?: string;
+  clear_text_reply?: string;
+  niin_formatted?: string;
+
+  // v_h6_name_inc
+  inc_status?: string;
+  concept_no?: string;
+  fiig?: string;
+  app_key?: string;
+  cond_code?: string;
+  type_code?: number;
+  dt_estb_canc?: string;
+  definition?: string;
+
+  // related_h6
+  related_inc?: number;
+  related_item_name?: string;
 }
 
 

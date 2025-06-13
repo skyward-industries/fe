@@ -54,7 +54,7 @@ export default function Navbar() {
 
   return (
     <>
-      <AppBar position="static" sx={{ padding: "0.5rem" }}>
+      <AppBar position="static" sx={{ padding: "0.5rem", maxHeight: "64px" }}>
         <Toolbar
           sx={{
             display: "flex",
@@ -64,14 +64,13 @@ export default function Navbar() {
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Link href="/" passHref>
-              <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
+              <Box sx={{ display: "flex", alignItems: "center", mr: 2, maxHeight: "64px" }}>
                 <Image
                   src="/logo.png"
                   alt="Logo"
                   width={160}
                   height={40}
                   priority
-                  style={{ height: "auto", width: "auto" }}
                 />
               </Box>
             </Link>
@@ -94,7 +93,6 @@ export default function Navbar() {
               </>
             )}
           </Box>
-
           <Box
             component="form"
             onSubmit={handleSearch}
@@ -130,8 +128,6 @@ export default function Navbar() {
           </Box>
         </Toolbar>
       </AppBar>
-
-      {/* Mobile Drawer */}
       <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
         <Box
           sx={{ width: 250 }}
