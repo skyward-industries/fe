@@ -1,87 +1,79 @@
-import { Metadata } from "next";
 import { fetchPartInfo } from "@/services/fetchPartInfo";
-import { slugify } from "@/utils/slugify";
+import type { Metadata } from "next";
 
-interface LayoutProps {
-  children: React.ReactNode;
-  params: Promise<{
+export async function generateMetadata({
+  params,
+}: {
+  params: {
     nsn: string;
     groupId: string;
     groupName: string;
     subgroupId: string;
     subgroupName: string;
-  }>;
-}
-
-export async function generateMetadata(props: LayoutProps): Promise<Metadata> {
-  const params = await props.params;
-  const cleanNSN = params.nsn?.replace("nsn-", "").replace("NSN-", "");
+  };
+}): Promise<Metadata> {
+  const { nsn, groupId, groupName, subgroupId, subgroupName } = params;
+  const cleanNSN = nsn.replace("nsn-", "").replace("NSN-", "");
   const parts = await fetchPartInfo(cleanNSN);
+  const part = parts?.[0];
 
-  if (!parts || parts.length === 0) {
-    return {
-      title: `NSN ${cleanNSN} | Part Details`,
-      description: `View details about NSN ${cleanNSN}, including manufacturer information, CAGE codes, and establishment details.`,
-      alternates: {
-        canonical: `https://www.skywardparts.com/catalog/${
-          params.groupId
-        }/${slugify(params.groupName)}/${params.subgroupId}/${slugify(
-          params.subgroupName
-        )}/nsn-${cleanNSN}`,
-      },
-      keywords: [
-        cleanNSN,
-        partNumber,
-        manufacturer,
-        cageCode,
-        "National Stock Number",
-        "NSN Lookup",
-        "NSN " + cleanNSN,
-      ],
-    };
+  if (!part) {
+    throw new Error("No part found for NSN");
   }
 
-  const part = parts[0];
-  const partNumber = part.part_number || "Unknown Part";
-  const manufacturer = part.company_name || "Unknown Manufacturer";
-  const cageCode = part.cage_code || "Unknown Cage Code";
+  const {
+    part_number,
+    company_name,
+    cage_code,
+    item_name,
+    fsg,
+    fsc,
+    fsg_title,
+    fsc_title,
+  } = part;
+
+  if (!fsg || !fsc || !fsg_title || !fsc_title) {
+    throw new Error("Missing FSG/FSC info in part record.");
+  }
+
+  const title = `NSN ${cleanNSN} | ${item_name || "Defense Part"} | ${company_name}`;
+  const description = `Technical specifications, supplier data, and logistics for NSN ${cleanNSN} (${item_name || "Item"}). Manufactured by ${company_name} (CAGE: ${cage_code}) with part number ${part_number}.`;
+
+  const canonical = `https://skywardparts.com/catalog/${fsg}/${fsg_title}/${fsc}/${fsc_title}/nsn-${cleanNSN}`;
 
   return {
-    title: `NSN ${cleanNSN} - ${partNumber} | Part Details`,
-    description: `Learn about NSN ${cleanNSN}: ${partNumber} by ${manufacturer}. Find manufacturer details, CAGE codes, and more at Skyward Industries.`,
+    title,
+    description,
     alternates: {
-      canonical: `https://www.skywardparts.com/catalog/${
-        params.groupId
-      }/${slugify(params.groupName)}/${params.subgroupId}/${slugify(
-        params.subgroupName
-      )}/nsn-${cleanNSN}`,
+      canonical,
     },
     keywords: [
       cleanNSN,
-      partNumber,
-      manufacturer,
-      cageCode,
-      "National Stock Number",
-      "NSN Lookup",
-      "NSN " + cleanNSN,
-    ],
+      item_name,
+      part_number,
+      company_name,
+      cage_code,
+      "NSN parts",
+      "military surplus",
+      "defense logistics",
+    ].filter(Boolean) as string[],
     openGraph: {
-      title: `NSN ${cleanNSN} - ${partNumber} | Part Details`,
-      description: `Detailed information about NSN ${cleanNSN}, including ${partNumber} by ${manufacturer}. Cage Code: ${cageCode}.`,
-      url: `https://www.skywardparts.com/catalog/${params.groupId}/${slugify(
-        params.groupName
-      )}/${params.subgroupId}/${slugify(params.subgroupName)}/nsn-${cleanNSN}`,
+      title,
+      description,
+      url: canonical,
       siteName: "Skyward Parts",
+      locale: "en_US",
       type: "article",
     },
     twitter: {
-      card: "summary_large_image",
-      title: `NSN ${cleanNSN} - ${partNumber}`,
-      description: `Find details on NSN ${cleanNSN}, including part ${partNumber} from ${manufacturer}.`,
+      card: "summary",
+      title,
+      description,
     },
+    metadataBase: new URL("https://skywardparts.com"),
   };
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

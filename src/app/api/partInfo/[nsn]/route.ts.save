@@ -1,0 +1,112 @@
+:
+import { NextResponse } from "next/server";
+
+export async function GET(
+  req: Request,
+  { params }: { params: { nsn: string } }
+asdfasdfasdf) {
+  const rawNsn = params.nsn;
+  const nsn = rawNsn.replace(/-/g, "");
+  console.error("❌ Full query error:", error);
+
+
+  try {
+    const query = `
+      SELECT 
+        p.part_number,
+        p.cage_code,
+        c.company_name,
+        c.street_address_1,
+        c.street_address_2,
+        c.po_box,
+        c.city,
+        c.state,
+        c.zip,
+        c.country,
+        c.date_est,
+        n.inc,
+        n.item_name,
+        n.sos,
+        n.end_item_name,
+        n.cancelled_niin,
+        f.activity_code,
+        f.nmfc_number,
+        f.nmfc_subcode,
+        f.uniform_freight_class,
+        f.ltl_class,
+        f.rate_value_code,
+        f.weight_computation_code,
+        f.special_handling_code,
+        f.air_dimension_code,
+        f.air_commodity_code,
+        f.nmfc_description,
+        m.moe_rule_vfm,
+        m.aac,
+        m.sosm,
+        m.unit_of_issue,
+        m.controlled_inventory_code,
+        m.shelf_life_code,
+        m.replenishment_code,
+        m.management_control_code,
+        m.use_status_code,
+        m.row_effective_date,
+        m.row_obs_date_fm,
+        r.moe_rule_vmr,
+        r.moe_code,
+        r.acquisition_method_code,
+        r.amsc_suffix_code,
+        r.inventory_management_strategy_code,
+        r.date_assigned,
+        r.item_management_code,
+        r.item_management_activity,
+        r.acquisition_advice_code,
+        r.primary_inventory_control_activity,
+        r.pica_level_of_authority,
+        r.secondary_inventory_control_activity,
+        r.sica_level_of_authority,
+        r.submitter,
+        r.authorized_collaborator,
+        r.supporting_collaborator,
+        r.authorized_receiver,
+        r.supporting_receiver,
+        r.designated_support_point,
+        r.former_moe_rule,
+        r.row_obs_date_mr,
+        ch.mrc,
+        ch.requirements_statement,
+        ch.clear_text_reply,
+        ch.niin_formatted,
+        h.inc_status,
+        h.concept_no,
+        h.fiig,
+        h.app_key,
+        h.cond_code,
+        h.type_code,
+        h.dt_estb_canc,
+        h.definition,
+        rel.related_inc,
+        rel.related_item_name
+      FROM part_numbers p
+      LEFT JOIN wp_cage_addresses c ON p.cage_code = c.cage_code
+      LEFT JOIN nsn_with_inc n ON p.nsn = n.nsn
+      LEFT JOIN freight_info f ON p.niin = f.niin
+      LEFT JOIN v_flis_management m ON p.nsn = m.nsn
+      LEFT JOIN v_moe_rule r ON p.nsn = r.nsn
+      LEFT JOIN char_data ch ON p.nsn = ch.nsn
+      LEFT JOIN v_h6_name_inc h ON n.inc = h.inc
+      LEFT JOIN related_h6 rel ON n.inc = rel.inc
+      WHERE p.nsn = $1
+    `;
+
+    const result = await pool.query(query, [nsn]);
+    return NextResponse.json(result.rows);
+  } catch (error) {
+    console.error("❌ Error in GET /api/partInfo/[nsn]:", error)
+    console.error("❌ Full query error:", error);
+;
+    return NextResponse.json(
+      { error: "Failed to fetch part info" },
+      { status: 500 }
+    );
+  }
+}
