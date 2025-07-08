@@ -1,38 +1,22 @@
-import { Box, Typography, Link, Stack } from "@mui/material";
-import NextLink from "next/link";
+// src/components/Footer.tsx
+"use client"; // This makes the entire component a client component
+
+import * as React from 'react';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import theme from '@/theme'; // Import theme here, safe for client components
 
 export default function Footer() {
   return (
-    <Box
-      sx={{
-        display: { xs: "none", md: "block" },
-        textAlign: "center",
-        py: 1,
-        borderTop: "1px solid grey",
-      }}
-    >
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        spacing={1}
-        justifyContent="center"
-        alignItems="center"
-        sx={{ mb: 1 }}
-      >
-        <Link component={NextLink} href="/about" underline="hover" color="text.secondary">
-          About
-        </Link>
-        <Link component={NextLink} href="/contact" underline="hover" color="text.secondary">
-          Contact
-        </Link>
-        <Link component={NextLink} href="/terms-and-conditions" underline="hover" color="text.secondary">
-          Terms & Conditions
-        </Link>
-        <Link component={NextLink} href="/privacy-policy" underline="hover" color="text.secondary">
-          Privacy Policy
-        </Link>
-      </Stack>
-      <Typography variant="body2" color="text.secondary">
-        © {new Date().getFullYear()} Skyward Parts. All rights reserved.
+    <Box component="footer" sx={{
+      bgcolor: theme.palette.primary.main,
+      color: theme.palette.primary.contrastText,
+      py: 3,
+      textAlign: 'center',
+      mt: 'auto' // Pushes footer to bottom of page content
+    }}>
+      <Typography variant="body2">
+        © {new Date().getFullYear()} Skyward Industries, LLC. All rights reserved.
       </Typography>
     </Box>
   );

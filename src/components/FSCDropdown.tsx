@@ -1,161 +1,51 @@
-"use client";
-
-import { fetchGroups } from "@/services/fetchGroups";
-import { fetchSubgroups } from "@/services/fetchSubgroups";
-import { slugify } from "@/utils/slugify";
-import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Divider,
-  List,
-  ListItem,
-  Paper,
-  Popper,
-  Typography,
-} from "@mui/material";
-import Link from "next/link";
-import React, { useEffect, useState } from "react";
+// src/components/FSCDropdown.tsx
+import * as React from 'react';
+import Button from '@mui/material/Button';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import { KeyboardArrowDown } from '@mui/icons-material';
+import Link from 'next/link';
 
 export default function FSCDropdown() {
-  const [groups, setGroups] = useState<any[]>([]);
-  const [subgroups, setSubgroups] = useState<any[]>([]);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
-  const [loadingSubs, setLoadingSubs] = useState(false);
-
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  useEffect(() => {
-    fetchGroups().then(setGroups);
-  }, []);
-
-  const handleFSCClick = (e: React.MouseEvent<HTMLElement>) => {
-    if (anchorEl) {
-      setAnchorEl(null);
-      setSelectedGroupId(null);
-      setSubgroups([]);
-    } else {
-      setAnchorEl(e.currentTarget);
-    }
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
   };
 
-  const handleGroupClick = async (groupId: string) => {
-    if (groupId === selectedGroupId) {
-      setSelectedGroupId(null);
-      setSubgroups([]);
-      return;
-    }
-
-    setSelectedGroupId(groupId);
-    setLoadingSubs(true);
-    const subs = await fetchSubgroups(groupId);
-    setSubgroups(subs);
-    setLoadingSubs(false);
+  const handleClose = () => {
+    setAnchorEl(null);
   };
 
   return (
-    <Box sx={{ position: "relative" }}>
+    <div>
       <Button
-        onClick={handleFSCClick}
-        sx={{ cursor: "pointer" }}
-        variant="filled"
+        id="fsc-dropdown-button"
+        aria-controls={open ? 'fsc-dropdown-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        onClick={handleClick}
+        color="inherit" // Inherit color from AppBar
+        sx={{ fontWeight: 'bold' }}
+        endIcon={<KeyboardArrowDown />}
       >
         Product Groups
-        {open ? (
-          <KeyboardArrowUp sx={{ color: "white" }} />
-        ) : (
-          <KeyboardArrowDown sx={{ color: "white" }} />
-        )}
       </Button>
-
-      <Popper
-        open={open}
+      <Menu
+        id="fsc-dropdown-menu"
         anchorEl={anchorEl}
-        placement="bottom-start"
-        disablePortal
-        sx={{ zIndex: 9999 }}
+        open={open}
+        onClose={handleClose}
+        MenuListProps={{
+          'aria-labelledby': 'fsc-dropdown-button',
+        }}
       >
-        <Paper elevation={3} sx={{ display: "flex" }}>
-          <List
-            dense
-            sx={{ width: 500, maxHeight: "70vh", overflowY: "scroll", p: 2 }}
-          >
-            {groups.map((group) => (
-              <>
-                <ListItem
-                  key={group.id}
-                  onClick={() => handleGroupClick(group.fsg)}
-                  selected={selectedGroupId === group.fsg}
-                  sx={{
-                    cursor: "pointer",
-                    whiteSpace: "normal",
-                    "&.Mui-selected": {
-                      bgcolor: "grey.900",
-                      color: "white",
-                    },
-                    "&.Mui-selected:hover": {
-                      bgcolor: "grey.800",
-                    },
-                    "&:hover": { bgcolor: "grey.800" },
-                  }}
-                >
-                  <Typography>{group.fsg_title}</Typography>
-                </ListItem>
-                <Divider />
-              </>
-            ))}
-          </List>
-
-          {selectedGroupId && (
-            <Box sx={{ width: 350, p: 2 }}>
-              {loadingSubs ? (
-                <Box p={2} display="flex" justifyContent="center">
-                  <CircularProgress size={24} />
-                </Box>
-              ) : subgroups.length > 0 ? (
-                <List dense sx={{ maxHeight: "70vh", overflowY: "scroll" }}>
-                  {subgroups.map((sub) => (
-                    <>
-                      <ListItem
-                        key={sub.id}
-                        sx={{
-                          cursor: "pointer",
-                          whiteSpace: "normal",
-                          "&:hover": { bgcolor: "grey.800" },
-                        }}
-                      >
-                        <Link
-                          href={`/catalog/${selectedGroupId}/${slugify(
-                            sub.fsc_title
-                          )}`}
-                          onClick={() => {
-                            setAnchorEl(null);
-                            setSelectedGroupId(null);
-                          }}
-                          style={{ textDecoration: "none", color: "inherit" }}
-                        >
-                          <Typography variant="body2">
-                            {sub.fsc_title}
-                          </Typography>
-                        </Link>
-                      </ListItem>
-                      <Divider />
-                    </>
-                  ))}
-                </List>
-              ) : (
-                <Box p={2}>
-                  <Typography variant="body2">
-                    No subgroups available.
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-          )}
-        </Paper>
-      </Popper>
-    </Box>
+        <MenuItem onClick={handleClose} component={Link} href="/product-group/fsg-16">Aircraft Propulsions & Components</MenuItem>
+        <MenuItem onClick={handleClose} component={Link} href="/product-group/fsg-61">Electrical Wire & Power</MenuItem>
+        <MenuItem onClick={handleClose} component={Link} href="/product-group/fsg-27">Hardware & Abrasives</MenuItem>
+        {/* Add more product groups here */}
+      </Menu>
+    </div>
   );
 }

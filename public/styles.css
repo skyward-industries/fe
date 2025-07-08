@@ -1,0 +1,533 @@
+/* Basic Resets & Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Ensures padding and border are included in element's total width and height */
+}
+
+:root {
+    /* Define colors as CSS variables for easy changes */
+    --primary-color: #007bff; /* A standard blue */
+    --secondary-color: #6c757d; /* Grey */
+    --accent-color: #28a745; /* Green for buttons, etc. */
+    --dark-header-bg: #34495e; /* Dark slate grey, similar to screenshot */
+    --text-color: #333;
+    --light-bg: #f8f9fa;
+    --white: #fff;
+    --border-color: #dee2e6;
+}
+
+body {
+    font-family: 'Lato', Arial, sans-serif; /* Use Lato, fallback to Arial */
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--light-bg);
+    overflow-x: hidden; /* Prevent horizontal scroll on small screens */
+}
+
+/* Optional: No scroll for body when mobile menu is open */
+body.no-scroll {
+    overflow: hidden;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif; /* Use Montserrat for headings */
+    margin-bottom: 0.5em;
+    color: var(--text-color);
+    line-height: 1.2;
+}
+
+h1 { font-size: 2.8rem; }
+h2 { font-size: 2.2rem; }
+h3 { font-size: 1.8rem; }
+h4 { font-size: 1.4rem; }
+
+p {
+    margin-bottom: 1em;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--primary-color); /* Maintain same color for now */
+    text-decoration: underline;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.btn:hover {
+    background: #0056b3; /* Darker shade of primary */
+    transform: translateY(-2px); /* Slight lift effect */
+    text-decoration: none;
+}
+
+.btn-work {
+    background: var(--accent-color); /* Green for 'Work' button */
+}
+
+.btn-work:hover {
+    background: #218838; /* Darker green */
+}
+
+/* Header */
+.main-header {
+    background: var(--dark-header-bg); /* Dark header background */
+    color: var(--white);
+    padding: 1rem 0;
+    position: relative; /* For mobile menu positioning */
+    z-index: 1000; /* Ensure header is on top */
+}
+
+.main-header .header-content {
+    display: flex;
+    justify-content: space-between; /* Distribute items */
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+}
+
+.main-header .logo h1 {
+    margin: 0;
+    color: var(--white);
+    font-size: 1.8rem; /* Adjusted for desktop */
+}
+
+.main-header .logo a {
+    color: var(--white);
+    text-decoration: none;
+}
+
+.main-header .logo a:hover {
+    color: #ddd;
+}
+
+.main-nav ul {
+    list-style: none;
+    padding: 0;
+    display: flex; /* Horizontal navigation */
+    margin: 0;
+}
+
+.main-nav ul li {
+    margin: 0 15px;
+}
+
+.main-nav ul li a {
+    color: var(--white);
+    font-weight: bold;
+    padding: 5px 0;
+    position: relative;
+    white-space: nowrap; /* Prevent nav items from wrapping */
+}
+
+.main-nav ul li a::after {
+    content: '';
+    position: absolute;
+    width: 0%;
+    height: 2px;
+    bottom: -5px; /* Adjust based on your preference */
+    left: 0;
+    background-color: var(--primary-color); /* Use primary color for hover underline */
+    transition: width 0.3s ease-in-out;
+}
+
+.main-nav ul li a:hover::after {
+    width: 100%;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Space between search and work button */
+}
+
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-box input[type="search"] {
+    padding: 8px 10px;
+    border: 1px solid #555;
+    border-radius: 5px;
+    background-color: #444;
+    color: var(--white);
+    font-size: 0.9rem;
+    width: 200px; /* Adjust as needed */
+    transition: border-color 0.3s ease;
+}
+
+.search-box input[type="search"]::placeholder {
+    color: #bbb;
+}
+
+.search-box input[type="search"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.search-btn {
+    background: transparent;
+    border: none;
+    color: var(--white);
+    padding: 0;
+    cursor: pointer;
+    font-size: 1.2rem; /* Size for Font Awesome icon */
+    margin-left: -30px; /* Overlap with input for icon placement */
+    z-index: 1; /* Ensure button is clickable over input */
+}
+
+/* Mobile Menu Toggle (Hamburger Icon) */
+.menu-toggle {
+    display: none; /* Hidden by default on desktop */
+    flex-direction: column;
+    justify-content: space-around;
+    width: 30px;
+    height: 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    position: relative; /* For absolute positioning of spans */
+    z-index: 1001; /* Ensure on top of mobile nav */
+}
+
+.menu-toggle span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: var(--white);
+    border-radius: 2px;
+    transition: all 0.3s ease-in-out;
+    transform-origin: 1px;
+}
+
+.menu-toggle.active span:nth-child(1) {
+    transform: rotate(45deg);
+}
+
+.menu-toggle.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-toggle.active span:nth-child(3) {
+    transform: rotate(-45deg);
+}
+
+
+/* Sections */
+section {
+    padding: 60px 0;
+    text-align: center;
+}
+
+/* Hero Section */
+.hero-section {
+    background: url('https://via.placeholder.com/1920x1080/007bff/ffffff?text=Skyward+Industries+Hero+Image') no-repeat center center/cover;
+    /* **IMPORTANT: Replace with your actual airplane image URL** */
+    color: var(--white);
+    height: 70vh; /* Viewport height for a tall hero */
+    display: flex; /* For potential vertical centering of content if added */
+    align-items: center;
+    justify-content: center;
+    position: relative; /* For pseudo-element overlay */
+}
+
+/* Optional: Semi-transparent overlay for better text readability */
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2); /* Dark overlay */
+    z-index: 0;
+}
+
+.hero-section .container {
+    position: relative;
+    z-index: 1; /* Ensure content is above overlay */
+}
+
+
+.about-section, .contact-section {
+    background: var(--white);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.product-groups-section {
+    background: var(--light-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.product-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Center items in the grid */
+    gap: 30px; /* Increased gap for better spacing */
+    margin-top: 30px;
+}
+
+.product-item {
+    background: var(--white);
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* Softer, larger shadow */
+    flex: 1 1 320px; /* Adjusted flex-basis for slightly larger items */
+    max-width: 380px; /* Max width to prevent items from becoming too wide */
+    text-align: left; /* Align text within product item to left */
+    transition: transform 0.3s ease;
+}
+
+.product-item:hover {
+    transform: translateY(-5px); /* Slight lift on hover */
+}
+
+.product-item img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    display: block; /* Remove extra space below image */
+}
+
+.product-item h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: var(--primary-color); /* Highlight product name */
+}
+
+.product-item p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--secondary-color);
+    margin-bottom: 20px;
+}
+
+.product-item .btn.view-subgroups-btn {
+    width: 100%; /* Make button full width of product item */
+    padding: 12px 0;
+}
+
+/* Forms */
+form {
+    display: flex;
+    flex-direction: column;
+    max-width: 600px; /* Slightly wider form */
+    margin: 0 auto;
+    gap: 18px; /* More space between form fields */
+    text-align: left; /* Align form labels/placeholders to left */
+}
+
+form input,
+form textarea {
+    padding: 14px; /* More padding */
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 1rem;
+    width: 100%;
+    background-color: var(--light-bg);
+    color: var(--text-color);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+form input:focus,
+form textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Subtle focus ring */
+}
+
+form textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+form .btn {
+    width: auto; /* Allow button to size itself, or set a max-width if desired */
+    align-self: flex-start; /* Align button to the left within the form */
+    padding: 12px 30px;
+}
+
+/* Footer */
+footer {
+    background: var(--dark-header-bg); /* Match header color */
+    color: var(--white);
+    padding: 30px 0; /* More padding */
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+
+/* --- Mobile Responsiveness (Media Queries) --- */
+
+@media (max-width: 1024px) {
+    /* Adjustments for larger tablets and smaller desktops */
+    .main-nav ul li {
+        margin: 0 10px;
+    }
+    .search-box input[type="search"] {
+        width: 150px;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Tablet and smaller screens */
+    .main-header .header-content {
+        flex-wrap: wrap; /* Allow elements to wrap */
+        justify-content: space-between; /* Space out logo and toggle */
+        padding: 0 20px; /* Ensure padding on header itself */
+    }
+
+    .main-header .logo {
+        flex-basis: auto; /* Auto size logo */
+        text-align: left;
+    }
+
+    .main-nav {
+        display: none; /* Hide main navigation on smaller screens */
+        flex-direction: column;
+        width: 100%;
+        background: var(--dark-header-bg);
+        position: absolute;
+        top: 100%; /* Position below header */
+        left: 0;
+        padding: 20px 0;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        opacity: 0; /* Hidden by default */
+        transform: translateY(-10px); /* Slight animation from above */
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        pointer-events: none; /* Disable interaction when hidden */
+        max-height: 0; /* Collapse by default */
+        overflow: hidden; /* Hide overflow */
+    }
+
+    .main-nav.active {
+        display: flex; /* Show when active */
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: all;
+        max-height: 300px; /* Max height to allow transition */
+    }
+
+    .main-nav ul {
+        flex-direction: column;
+        align-items: center; /* Center nav items */
+        width: 100%;
+    }
+
+    .main-nav ul li {
+        margin: 10px 0;
+        width: 100%;
+        text-align: center;
+    }
+
+    .main-nav ul li a {
+        padding: 10px 0;
+        display: block; /* Make links full width */
+        font-size: 1.1rem;
+    }
+
+    .main-nav ul li a::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .menu-toggle {
+        display: flex; /* Show hamburger icon */
+    }
+
+    .header-actions {
+        flex-basis: 100%; /* Take full width below nav on mobile */
+        justify-content: center; /* Center search and work button */
+        margin-top: 15px; /* Space from logo/toggle */
+        padding-bottom: 10px; /* Add some padding below */
+        border-top: 1px solid rgba(255,255,255,0.1); /* Separator */
+        padding-top: 10px;
+    }
+
+    .search-box input[type="search"] {
+        width: 180px; /* Give search more width on mobile */
+    }
+
+    .hero-section {
+        height: 50vh; /* Shorter hero on mobile */
+    }
+
+    h1 { font-size: 2.2rem; }
+    h2 { font-size: 1.8rem; }
+    h3 { font-size: 1.5rem; }
+
+    section {
+        padding: 40px 0;
+    }
+
+    .product-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .product-item {
+        max-width: 90%; /* Allow product items to be wider */
+    }
+
+    form {
+        max-width: 90%;
+    }
+    form .btn {
+        align-self: center; /* Center button on mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    /* Smaller mobile screens */
+    h1 { font-size: 1.8rem; }
+    h2 { font-size: 1.6rem; }
+
+    .main-header .logo h1 {
+        font-size: 1.5rem;
+    }
+
+    .header-actions {
+        flex-direction: column; /* Stack search and work button */
+        gap: 10px;
+    }
+    .search-box input[type="search"] {
+        width: calc(100% - 40px); /* Adjust width for smaller screens */
+    }
+    .btn-work {
+        width: 100%;
+        text-align: center;
+    }
+
+    .container {
+        padding: 0 15px;
+    }
+    section {
+        padding: 30px 0;
+    }
+}

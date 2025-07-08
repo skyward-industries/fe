@@ -1,5 +1,6 @@
 "use client"; // Ensures this runs on the client-side
-import { useState, useEffect, use } from "react";
+//[]
+import { useState, useEffect } from "react";
 import { fetchParts, Part } from "@/services/fetchParts";
 import {
   Button,
@@ -21,15 +22,17 @@ import Link from "next/link";
 import { ArrowLeft } from "@mui/icons-material";
 import { capitalizeWords } from "@/utils/capitalizeWords";
 
-export default function PartsPage(props: {
-  params: Promise<{
+export default function PartsPage({
+  params, // Directly destructure params from props
+}: {
+  params: { // Define the structure of params here
     groupId: string;
     groupName: string;
     subgroupId: string;
     subgroupName: string;
-  }>;
+  };
 }) {
-  const { groupId, groupName, subgroupId, subgroupName } = use(props.params);
+  const { groupId, groupName, subgroupId, subgroupName } = params;
   const [parts, setParts] = useState<Part[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -51,10 +54,9 @@ export default function PartsPage(props: {
     };
     loadParts();
   }, [subgroupId, page]);
-
   const formattedGroupName = subgroupName
     .replace("nsn-", "")
-    .replace("NSN-")
+    .replace("NSN-", "")
     ?.replaceAll("-", " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
 

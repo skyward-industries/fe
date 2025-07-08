@@ -1,149 +1,89 @@
-"use client";
-
-import { fetchGroups, Group } from "@/services/fetchGroups";
-import { capitalizeWords } from "@/utils/capitalizeWords";
-import { slugify } from "@/utils/slugify";
+// src/app/catalog/page.tsx
+import React from 'react';
+import { fetchGroups, Group } from '@/services/fetchGroups'; // You'll need to update the Group interface
+import { capitalizeWords } from '@/utils/capitalizeWords';
+import { slugify } from '@/utils/slugify';
 import {
-  Box,
-  Button,
-  Card,
-  CardContent,
   Container,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Typography,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+  Box,
+  Paper,
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Button
+} from '@mui/material';
+import Link from 'next/link';
+import type { Metadata } from 'next';
 
-export default function CatalogPage() {
-  const [groups, setGroups] = useState<Group[]>([]);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const uniqueGroups = Array.from(
-  new Map(groups.map((group) => [group.id, group])).values()
-);
-  useEffect(() => {
-    fetchGroups().then(setGroups);
-  }, []);
+// --- SEO: Metadata for this page ---
+export const metadata: Metadata = {
+  title: 'Product Groups | Skyward Industries Catalog',
+  description: 'Explore the main product groups from Skyward Industries. Browse our catalog by Federal Supply Group (FSG) for all your aerospace and defense needs.',
+  alternates: {
+    canonical: 'https://www.skywardparts.com/catalog',
+  },
+};
+
+export default async function CatalogPage() {
+  const groups: Group[] = await fetchGroups(); // Fetches only distinct FSGs now
 
   return (
-    <Container maxWidth="xl" sx={{ my: 4 }}>
-      <Typography
-        variant="h4"
-        fontWeight="bold"
-        textAlign="center"
-        gutterBottom
-      >
-        Product Groups
-      </Typography>
-      <Typography
-        variant="subtitle1"
-        color="textSecondary"
-        textAlign="center"
-        gutterBottom
-      >
-        Explore our diverse range of industry-leading product groups.
-      </Typography>
+    <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
+      <Box textAlign="center" mb={{ xs: 4, md: 6 }}>
+        <Typography component="h1" variant="h2" fontWeight="bold" gutterBottom>
+          Product Groups
+        </Typography>
+        <Typography variant="h6" color="text.secondary">
+          Explore our diverse range of industry-leading product groups.
+        </Typography>
+      </Box>
 
-      {isMobile ? (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-            mt: 3,
-            height: "100vh",
-            overflowY: "scroll",
-          }}
-        >
-          {groups.map((group) => (
-            <Card
-              key={group.id}
-              variant="outlined"
-              sx={{ borderRadius: 2, minHeight: "240px" }}
-            >
-              <CardContent>
-                <Typography variant="h6" fontWeight="bold">
-                  {group.fsg_title}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="textSecondary"
-                  sx={{ my: 1 }}
-                >
-                  {group.fsc_inclusions || ""}
-                </Typography>
-                <Button
-                  variant="contained"
-                  fullWidth
-                  color="primary"
-                  component={Link}
-                  href={`/catalog/${group.fsg}/${slugify(group.fsg_title)}`}
-                >
-                  View Subgroups
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </Box>
-      ) : (
-        <TableContainer
-          component={Paper}
-          sx={{ height: "100vh", overflowY: "scroll", borderRadius: 2, mt: 3 }}
-        >
-          <Table stickyHeader>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: "primary.dark" }}>
-                <TableCell sx={{ fontWeight: "bold", color: "white" }}>
-                  Group Name
+      {/* Table Layout */}
+      <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
+        <Table aria-label="product groups table">
+          <TableHead>
+            <TableRow sx={{
+              // Style the table header to match your dark theme screenshot
+              '& .MuiTableCell-head': {
+                backgroundColor: 'primary.dark', // Use a dark theme color
+                color: 'common.white',
+                fontWeight: 'bold',
+                fontSize: '1.1rem',
+              },
+            }}>
+              <TableCell>Group Name</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell align="right">Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {groups.map((group, index) => (
+              <TableRow
+                key={group.fsg}
+                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+              >
+                <TableCell component="th" scope="row" sx={{ fontWeight: '500' }}>
+                  {capitalizeWords(group.fsg_title)}
                 </TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white" }}>
-                  Description
-                </TableCell>
-                <TableCell
-                  sx={{
-                    fontWeight: "bold",
-                    color: "white",
-                    textAlign: "center",
-                  }}
-                >
-                  Actions
+                <TableCell>{group.description || 'N/A'}</TableCell>
+                <TableCell align="right">
+                  <Button
+                    variant="contained"
+                    component={Link}
+                    href={`/catalog/${group.fsg}/${slugify(group.fsg_title || '')}`}
+                  >
+                    View Subgroups
+                  </Button>
                 </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {uniqueGroups.map((group) => (
-                <TableRow key={group.id} hover>
-                  <TableCell>{capitalizeWords(group.fsg_title)}</TableCell>
-                  <TableCell>
-                    {capitalizeWords(group.fsc_inclusions || "")}
-                  </TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      sx={{ fontWeight: "bold" }}
-                      component={Link}
-                      href={`/catalog/${group.fsg}/${slugify(group.fsg_title)}`}
-                    >
-                      View Subgroups
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Container>
   );
 }

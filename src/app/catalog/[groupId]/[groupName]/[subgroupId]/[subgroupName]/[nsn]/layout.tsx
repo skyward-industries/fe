@@ -1,6 +1,9 @@
-import { fetchPartInfo } from "@/services/fetchPartInfo";
-import type { Metadata } from "next";
+// src/app/catalog/[groupId]/[groupName]/[subgroupId]/[subgroupName]/[nsn]/layout.tsx
+import { fetchPartInfo, Part } from '@/services/fetchPartInfo';
+import type { Metadata } from 'next';
+import { capitalizeWords } from '@/utils/capitalizeWords';
 
+// This function runs on the server to generate dynamic metadata for each NSN page
 export async function generateMetadata({
   params,
 }: {
@@ -12,68 +15,90 @@ export async function generateMetadata({
     subgroupName: string;
   };
 }): Promise<Metadata> {
-  const { nsn, groupId, groupName, subgroupId, subgroupName } = params;
-  const cleanNSN = nsn.replace("nsn-", "").replace("NSN-", "");
-  const parts = await fetchPartInfo(cleanNSN);
-  const part = parts?.[0];
+  const cleanNSN = params.nsn.replace(/^nsn[-]?/i, "");
+  const parts: Part[] = await fetchPartInfo(cleanNSN);
 
-  if (!part) {
-    throw new Error("No part found for NSN");
-  }
+  const firstPart = parts.length > 0 ? parts[0] : null;
 
-  const {
-    part_number,
-    company_name,
-    cage_code,
-    item_name,
-    fsg,
-    fsc,
-    fsg_title,
-    fsc_title,
-  } = part;
+  // Safely get data for title/description/keywords, providing strong fallbacks
+  const nsnValue = cleanNSN;
+  const partNumberValue = firstPart?.part_number?.toUpperCase();
+  const itemNameValue = firstPart?.item_name ? capitalizeWords(firstPart.item_name) : 'Defense & Aerospace Part';
+  const companyNameValue = firstPart?.company_name ? capitalizeWords(firstPart.company_name) : 'Leading Supplier';
+  const fsgTitleValue = firstPart?.fsg_title ? capitalizeWords(firstPart.fsg_title) : 'Military Components';
+  const fscTitleValue = firstPart?.fsc_title ? capitalizeWords(firstPart.fsc_title) : 'Industrial Equipment';
+  const definitionValue = firstPart?.definition;
 
-  if (!fsg || !fsc || !fsg_title || !fsc_title) {
-    throw new Error("Missing FSG/FSC info in part record.");
-  }
+  // --- Construct Dynamic SEO Metadata ---
 
-  const title = `NSN ${cleanNSN} | ${item_name || "Defense Part"} | ${company_name}`;
-  const description = `Technical specifications, supplier data, and logistics for NSN ${cleanNSN} (${item_name || "Item"}). Manufactured by ${company_name} (CAGE: ${cage_code}) with part number ${part_number}.`;
+  // Title: Prioritize Item Name > Part Number > FSC Title > Generic
+  // This is the most important tag for search engines.
+  const pageTitle = [itemNameValue, `NSN ${nsnValue}`, partNumberValue, fscTitleValue, "Skyward Industries"].filter(Boolean).join(' | ');
 
-  const canonical = `https://skywardparts.com/catalog/${fsg}/${fsg_title}/${fsc}/${fsc_title}/nsn-${cleanNSN}`;
+  // Description: This is the text that appears in search results. Make it compelling.
+  const pageDescription = definitionValue || 
+                          `Discover ${itemNameValue} with NSN ${nsnValue}${partNumberValue ? ` and part number ${partNumberValue}` : ''}. Get quotes and detailed information for military and defense procurement.`;
+  
+  // Keywords: While less important for Google, they help define context.
+  const pageKeywords = [
+    'NSN', nsnValue,
+    'part number', partNumberValue,
+    itemNameValue?.toLowerCase(),
+    fsgTitleValue?.toLowerCase(), fscTitleValue?.toLowerCase(),
+    companyNameValue?.toLowerCase(),
+    'military parts', 'defense procurement', 'government supply', 'aerospace components', 'industrial equipment',
+    'buy parts', 'RFQ', 'national stock number'
+  ].filter(Boolean).join(', ');
+
+  // Image URL: For social sharing.
+  const imageUrl = firstPart?.fsg
+    ? `https://www.skywardparts.com/category-images/${firstPart.fsg}/1.png`
+    : `https://www.skywardparts.com/default-product.jpg`;
+
+  // Canonical URL: Prevents duplicate content issues.
+  const canonicalUrl = `https://www.skywardparts.com/catalog/${params.groupId}/${params.groupName}/${params.subgroupId}/${params.subgroupName}/${params.nsn}`;
 
   return {
-    title,
-    description,
+    title: pageTitle,
+    description: pageDescription,
+    keywords: pageKeywords,
     alternates: {
-      canonical,
+        canonical: canonicalUrl,
     },
-    keywords: [
-      cleanNSN,
-      item_name,
-      part_number,
-      company_name,
-      cage_code,
-      "NSN parts",
-      "military surplus",
-      "defense logistics",
-    ].filter(Boolean) as string[],
     openGraph: {
-      title,
-      description,
-      url: canonical,
-      siteName: "Skyward Parts",
-      locale: "en_US",
-      type: "article",
+      title: pageTitle,
+      description: pageDescription,
+      url: canonicalUrl,
+      siteName: 'Skyward Industries',
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${itemNameValue} NSN ${nsnValue} Image`,
+        },
+      ],
+      type: 'website',
     },
     twitter: {
-      card: "summary",
-      title,
-      description,
+      card: 'summary_large_image',
+      title: pageTitle,
+      description: pageDescription,
+      images: [imageUrl],
+      creator: '@yourtwitterhandle', // IMPORTANT: Replace with your actual Twitter handle
     },
-    metadataBase: new URL("https://skywardparts.com"),
   };
 }
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+// Default layout component, just renders children
+export default function NsnLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <>
+      {children}
+    </>
+  );
 }

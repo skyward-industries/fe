@@ -1,32 +1,44 @@
-"use client";
+// src/context/SelectionContext.tsx
+"use client"; // This context is client-side only
 
-import { PartInfo } from "@/services/fetchPartInfo";
-import { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
+// Define the shape of your selected item (adjust as needed)
+interface SelectedItem {
+  id: string;
+  name: string;
+  // Add other properties like quantity, price, etc.
+}
 
-type SelectionContextType = {
-  selectedItems: PartInfo[];
-  addItem: (item: PartInfo) => void;
+interface SelectionContextType {
+  selectedItems: SelectedItem[];
+  addItem: (item: SelectedItem) => void;
   removeItem: (id: string) => void;
   clearSelection: () => void;
-};
+}
 
 const SelectionContext = createContext<SelectionContextType | undefined>(undefined);
 
-export const SelectionProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedItems, setSelectedItems] = useState<PartInfo[]>([]);
+interface SelectionProviderProps {
+  children: ReactNode;
+}
 
-  const addItem = (item: PartInfo) => {
-    setSelectedItems((prev) => {
-      if (!prev.find((i) => i.part_number === item.part_number)) {
-        return [...prev, item];
+export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }) => {
+  const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
+
+  const addItem = (item: SelectedItem) => {
+    setSelectedItems((prevItems) => {
+      // Prevent duplicates, or update quantity if item already exists
+      const exists = prevItems.some(i => i.id === item.id);
+      if (!exists) {
+        return [...prevItems, item];
       }
-      return prev;
+      return prevItems; // Item already exists, do nothing or update logic
     });
   };
 
-  const removeItem = (part_number: string) => {
-    setSelectedItems((prev) => prev.filter((item) => item.part_number !== part_number));
+  const removeItem = (id: string) => {
+    setSelectedItems((prevItems) => prevItems.filter(item => item.id !== id));
   };
 
   const clearSelection = () => {
@@ -42,6 +54,8 @@ export const SelectionProvider = ({ children }: { children: ReactNode }) => {
 
 export const useSelection = () => {
   const context = useContext(SelectionContext);
-  if (!context) throw new Error("useSelection must be used within a SelectionProvider");
+  if (context === undefined) {
+    throw new Error('useSelection must be used within a SelectionProvider');
+  }
   return context;
 };

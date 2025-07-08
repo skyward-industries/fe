@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skyward Industries - Innovative Solutions</title>
+    <meta name="description" content="Skyward Industries provides innovative aerospace and industrial solutions. Explore our product groups, capabilities, and contact us.">
+    <meta name="keywords" content="Skyward Industries, aerospace, industrial, components, propulsion, manufacturing, services, product groups, contact">
+    <meta name="author" content="Skyward Industries LLC">
+
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:title" content="Skyward Industries - Innovative Solutions">
+    <meta property="og:description" content="Skyward Industries provides innovative aerospace and industrial solutions.">
+    <meta property="og:image" content="https://yourwebsite.com/images/skyward-logo-social.jpg"> <!-- **IMPORTANT: Replace with your actual logo/image URL** -->
+    <meta property="og:url" content="https://yourwebsite.com"> <!-- **IMPORTANT: Replace with your actual website URL** -->
+    <meta property="og:type" content="website">
+
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon"> <!-- Add favicon.ico to your public folder -->
+
+    <!-- Google Fonts - Montserrat and Lato for a professional look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+
+    <!-- Link to your CSS file -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container header-content">
+            <div class="logo">
+                <h1><a href="/">Skyward Industries, LLC</a></h1>
+            </div>
+            <nav class="main-nav" id="main-nav">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#catalog">Catalog</a></li>
+                    <li><a href="#product-groups">Product Groups</a></li>
+                    <li><a href="#contact">Contact Us</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <div class="search-box">
+                    <input type="search" placeholder="NSN or Part Number Search" aria-label="Search NSN or Part Number">
+                    <button type="submit" class="search-btn" aria-label="Search"><i class="fas fa-search"></i></button> <!-- Placeholder for Font Awesome icon -->
+                </div>
+                <a href="/work" class="btn btn-work">Work</a>
+            </div>
+            <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="hero-section">
+            <!-- Content for the hero section if any, but screenshot suggests just image -->
+            <!-- The "About Skyward Industries" title will be a separate section -->
+        </section>
+
+        <section id="about" class="about-section">
+            <div class="container">
+                <h2>About Skyward Industries</h2> <!-- Changed to h2 based on screenshot position -->
+                <p>Skyward Industries is dedicated to pushing the boundaries of technology and service. With a focus on [Your Industry/Niche], we aim to deliver excellence and create lasting impact through innovative solutions and unparalleled commitment to quality and customer satisfaction.</p>
+                <p>Learn more about our mission, vision, and the values that drive us to be leaders in the [Your Industry] sector.</p>
+            </div>
+        </section>
+
+        <!-- Placeholder for a Catalog section if you want one later -->
+        <section id="catalog" class="catalog-section" style="display: none;">
+            <div class="container">
+                <h2>Our Catalog</h2>
+                <p>Browse our extensive catalog of products and solutions.</p>
+                <!-- Catalog content here -->
+            </div>
+        </section>
+
+        <section id="product-groups" class="product-groups-section">
+            <div class="container">
+                <h2>Product Groups</h2>
+                <div class="product-grid">
+                    <div class="product-item">
+                        <img src="https://via.placeholder.com/400x250?text=Aircraft+Propulsions" alt="Image of Aircraft Propulsions and Components"> <!-- **IMPORTANT: Replace with your actual image URL** -->
+                        <h3>Aircraft Propulsions and Components</h3>
+                        <p>Industry Aircraft Propulsions, Propeller Blades, Controls, Cable, Valve, Air Cylinders, Red Only Equipment, Power Units Engines, Integral Oil Control Regulators and Propeller Assemblies.</p>
+                        <a href="#" class="btn view-subgroups-btn">View Subgroups</a>
+                    </div>
+                    <!-- You can add more .product-item divs here for other product groups -->
+                    <!-- Example:
+                    <div class="product-item">
+                        <img src="https://via.placeholder.com/400x250?text=Industrial+Solutions" alt="Image for Industrial Solutions">
+                        <h3>Industrial Solutions</h3>
+                        <p>Description of industrial solutions and key areas of expertise.</p>
+                        <a href="#" class="btn view-subgroups-btn">View Subgroups</a>
+                    </div>
+                    -->
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="contact-section">
+            <div class="container">
+                <h2>Contact Us</h2>
+                <p>Have a question or need a quote? Reach out to us!</p>
+                <form>
+                    <input type="text" placeholder="Your Name" aria-label="Your Name" required>
+                    <input type="email" placeholder="Your Email" aria-label="Your Email" required>
+                    <input type="text" placeholder="Subject" aria-label="Subject">
+                    <textarea placeholder="Your Message" aria-label="Your Message" required></textarea>
+                    <button type="submit" class="btn">Send Message</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2023 Skyward Industries, LLC. All rights reserved.</p>
+            <!-- Add other footer links like privacy policy, terms, etc. if needed -->
+        </div>
+    </footer>
+
+    <!-- Optional: For Font Awesome icons (like search icon) -->
+    <script src="https://kit.fontawesome.com/your-font-awesome-kit-code.js" crossorigin="anonymous"></script> <!-- **IMPORTANT: Replace with your Font Awesome kit code or remove if not using** -->
+
+    <!-- JavaScript for Mobile Menu Toggle -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuToggle = document.getElementById('menu-toggle');
+            const mainNav = document.getElementById('main-nav');
+
+            if (menuToggle && mainNav) {
+                menuToggle.addEventListener('click', () => {
+                    mainNav.classList.toggle('active');
+                    menuToggle.classList.toggle('active');
+                    document.body.classList.toggle('no-scroll'); // Optional: prevent scrolling when menu is open
+                });
+
+                // Close menu if a nav link is clicked (for single-page navigation)
+                mainNav.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        mainNav.classList.remove('active');
+                        menuToggle.classList.remove('active');
+                        document.body.classList.remove('no-scroll');
+                    });
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
