@@ -1,5 +1,5 @@
 // @ts-ignore
-import pool from '@/lib/db';
+import {pool} from '@/lib/db';
 
 export async function GET(req: Request, context: { params: { fsc: string } }) {
   const { fsc } = context.params;

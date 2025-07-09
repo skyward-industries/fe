@@ -1,7 +1,7 @@
 // src/app/api/test/route.ts (or whatever the file is named)
 
 // FIXED: Clean path and import 'pool' directly because it's a default export from db.js
-import pool from '../../../lib/db.js';
+import { pool } from "/home/ec2-user/fe/src/lib/db"
 
 export async function GET() {
   try {

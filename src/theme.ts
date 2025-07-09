@@ -164,7 +164,7 @@ const themeOptions: ThemeOptions = {
         },
     },
   },
-  breakpoints: {
+   breakpoints: {
     values: {
       xs: 0,
       sm: 600,
@@ -173,7 +173,7 @@ const themeOptions: ThemeOptions = {
       xl: 1536,
     },
   },
-};
+}; // ← this closes `themeOptions`
 
 const theme = createTheme(themeOptions);
 

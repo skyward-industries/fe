@@ -21,7 +21,7 @@ export interface PartResponse {
 
 export async function fetchParts(fsc: string, page: number = 1, limit: number = 100): Promise<PartResponse> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/parts/${fsc}?page=${page}&limit=${limit}`);
+    const res = await fetch(`${process.env.INTERNAL_API_URL}/api/parts/${fsc}?page=${page}&limit=${limit}`);
     console.log(res);
 
     if (!res.ok) {

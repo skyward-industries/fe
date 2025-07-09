@@ -1,5 +1,5 @@
 // @ts-ignore
-import pool from '@/lib/db.js';
+import {pool} from '@/lib/db';
 
 export async function GET() {
   try {
