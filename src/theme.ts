@@ -5,174 +5,140 @@ import { grey, blue, green, red } from '@mui/material/colors';
 const themeOptions: ThemeOptions = {
   palette: {
     primary: {
-      main: '#34495e', // Dark slate grey for AppBar and main dark elements
-      light: '#5c7c9e',
-      dark: '#1f2e3d',
+      main: '#1e3a5f', // Deep aerospace blue
+      light: '#4a90a4',
+      dark: '#0f1c2e',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#607d8b', // A slightly muted blue-grey for secondary elements
-      light: '#8eacbb',
-      dark: '#345163',
+      main: '#2c5f7f', // Professional steel blue
+      light: '#5a8dad',
+      dark: '#1a3d52',
       contrastText: '#ffffff',
     },
     error: {
-      main: red[500], // Standard red for error/important actions
+      main: '#d32f2f',
+      light: '#ef5350',
+      dark: '#c62828',
     },
     success: {
-      main: green[500], // For success messages/actions
+      main: '#2e7d32',
+      light: '#4caf50',
+      dark: '#1b5e20',
     },
     info: {
-      main: blue[500], // For informational messages
+      main: '#0277bd',
+      light: '#03a9f4',
+      dark: '#01579b',
     },
     background: {
-      default: grey[50], // Very light grey for general background
-      paper: '#ffffff', // Pure white for cards and elements
+      default: '#f8fafc', // Cleaner off-white
+      paper: '#ffffff',
     },
     text: {
-      primary: grey[900], // Dark grey for main text
-      secondary: grey[700], // Lighter grey for subtle text
+      primary: '#1a202c',
+      secondary: '#4a5568',
     },
+    // Custom colors for enhanced design
+    mode: 'light',
   },
   typography: {
-    fontFamily: ['"Lato"', 'Arial', 'sans-serif'].join(','),
+    fontFamily: ['"Inter"', '"Roboto"', '"Helvetica"', 'Arial', 'sans-serif'].join(','),
     h1: {
-      fontFamily: ['"Montserrat"', 'sans-serif'].join(','),
-      fontSize: '3rem',
+      fontFamily: ['"Poppins"', '"Montserrat"', 'sans-serif'].join(','),
+      fontSize: 'clamp(2.5rem, 5vw, 4rem)',
       fontWeight: 700,
-      color: grey[900],
-      lineHeight: 1.2,
+      color: '#1a202c',
+      lineHeight: 1.1,
+      letterSpacing: '-0.02em',
     },
     h2: {
-      fontFamily: ['"Montserrat"', 'sans-serif'].join(','),
-      fontSize: '2.5rem',
-      fontWeight: 700,
-      color: grey[900],
+      fontFamily: ['"Poppins"', '"Montserrat"', 'sans-serif'].join(','),
+      fontSize: 'clamp(2rem, 4vw, 3rem)',
+      fontWeight: 600,
+      color: '#1a202c',
       lineHeight: 1.2,
+      letterSpacing: '-0.01em',
     },
     h3: {
-      fontFamily: ['"Montserrat"', 'sans-serif'].join(','),
-      fontSize: '2rem',
+      fontFamily: ['"Poppins"', '"Montserrat"', 'sans-serif'].join(','),
+      fontSize: 'clamp(1.5rem, 3vw, 2.25rem)',
       fontWeight: 600,
-      color: grey[900],
-      lineHeight: 1.2,
+      color: '#1a202c',
+      lineHeight: 1.3,
     },
     h4: {
-      fontFamily: ['"Montserrat"', 'sans-serif'].join(','),
-      fontSize: '1.7rem',
+      fontFamily: ['"Poppins"', '"Montserrat"', 'sans-serif'].join(','),
+      fontSize: 'clamp(1.25rem, 2.5vw, 1.75rem)',
       fontWeight: 600,
-      color: grey[900],
-      lineHeight: 1.2,
+      color: '#1e3a5f',
+      lineHeight: 1.3,
     },
     h5: {
-      fontFamily: ['"Montserrat"', 'sans-serif'].join(','),
-      fontSize: '1.4rem',
+      fontFamily: ['"Poppins"', '"Montserrat"', 'sans-serif'].join(','),
+      fontSize: 'clamp(1.1rem, 2vw, 1.4rem)',
       fontWeight: 500,
-      color: grey[900],
+      color: '#1e3a5f',
+      lineHeight: 1.4,
+    },
+    h6: {
+      fontFamily: ['"Poppins"', '"Montserrat"', 'sans-serif'].join(','),
+      fontSize: '1.1rem',
+      fontWeight: 500,
+      color: '#2c5f7f',
+      lineHeight: 1.4,
     },
     body1: {
       fontSize: '1rem',
-      lineHeight: 1.6,
+      lineHeight: 1.7,
+      color: '#4a5568',
     },
     body2: {
-      fontSize: '0.9rem',
+      fontSize: '0.875rem',
       lineHeight: 1.6,
+      color: '#4a5568',
     },
     button: {
-      fontWeight: 700,
+      fontWeight: 600,
+      textTransform: 'none',
+      fontSize: '0.95rem',
+    },
+    caption: {
+      fontSize: '0.75rem',
+      color: '#718096',
     },
   },
-  components: {
-    MuiAppBar: {
-      styleOverrides: {
-        root: {
-          boxShadow: 'none', // Remove default AppBar shadow for a cleaner look
-          padding: '0.5rem 0', // Consistent padding
-        },
-      },
-    },
-    MuiToolbar: {
-      styleOverrides: {
-        root: {
-          minHeight: '64px', // Ensure consistent height
-          '@media (max-width:600px)': {
-            minHeight: '56px', // Standard mobile app bar height
-          },
-        },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: '8px', // Slightly more rounded buttons
-          textTransform: 'none', // Keep button text as is (not all caps)
-          padding: '8px 16px', // Standard padding for buttons
-        },
-        containedPrimary: {
-          backgroundColor: '#007bff', // Your "traditional" blue for contained primary buttons
-          '&:hover': {
-            backgroundColor: '#0056b3',
-          },
-        },
-        outlinedPrimary: {
-          borderColor: '#007bff', // Match border color
-          color: '#007bff', // Match text color
-          '&:hover': {
-            backgroundColor: 'rgba(0, 123, 255, 0.04)', // Light hover background
-            borderColor: '#0056b3',
-          },
-        },
-        containedError: { // For Create RFQ button
-          backgroundColor: red[600],
-          '&:hover': {
-            backgroundColor: red[700],
-          },
-        },
-      },
-    },
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          '& .MuiOutlinedInput-root': {
-            borderRadius: '8px', // Match button radius
-            backgroundColor: grey[100], // Light background for text fields
-            '&.Mui-focused fieldset': {
-              borderColor: '#007bff', // Primary color border on focus
-            },
-          },
-          '& .MuiInputBase-input': {
-            padding: '10px 14px', // Adjust padding for a cleaner look
-          },
-        },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: '12px', // More prominent rounded corners for cards
-          boxShadow: '0 4px 20px rgba(0,0,0,0.08)', // Softer, larger shadow
-          transition: 'transform 0.3s ease-in-out',
-          '&:hover': {
-            transform: 'translateY(-5px)', // Subtle lift on hover
-          },
-        },
-      },
-    },
-    MuiContainer: {
-        defaultProps: {
-            maxWidth: 'lg', // Default container size for most content
-        },
-    },
+  shape: {
+    borderRadius: 12,
   },
-  breakpoints: {
-    values: {
-      xs: 0,
-      sm: 600,
-      md: 900, // Common tablet breakpoint
-      lg: 1200, // Common desktop breakpoint
-      xl: 1536,
-    },
-  },
+  shadows: [
+    'none',
+    '0px 1px 3px rgba(0, 0, 0, 0.05)',
+    '0px 4px 6px rgba(0, 0, 0, 0.07)',
+    '0px 5px 15px rgba(0, 0, 0, 0.08)',
+    '0px 10px 24px rgba(0, 0, 0, 0.1)',
+    '0px 15px 35px rgba(0, 0, 0, 0.12)',
+    '0px 20px 40px rgba(0, 0, 0, 0.14)',
+    '0px 25px 50px rgba(0, 0, 0, 0.16)',
+    '0px 25px 50px rgba(0, 0, 0, 0.16)',
+    '0px 25px 50px rgba(0, 0, 0, 0.16)',
+    '0px 25px 50px rgba(0, 0, 0, 0.16)',
+    '0px 25px 50px rgba(0, 0, 0, 0.16)',
+    '0px 25px 50px rgba(0, 0, 0, 0.16)',
+    '0px 25px 50px rgba(0, 0, 0, 0.16)',
+    '0px 25px 50px rgba(0, 0, 0, 0.16)',
+    '0px 25px 50px rgba(0, 0, 0, 0.16)',
+    '0px 25px 50px rgba(0, 0, 0, 0.16)',
+    '0px 25px 50px rgba(0, 0, 0, 0.16)',
+    '0px 25px 50px rgba(0, 0, 0, 0.16)',
+    '0px 25px 50px rgba(0, 0, 0, 0.16)',
+    '0px 25px 50px rgba(0, 0, 0, 0.16)',
+    '0px 25px 50px rgba(0, 0, 0, 0.16)',
+    '0px 25px 50px rgba(0, 0, 0, 0.16)',
+    '0px 25px 50px rgba(0, 0, 0, 0.16)',
+    '0px 25px 50px rgba(0, 0, 0, 0.16)',
+    '0px 25px 50px rgba(0, 0, 0, 0.16)',
+  ],
 };
 
 const theme = createTheme(themeOptions);
