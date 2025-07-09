@@ -18,6 +18,10 @@ import {
 } from "@mui/material";
 // --- End Core Imports ---
 
+// --- Animation Imports ---
+import FadeInSection from './FadeInSection';
+// --- End Animation Imports ---
+
 // --- External Libraries ---
 import NextLink from "next/link"; // For navigation to different pages (e.g., /catalog)
 // import Slider from "react-slick"; // The Slider needs to run on the client - COMMENTED OUT FOR DEBUGGING
@@ -172,82 +176,88 @@ export default function HomePageClient({ groups }: HomePageClientProps) {
 
       {/* About Section - Wrapped in ScrollableSection for scrolling */}
       <ScrollableSection id="section-about" title="About Skyward Industries">
-        <Typography variant="body1" color="textSecondary" textAlign="center" sx={{ maxWidth: 800, mx: "auto", mb: 4 }}>
-          {`Skyward Industries was founded by three friends who share a passion
-          for aerospace and a deep-rooted connection to the Space Coast. We
-          revolutionize how aerospace parts are sourced by offering fast,
-          customer-first service and access to a vast network of reliable
-          manufacturers. Whether you're a Fortune 500 company or a small
-          repair shop, we’re here to help.`}
-        </Typography>
+        <FadeInSection delay={0.1}>
+          <Typography variant="body1" color="textSecondary" textAlign="center" sx={{ maxWidth: 800, mx: "auto", mb: 4 }}>
+            {`Skyward Industries was founded by three friends who share a passion
+            for aerospace and a deep-rooted connection to the Space Coast. We
+            revolutionize how aerospace parts are sourced by offering fast,
+            customer-first service and access to a vast network of reliable
+            manufacturers. Whether you're a Fortune 500 company or a small
+            repair shop, we’re here to help.`}
+          </Typography>
+        </FadeInSection>
       </ScrollableSection>
       <Divider />
 
       {/* Featured Product Categories Section */}
       <ScrollableSection id="section-featured-categories" title="Featured Product Categories">
-        <Container maxWidth="lg">
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 4 }}>
-            {/* Category 1 */}
-            <Card component={NextLink} href="/catalog/61/Electrical%20Wire%20and%20Cable" sx={{ textDecoration: 'none', ':hover': { boxShadow: 6 } }}>
-              <CardMedia component="img" height="140" image="/category-images/61/1.png" alt="Electrical Wire and Cable" />
-              <CardContent>
-                <Typography variant="h6" fontWeight="bold">Electrical Wire & Cable</Typography>
-                <Typography variant="body2" color="textSecondary">High-quality wiring and cabling for aerospace and industrial applications.</Typography>
-              </CardContent>
-            </Card>
-            {/* Category 2 */}
-            <Card component={NextLink} href="/catalog/31/Bearings" sx={{ textDecoration: 'none', ':hover': { boxShadow: 6 } }}>
-              <CardMedia component="img" height="140" image="/category-images/31/1.png" alt="Bearings" />
-              <CardContent>
-                <Typography variant="h6" fontWeight="bold">Bearings</Typography>
-                <Typography variant="body2" color="textSecondary">Precision bearings for critical aerospace and industrial systems.</Typography>
-              </CardContent>
-            </Card>
-            {/* Category 3 */}
-            <Card component={NextLink} href="/catalog/43/Pumps%20and%20Compressors" sx={{ textDecoration: 'none', ':hover': { boxShadow: 6 } }}>
-              <CardMedia component="img" height="140" image="/category-images/43/1.png" alt="Pumps and Compressors" />
-              <CardContent>
-                <Typography variant="h6" fontWeight="bold">Pumps & Compressors</Typography>
-                <Typography variant="body2" color="textSecondary">Reliable pumps and compressors for demanding environments.</Typography>
-              </CardContent>
-            </Card>
-            {/* Category 4 */}
-            <Card component={NextLink} href="/catalog/60/Fittings" sx={{ textDecoration: 'none', ':hover': { boxShadow: 6 } }}>
-              <CardMedia component="img" height="140" image="/category-images/60/1.png" alt="Fittings" />
-              <CardContent>
-                <Typography variant="h6" fontWeight="bold">Fittings</Typography>
-                <Typography variant="body2" color="textSecondary">Durable fittings for fluid and air systems in aerospace and industry.</Typography>
-              </CardContent>
-            </Card>
-          </Box>
-        </Container>
+        <FadeInSection delay={0.2}>
+          <Container maxWidth="lg">
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 4 }}>
+              {/* Category 1 */}
+              <Card component={NextLink} href="/catalog/61/Electrical%20Wire%20and%20Cable" sx={{ textDecoration: 'none', ':hover': { boxShadow: 6 } }}>
+                <CardMedia component="img" height="140" image="/category-images/61/1.png" alt="Electrical Wire and Cable" />
+                <CardContent>
+                  <Typography variant="h6" fontWeight="bold">Electrical Wire & Cable</Typography>
+                  <Typography variant="body2" color="textSecondary">High-quality wiring and cabling for aerospace and industrial applications.</Typography>
+                </CardContent>
+              </Card>
+              {/* Category 2 */}
+              <Card component={NextLink} href="/catalog/31/Bearings" sx={{ textDecoration: 'none', ':hover': { boxShadow: 6 } }}>
+                <CardMedia component="img" height="140" image="/category-images/31/1.png" alt="Bearings" />
+                <CardContent>
+                  <Typography variant="h6" fontWeight="bold">Bearings</Typography>
+                  <Typography variant="body2" color="textSecondary">Precision bearings for critical aerospace and industrial systems.</Typography>
+                </CardContent>
+              </Card>
+              {/* Category 3 */}
+              <Card component={NextLink} href="/catalog/43/Pumps%20and%20Compressors" sx={{ textDecoration: 'none', ':hover': { boxShadow: 6 } }}>
+                <CardMedia component="img" height="140" image="/category-images/43/1.png" alt="Pumps and Compressors" />
+                <CardContent>
+                  <Typography variant="h6" fontWeight="bold">Pumps & Compressors</Typography>
+                  <Typography variant="body2" color="textSecondary">Reliable pumps and compressors for demanding environments.</Typography>
+                </CardContent>
+              </Card>
+              {/* Category 4 */}
+              <Card component={NextLink} href="/catalog/60/Fittings" sx={{ textDecoration: 'none', ':hover': { boxShadow: 6 } }}>
+                <CardMedia component="img" height="140" image="/category-images/60/1.png" alt="Fittings" />
+                <CardContent>
+                  <Typography variant="h6" fontWeight="bold">Fittings</Typography>
+                  <Typography variant="body2" color="textSecondary">Durable fittings for fluid and air systems in aerospace and industry.</Typography>
+                </CardContent>
+              </Card>
+            </Box>
+          </Container>
+        </FadeInSection>
       </ScrollableSection>
       <Divider />
 
       {/* Why Choose Us Section */}
       <ScrollableSection id="section-why-choose-us" title="Why Choose Us?">
-        <Container maxWidth="lg">
-          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4, justifyContent: 'center', alignItems: 'stretch' }}>
-            {/* Column 1 */}
-            <Box sx={{ flex: 1, textAlign: 'center', p: 2 }}>
-              <Typography variant="h3" color="primary" sx={{ mb: 2 }}>⚡</Typography>
-              <Typography variant="h6" fontWeight="bold" gutterBottom>Fast, Reliable Service</Typography>
-              <Typography variant="body2" color="textSecondary">We pride ourselves on rapid response times and dependable delivery, so you can keep your projects moving forward.</Typography>
+        <FadeInSection delay={0.3}>
+          <Container maxWidth="lg">
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4, justifyContent: 'center', alignItems: 'stretch' }}>
+              {/* Column 1 */}
+              <Box sx={{ flex: 1, textAlign: 'center', p: 2 }}>
+                <Typography variant="h3" color="primary" sx={{ mb: 2 }}>⚡</Typography>
+                <Typography variant="h6" fontWeight="bold" gutterBottom>Fast, Reliable Service</Typography>
+                <Typography variant="body2" color="textSecondary">We pride ourselves on rapid response times and dependable delivery, so you can keep your projects moving forward.</Typography>
+              </Box>
+              {/* Column 2 */}
+              <Box sx={{ flex: 1, textAlign: 'center', p: 2 }}>
+                <Typography variant="h3" color="primary" sx={{ mb: 2 }}>✅</Typography>
+                <Typography variant="h6" fontWeight="bold" gutterBottom>Trusted Quality</Typography>
+                <Typography variant="body2" color="textSecondary">All our products are sourced from reputable manufacturers and meet rigorous industry standards.</Typography>
+              </Box>
+              {/* Column 3 */}
+              <Box sx={{ flex: 1, textAlign: 'center', p: 2 }}>
+                <Typography variant="h3" color="primary" sx={{ mb: 2 }}>🎧</Typography>
+                <Typography variant="h6" fontWeight="bold" gutterBottom>Customer-First Support</Typography>
+                <Typography variant="body2" color="textSecondary">Our team is here to help you every step of the way, from product selection to after-sales support.</Typography>
+              </Box>
             </Box>
-            {/* Column 2 */}
-            <Box sx={{ flex: 1, textAlign: 'center', p: 2 }}>
-              <Typography variant="h3" color="primary" sx={{ mb: 2 }}>✅</Typography>
-              <Typography variant="h6" fontWeight="bold" gutterBottom>Trusted Quality</Typography>
-              <Typography variant="body2" color="textSecondary">All our products are sourced from reputable manufacturers and meet rigorous industry standards.</Typography>
-            </Box>
-            {/* Column 3 */}
-            <Box sx={{ flex: 1, textAlign: 'center', p: 2 }}>
-              <Typography variant="h3" color="primary" sx={{ mb: 2 }}>🎧</Typography>
-              <Typography variant="h6" fontWeight="bold" gutterBottom>Customer-First Support</Typography>
-              <Typography variant="body2" color="textSecondary">Our team is here to help you every step of the way, from product selection to after-sales support.</Typography>
-            </Box>
-          </Box>
-        </Container>
+          </Container>
+        </FadeInSection>
       </ScrollableSection>
       <Divider />
 
@@ -326,9 +336,11 @@ export default function HomePageClient({ groups }: HomePageClientProps) {
 
       {/* Contact Section - Wrapped in ScrollableSection for scrolling */}
       <ScrollableSection id="section-contact" title="Contact Us">
-        <Typography variant="body1" color="textSecondary" textAlign="center">📍 980 Rockledge Blvd, Rockledge FL, 32955</Typography>
-        <Typography variant="body1" color="textSecondary" textAlign="center">✉️ Email: admin@skywardparts.com</Typography>
-        <Typography variant="body1" color="textSecondary" textAlign="center">📞 Phone: +1 (321) 351-2875</Typography>
+        <FadeInSection delay={0.4}>
+          <Typography variant="body1" color="textSecondary" textAlign="center">📍 980 Rockledge Blvd, Rockledge FL, 32955</Typography>
+          <Typography variant="body1" color="textSecondary" textAlign="center">✉️ Email: admin@skywardparts.com</Typography>
+          <Typography variant="body1" color="textSecondary" textAlign="center">📞 Phone: +1 (321) 351-2875</Typography>
+        </FadeInSection>
       </ScrollableSection>
     </Box>
   );
