@@ -1,0 +1,47 @@
+# .github/workflows/deploy.yml
+name: Deploy to EC2 on push to main
+
+on:
+  push:
+    branches:
+      - main # This workflow only runs when you push to the 'main' branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the code from your repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' # Use the same Node.js version as your server
+
+      # Step 3: Install dependencies and build the project (CI part)
+      - name: Install dependencies
+        run: npm ci # 'ci' is faster and safer for servers than 'install'
+      - name: Build project
+        run: npm run build
+        # If the build fails, the workflow stops here automatically
+
+      # Step 4: Deploy to EC2 (CD part)
+      - name: SSH and Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }} # Your server's IP address
+          username: ${{ secrets.EC2_USERNAME }} # e.g., 'ec2-user'
+          key: ${{ secrets.EC2_SSH_KEY }} # Your private .pem key
+          script: |
+            # Navigate to your project directory on the server
+            cd /home/ec2-user/fe
+            # Pull the latest changes from the 'main' branch
+            git pull origin main
+            # Install any new dependencies
+            npm install
+            # Restart the application with PM2 to apply changes
+            # 'reload' is a zero-downtime restart
+            pm2 reload ecosystem.config.cjs
