@@ -6,6 +6,9 @@ import { fetchGroups, Group } from '@/services/fetchGroups'; // You'll need to u
 import { capitalizeWords } from '@/utils/capitalizeWords';
 // @ts-ignore
 import { slugify } from '@/utils/slugify';
+
+// Force dynamic rendering to avoid build-time database access
+export const dynamic = 'force-dynamic';
 import {
   Container,
   Typography,
@@ -32,7 +35,13 @@ export const metadata: Metadata = {
 };
 
 export default async function CatalogPage() {
-  const groups: Group[] = await fetchGroups(); // Fetches only distinct FSGs now
+  let groups: Group[] = [];
+  try {
+    groups = await fetchGroups(); // Fetches only distinct FSGs now
+  } catch (error) {
+    console.error('Failed to fetch groups for catalog page:', error);
+    // Continue with empty groups array
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>

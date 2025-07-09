@@ -5,9 +5,18 @@ import { fetchGroups } from "@/services/fetchGroups";
 // @ts-ignore
 import HomePageClient from "@/components/HomePageClient"; // Import the new Client Component
 
+// Force dynamic rendering to avoid build-time database access
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   // 1. Fetch data on the server, before the page is sent to the client.
-  const allGroups = await fetchGroups();
+  let allGroups: any[] = [];
+  try {
+    allGroups = await fetchGroups();
+  } catch (error) {
+    console.error('Failed to fetch groups for homepage:', error);
+    // Continue with empty groups array
+  }
 
   // 2. Define SEO metadata here. It gets rendered into the static HTML.
   const organizationSchema = {
