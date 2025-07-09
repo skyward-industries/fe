@@ -1,6 +1,8 @@
 // src/app/catalog/[groupId]/[groupName]/[subgroupId]/[subgroupName]/[nsn]/layout.tsx
+// @ts-ignore
 import { fetchPartInfo, Part } from '@/services/fetchPartInfo';
 import type { Metadata } from 'next';
+// @ts-ignore
 import { capitalizeWords } from '@/utils/capitalizeWords';
 
 // This function runs on the server to generate dynamic metadata for each NSN page

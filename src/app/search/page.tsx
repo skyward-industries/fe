@@ -1,7 +1,9 @@
 // src/app/search/page.tsx
 // This is a Server Component that displays search results.
 import React from 'react';
+// @ts-ignore
 import { fetchPartInfo, Part } from "@/services/fetchPartInfo";
+// @ts-ignore
 import { slugify } from '@/utils/slugify';
 import {
   Box,

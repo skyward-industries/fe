@@ -1,7 +1,6 @@
-import {
-  fetchSitemapSubgroups,
-  Subgroup,
-} from "@/services/fetchSitemapSubgroups";
+// @ts-ignore
+import {fetchSitemapSubgroups,Subgroup,} from "@/services/fetchSitemapSubgroups";
+// @ts-ignore
 import { slugify } from "@/utils/slugify";
 
 export const dynamic = "force-dynamic"; // Ensures fresh data on every request

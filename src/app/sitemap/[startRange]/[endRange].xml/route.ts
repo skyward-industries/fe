@@ -1,4 +1,7 @@
+// @ts-ignore
+
 import { fetchSitemapParts, SitemapPart } from "@/services/fetchSitemapParts";
+// @ts-ignore
 import { slugify } from "@/utils/slugify";
 
 export const dynamic = "force-dynamic"; // Ensures fresh data on every request

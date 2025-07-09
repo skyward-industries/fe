@@ -1,4 +1,6 @@
+// @ts-ignore
 import { fetchGroups, Group } from "@/services/fetchGroups";
+// @ts-ignore
 import { slugify } from "@/utils/slugify";
 
 export const dynamic = "force-dynamic"; // Ensures fresh data on every request

@@ -1,4 +1,4 @@
-import { fetchProductById } from "./fetchPartInfo";
+import { fetchPartInfo } from "./fetchPartInfo";
 
 // Mock database of products and their corresponding groups
 const productGroups = {
@@ -12,7 +12,7 @@ export async function fetchProductGroup(productId: string) {
   try {
     for (const [groupId, productIds] of Object.entries(productGroups)) {
       if (productIds.includes(productId)) {
-        const product = await fetchProductById(groupId, productId);
+        const product = await fetchPartInfo(productId);
         return { groupId, product };
       }
     }

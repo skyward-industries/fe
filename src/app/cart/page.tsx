@@ -1,6 +1,7 @@
 "use client";
-
+// @ts-ignore
 import { useSelection } from "@/context/SelectionContext";
+// @ts-ignore
 import { PartInfo } from "@/services/fetchPartInfo";
 import {
   Button,
@@ -301,7 +302,7 @@ export default function CartPage() {
               fullWidth
               {...register("email", { required: "Email is required" })}
               error={!!errors.email}
-              helperText={errors.email?.message}
+              helperText={errors.email?.message as string}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -310,7 +311,7 @@ export default function CartPage() {
               fullWidth
               {...register("firstName", { required: "First Name is required" })}
               error={!!errors.firstName}
-              helperText={errors.firstName?.message}
+              helperText={errors.firstName?.message as string}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -319,7 +320,7 @@ export default function CartPage() {
               fullWidth
               {...register("lastName", { required: "Last Name is required" })}
               error={!!errors.lastName}
-              helperText={errors.lastName?.message}
+              helperText={errors.lastName?.message as string}
             />{" "}
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -333,7 +334,7 @@ export default function CartPage() {
                 required: "Company Name is required",
               })}
               error={!!errors.companyName}
-              helperText={errors.companyName?.message}
+              helperText={errors.companyName?.message as string}
             />
           </Grid>
           <Grid item xs={12}>

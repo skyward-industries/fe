@@ -7,6 +7,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 interface SelectedItem {
   id: string;
   name: string;
+  part_number: string;
   // Add other properties like quantity, price, etc.
 }
 

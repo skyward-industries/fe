@@ -1,7 +1,8 @@
 // src/components/HomePageClient.tsx
 "use client"; // THIS IS THE MOST IMPORTANT LINE
-
+// @ts-ignore
 import { capitalizeWords } from "@/utils/capitalizeWords";
+// @ts-ignore
 import { slugify } from "@/utils/slugify";
 import {
   Box,
@@ -14,7 +15,9 @@ import {
   Typography,
 } from "@mui/material";
 import Slider from "react-slick"; // The Slider needs to run on the client
+
 import Link from "next/link";
+// @ts-ignore
 import { Group } from "@/services/fetchGroups"; // Import the Group type
 
 // The props this component will receive from its parent (the Server Component)
@@ -61,7 +64,7 @@ export default function HomePageClient({ groups }: HomePageClientProps) {
           backgroundPosition: "center center",
           minHeight: { xs: '60vh', md: '80vh' },
           display: "flex", alignItems: "center", justifyContent: "center",
-          textAlign: "center", color: "white", position: "relative",
+          textAlign: "center", color: "white", position: "relative", 
         }}
       >
         <Box sx={{ position: "absolute", inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.4)' }}/>

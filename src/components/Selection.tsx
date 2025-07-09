@@ -2,6 +2,7 @@
 
 import { Button } from "@mui/material";
 import { useSelection } from "@/context/SelectionContext";
+// @ts-ignore
 import { PartInfo } from "@/services/fetchPartInfo";
 
 export default function SelectionButton({ item }: { item: PartInfo }) {

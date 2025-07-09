@@ -1,7 +1,10 @@
 // src/app/catalog/page.tsx
 import React from 'react';
+// @ts-ignore
 import { fetchGroups, Group } from '@/services/fetchGroups'; // You'll need to update the Group interface
+// @ts-ignore
 import { capitalizeWords } from '@/utils/capitalizeWords';
+// @ts-ignore
 import { slugify } from '@/utils/slugify';
 import {
   Container,

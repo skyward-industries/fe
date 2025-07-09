@@ -1,8 +1,14 @@
-import pool from '../../../../lib/db';
+// src/app/api/test/route.ts (or whatever the file is named)
+
+// FIXED: Clean path and import 'pool' directly because it's a default export from db.js
+import pool from '../../../lib/db.js';
 
 export async function GET() {
   try {
+    // FIXED: Now the 'pool' variable exists and can be used
     const result = await pool.query('SELECT * FROM part_info LIMIT 10');
+
+    // Your logic here is good!
     return new Response(JSON.stringify({ time: result.rows[0] }), {
       status: 200,
     });

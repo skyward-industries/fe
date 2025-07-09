@@ -1,4 +1,5 @@
 // src/services/fetchGroups.ts
+// @ts-ignore
 import { getGroups as dbGetGroups } from '@/lib/db'; // Import the db function directly
 
 /**

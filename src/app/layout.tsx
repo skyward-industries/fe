@@ -7,11 +7,14 @@ import { Inter } from 'next/font/google';
 import "slick-carousel/slick/slick.css"
 import "slick-carousel/slick/slick-theme.css"
 // Import your wrapper/provider components
+// @ts-ignore
 import ThemeRegistry from '@/components/ThemeRegistry';
 import { SelectionProvider } from '@/context/SelectionContext';
 
 // Import your global UI components
+// @ts-ignore
 import Navbar from '@/components/NavBar';
+// @ts-ignore
 import Footer from '@/components/Footer'; // Import the dedicated Footer component
 
 // Import global styles

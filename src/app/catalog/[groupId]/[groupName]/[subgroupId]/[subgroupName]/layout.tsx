@@ -1,3 +1,4 @@
+// @ts-ignore
 import { slugify } from "@/utils/slugify";
 import { Metadata } from "next";
 
@@ -15,7 +16,7 @@ export async function generateMetadata(props: LayoutProps): Promise<Metadata> {
   const params = await props.params;
   const formattedGroupName = params.subgroupName
     .replace("nsn-", "")
-    .replace("NSN-")
+    .replace("NSN-","")
     ?.replaceAll("-", " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
 

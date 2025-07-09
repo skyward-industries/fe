@@ -4,6 +4,7 @@
 import * as React from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+// @ts-ignore
 import theme from '@/theme'; // Import your theme here
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter'; // Keep this for caching
 

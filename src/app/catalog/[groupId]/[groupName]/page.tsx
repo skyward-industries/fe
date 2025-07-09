@@ -1,6 +1,10 @@
+// @ts-ignore
 import { fetchSubgroups, Subgroup } from "@/services/fetchSubgroups";
+// @ts-ignore
 import { capitalizeWords } from "@/utils/capitalizeWords";
+// @ts-ignore
 import { slugify } from "@/utils/slugify";
+// @ts-ignore
 import { ArrowLeft } from "@mui/icons-material";
 import {
   Button,

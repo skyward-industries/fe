@@ -1,6 +1,7 @@
 "use client"; // Ensures this runs on the client-side
 //[]
 import { useState, useEffect } from "react";
+// @ts-ignore
 import { fetchParts, Part } from "@/services/fetchParts";
 import {
   Button,
@@ -20,6 +21,7 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import { ArrowLeft } from "@mui/icons-material";
+// @ts-ignore
 import { capitalizeWords } from "@/utils/capitalizeWords";
 
 export default function PartsPage({

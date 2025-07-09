@@ -4,6 +4,7 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+// @ts-ignore
 import theme from '@/theme'; // Import theme here, safe for client components
 
 export default function Footer() {

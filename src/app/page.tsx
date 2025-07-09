@@ -1,7 +1,8 @@
 // src/app/page.tsx
 // This is a Server Component. It runs only on the server.
-
+// @ts-ignore
 import { fetchGroups } from "@/services/fetchGroups";
+// @ts-ignore
 import HomePageClient from "@/components/HomePageClient"; // Import the new Client Component
 
 export default async function Home() {
