@@ -1,42 +1,41 @@
-// File: /home/ec2-user/fe/src/lib/db.js
-// This file sets up the PostgreSQL database connection and data fetching functions using ES Modules for Next.js.
-
-import 'server-only'; // Keep this directive for Next.js server-side code
-import { Pool } from 'pg'; // Use ES Module import
+// src/lib/db.js
+// This file sets up the PostgreSQL database connection and data fetching functions.
+import 'server-only'
+import { Pool } from 'pg';
 
 // -----------------------------------------------------------------------------
 // PostgreSQL Connection Pool Setup
 // -----------------------------------------------------------------------------
+// ... (Your existing pool setup code remains unchanged)
 const pool = new Pool({
-  // Use process.env directly (variables are loaded by Next.js/Vercel environment)
   host: process.env.PGHOST,
   port: parseInt(process.env.PGPORT || '5432', 10),
   database: process.env.PGDATABASE,
   user: process.env.PGUSER,
   password: process.env.PGPASSWORD,
   ssl: {
-    rejectUnauthorized: false, // Be cautious with rejectUnauthorized: false in prod
+    rejectUnauthorized: false,
   },
 });
 
 pool.on('connect', () => {
-  console.log('[FE DB] PostgreSQL client connected successfully!');
+  console.log('PostgreSQL client connected successfully!');
 });
 pool.on('error', (err) => {
-  console.error('[FE DB] Unexpected error on idle PostgreSQL client', err);
+  console.error('Unexpected error on idle PostgreSQL client', err);
 });
 
 
 // -----------------------------------------------------------------------------
-// Database Query Functions (Defined using standard async function syntax)
+// Database Query Functions
 // -----------------------------------------------------------------------------
 
 /**
  * Fetches detailed part information from the database based on NSN.
- * Used by the FE Next.js app for its own data needs.
+ * ... (Your getPartsByNSN function remains unchanged)
  */
-async function getPartsByNSN(nsn) {
-  // ... (Your existing query and logic using 'pool') ...
+export async function getPartsByNSN(nsn) {
+  // ... (No changes needed here)
   const query = `
     SELECT
       pi.nsn, pi.fsg, pi.fsc,
@@ -63,27 +62,32 @@ async function getPartsByNSN(nsn) {
     LEFT JOIN public.freight_info fi ON pi.niin = fi.niin
     WHERE pi.nsn = $1;
   `;
-   try {
+
+  try {
     const client = await pool.connect();
-    console.log(`[FE DB Query] Executing getPartsByNSN for NSN: ${nsn}`);
+    console.log(`[DB Query] Executing getPartsByNSN for NSN: ${nsn}`);
     const result = await client.query(query, [nsn]);
     client.release();
-    console.log(`[FE DB Query] getPartsByNSN found ${result.rows.length} record(s).`);
-    if (result.rows.length === 0) { return []; }
+    console.log(`[DB Query] getPartsByNSN found ${result.rows.length} record(s).`);
+
+    if (result.rows.length === 0) {
+      return [];
+    }
     return result.rows;
-   } catch (error) {
-     console.error('[FE DB Query] Error in getPartsByNSN:', error);
-     throw new Error('FE: Failed to fetch part data from the database.');
-   }
+  } catch (error) {
+    console.error('[DB Query] Error in getPartsByNSN:', error);
+    throw new Error('Failed to fetch part data from the database. Please check DB connection and SQL query.');
+  }
 }
 
 /**
  * Fetches only the main, distinct product groups (FSGs) from the database.
- * Used by the FE Next.js app.
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of main group objects.
  */
-async function getGroups() {
-  // ... (Your existing query and logic using 'pool') ...
-   const query = `
+export async function getGroups() {
+  // --- MODIFIED QUERY ---
+  // This query now ensures each Federal Supply Group (FSG) appears only once.
+  const query = `
     SELECT
       fsg,
       fsg_title,
@@ -99,26 +103,29 @@ async function getGroups() {
     -- Order the results for a consistent and predictable display.
     ORDER BY fsg ASC;
   `;
-   try {
-      const client = await pool.connect();
-      console.log('[FE DB Query] Executing getGroups.');
-      const result = await client.query(query);
-      client.release();
-      console.log(`[FE DB Query] getGroups found ${result.rows.length} unique group(s).`);
-      return result.rows;
-   } catch (error) {
-      console.error('[FE DB Query] Error in getGroups:', error);
-      throw new Error('FE: Failed to fetch product groups from database.');
-   }
+
+  try {
+    const client = await pool.connect();
+    console.log('[DB Query] Executing getGroups to fetch main product groups.');
+    const result = await client.query(query);
+    client.release();
+    console.log(`[DB Query] getGroups found ${result.rows.length} unique group(s).`);
+    return result.rows;
+  } catch (error) {
+    console.error('[DB Query] Error in getGroups:', error);
+    throw new Error('Failed to fetch product groups from database.');
+  }
 }
+// ... (keep all your existing code in db.js, including getPartsByNSN and getGroups)
 
 /**
  * Fetches all subgroups (FSCs) for a specific main group (FSG).
- * Used by the FE Next.js app.
+ * @param {string} fsg - The Federal Supply Group code (e.g., '10').
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of subgroup objects.
  */
-async function getSubgroupsByGroup(fsg) {
-  // ... (Your existing query and logic using 'pool') ...
-   const query = `
+export async function getSubgroupsByGroup(fsg) {
+  // This query gets all unique Federal Supply Classes (FSCs) for a given FSG.
+  const query = `
     SELECT
       fsc,
       fsc_title,
@@ -128,27 +135,25 @@ async function getSubgroupsByGroup(fsg) {
       AND fsc_title IS NOT NULL AND fsc_title <> ''
     ORDER BY fsc ASC;
   `;
-   try {
-      const client = await pool.connect();
-      console.log(`[FE DB Query] Executing getSubgroupsByGroup for FSG: ${fsg}`);
-      const result = await client.query(query, [fsg]);
-      client.release();
-      console.log(`[FE DB Query] getSubgroupsByGroup found ${result.rows.length} subgroup(s).`);
-      return result.rows;
-   } catch (error) {
-      console.error(`[FE DB Query] Error in getSubgroupsByGroup for FSG ${fsg}:`, error);
-      throw new Error('FE: Failed to fetch subgroup data from the database.');
-   }
+
+  try {
+    const client = await pool.connect();
+    console.log(`[DB Query] Executing getSubgroupsByGroup for FSG: ${fsg}`);
+    const result = await client.query(query, [fsg]);
+    client.release();
+    console.log(`[DB Query] getSubgroupsByGroup found ${result.rows.length} subgroup(s).`);
+    return result.rows;
+  } catch (error) {
+    console.error(`[DB Query] Error in getSubgroupsByGroup for FSG ${fsg}:`, error);
+    throw new Error('Failed to fetch subgroup data from the database.');
+  }
 }
 
-// --- ES Module NAMED Exports ---
-// Export the pool and the functions as NAMED exports
-export {
-    pool, // Export the pool instance
-    getPartsByNSN, // Export the functions
-    getGroups,
-    getSubgroupsByGroup
-    // Add other functions from your original db.js if needed
-};
+/**
+ * Fetches all unique NSNs and their names for a given subgroup (FSC).
+ * @param {string} fsc - The Federal Supply Class code (e.g., '1005').
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of product/NSN objects.
+ */
 
-// REMOVE ANY 'export default ...' line from this file if it exists
+// ... (Your exports remain the same)
+export default pool;

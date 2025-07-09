@@ -9,4 +9,4 @@ Disallow: /cage-code-details/
 Host: https://skywardparts.com
 
 # Sitemap Index
-Sitemap: https://skywardparts.com/sitemap-index.xml
+Sitemap: https://skywardparts.com/sitemap.xml

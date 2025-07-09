@@ -7,7 +7,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "start:prod": "npm run build && next start"
   },
   "dependencies": {
     "@emotion/cache": "^11.11.0",
@@ -31,6 +32,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.60.0",
+    "react-scroll": "^1.9.3",
     "react-slick": "^0.29.0",
     "server-only": "^0.0.1",
     "sharp": "^0.34.2",
@@ -42,6 +44,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/react-scroll": "^1.8.10",
     "eslint": "^9",
     "eslint-config-next": "15.2.0",
     "typescript": "^5"
