@@ -46,7 +46,7 @@ type PageProps = {
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { nsn, subgroupName } = params;
+  const { nsn, subgroupName, groupName, groupId, subgroupId } = params;
   const cleanNSN = nsn.replace(/^nsn[-]?/i, "");
   
   // Fetch minimal data needed for metadata
@@ -55,15 +55,76 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const itemName = capitalizeWords(sharedPartData?.item_name || "Part");
   const decodedSubgroupName = capitalizeWords(decodeURIComponent(subgroupName));
-  const pageTitle = `${itemName} | NSN ${cleanNSN} | Skyward Industries`;
-  const pageDescription = `Find detailed information, specifications, and suppliers for NSN ${cleanNSN} (${itemName}). Part of the ${decodedSubgroupName} category. Request a quote from Skyward Industries.`;
+  const decodedGroupName = capitalizeWords(decodeURIComponent(groupName));
+  const pageTitle = `${itemName} NSN ${cleanNSN} | ${decodedSubgroupName} | Skyward Industries`;
+  const pageDescription = `Find ${itemName} (NSN ${cleanNSN}) specifications, suppliers, and pricing. Part of ${decodedSubgroupName} category. Certificate of conformance available. Request quote from Skyward Industries.`;
+
+  // Enhanced keywords array
+  const keywords = [
+    itemName,
+    cleanNSN,
+    `NSN ${cleanNSN}`,
+    `NSN-${cleanNSN}`,
+    "part number",
+    "CAGE code",
+    "aerospace parts",
+    "defense supply",
+    "military parts",
+    "NSN lookup",
+    decodedSubgroupName,
+    decodedGroupName,
+    sharedPartData?.company_name,
+    "certificate of conformance",
+    "AS9100",
+    "quality assured",
+    "Skyward Industries"
+  ].filter(Boolean);
 
   return {
     title: pageTitle,
     description: pageDescription,
-    keywords: [itemName, cleanNSN, `NSN ${cleanNSN}`, "part number", "CAGE code", "aerospace parts", "defense supply", decodedSubgroupName],
+    keywords: keywords,
     alternates: {
-      canonical: `/catalog/${params.groupId}/${params.groupName}/${params.subgroupId}/${params.subgroupName}/${params.nsn}`,
+      canonical: `/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}/${nsn}`,
+    },
+    openGraph: {
+      title: pageTitle,
+      description: pageDescription,
+      url: `https://www.skywardparts.com/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}/${nsn}`,
+      siteName: 'Skyward Industries',
+      images: [
+        {
+          url: `https://www.skywardparts.com/images/parts/${cleanNSN}-preview.jpg`,
+          width: 1200,
+          height: 630,
+          alt: `${itemName} - NSN ${cleanNSN}`,
+        },
+      ],
+      locale: 'en_US',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: pageTitle,
+      description: pageDescription,
+      images: [`https://www.skywardparts.com/images/parts/${cleanNSN}-preview.jpg`],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+    other: {
+      'part-number': cleanNSN,
+      'item-name': itemName,
+      'supplier': sharedPartData?.company_name || 'Various',
+      'cage-code': sharedPartData?.cage_code || '',
     },
   };
 }
@@ -126,16 +187,53 @@ export default async function PartInfoPage({ params }: PageProps) {
         "description": sharedPartData.definition || `Detailed specifications and supplier information for National Stock Number ${cleanNSN}.`,
         "sku": cleanNSN,
         "mpn": cleanNSN,
+        "gtin": cleanNSN,
+        "identifier": cleanNSN,
+        "category": capitalizeWords(decodedSubgroupName),
         "brand": {
+          "@type": "Organization",
+          "name": capitalizeWords(sharedPartData.company_name || 'Various Manufacturers')
+        },
+        "manufacturer": {
           "@type": "Organization",
           "name": capitalizeWords(sharedPartData.company_name || 'Various Manufacturers')
         },
         "offers": {
           "@type": "Offer",
           "url": `https://www.skywardparts.com/catalog/${groupId}/${decodedGroupName}/${subgroupId}/${decodedSubgroupName}/${nsn}`,
-          "priceCurrency": "USD", "price": "0", "availability": "https://schema.org/InStock",
-          "seller": { "@type": "Organization", "name": "Skyward Industries" }
-        }
+          "priceCurrency": "USD",
+          "price": "0",
+          "availability": "https://schema.org/InStock",
+          "itemCondition": "https://schema.org/NewCondition",
+          "seller": { 
+            "@type": "Organization", 
+            "name": "Skyward Industries",
+            "url": "https://www.skywardparts.com",
+            "telephone": "+1-321-351-2875"
+          }
+        },
+        "additionalProperty": [
+          {
+            "@type": "PropertyValue",
+            "name": "NSN",
+            "value": cleanNSN
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "CAGE Code",
+            "value": sharedPartData.cage_code || "Various"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "FSC",
+            "value": sharedPartData.fsc || ""
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "FSG",
+            "value": sharedPartData.fsg || ""
+          }
+        ]
       },
       {
         "@type": "BreadcrumbList",
@@ -146,6 +244,38 @@ export default async function PartInfoPage({ params }: PageProps) {
           { "@type": "ListItem", "position": 4, "name": capitalizeWords(decodedSubgroupName), "item": `https://www.skywardparts.com/catalog/${groupId}/${decodedGroupName}/${subgroupId}/${decodedSubgroupName}` },
           { "@type": "ListItem", "position": 5, "name": `NSN ${cleanNSN}` }
         ]
+      },
+      {
+        "@type": "Organization",
+        "name": "Skyward Industries",
+        "url": "https://www.skywardparts.com",
+        "logo": "https://www.skywardparts.com/logo.png",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+1-321-351-2875",
+          "contactType": "Customer Service",
+          "email": "admin@skywardparts.com"
+        }
+      },
+      {
+        "@type": "WebPage",
+        "name": `${generalItemName} - NSN ${cleanNSN}`,
+        "description": sharedPartData.definition || `Detailed specifications and supplier information for National Stock Number ${cleanNSN}.`,
+        "url": `https://www.skywardparts.com/catalog/${groupId}/${decodedGroupName}/${subgroupId}/${decodedSubgroupName}/${nsn}`,
+        "mainEntity": {
+          "@type": "Product",
+          "name": `${generalItemName} - NSN ${cleanNSN}`
+        },
+        "breadcrumb": {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.skywardparts.com" },
+            { "@type": "ListItem", "position": 2, "name": "Catalog", "item": "https://www.skywardparts.com/catalog" },
+            { "@type": "ListItem", "position": 3, "name": capitalizeWords(decodedGroupName), "item": `https://www.skywardparts.com/catalog/${groupId}/${decodedGroupName}` },
+            { "@type": "ListItem", "position": 4, "name": capitalizeWords(decodedSubgroupName), "item": `https://www.skywardparts.com/catalog/${groupId}/${decodedGroupName}/${subgroupId}/${decodedSubgroupName}` },
+            { "@type": "ListItem", "position": 5, "name": `NSN ${cleanNSN}` }
+          ]
+        }
       }
     ]
   };

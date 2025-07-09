@@ -66,6 +66,10 @@ export default function Navbar() {
     { label: "Home", href: "/" },
     { label: "About", href: "/about" },
     { label: "Catalog", href: "/catalog" },
+    { label: "Services", href: "/services" },
+    { label: "Industries", href: "/industries" },
+    { label: "Resources", href: "/resources" },
+    { label: "Contact", href: "/contact" },
     { label: "Create RFQ", href: "/cart", variant: "outlined" as const, color: "error" as const },
   ];
 
