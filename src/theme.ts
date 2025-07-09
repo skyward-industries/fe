@@ -164,7 +164,7 @@ const themeOptions: ThemeOptions = {
         },
     },
   },
-  breakpoints: {
+   breakpoints: {
     values: {
       xs: 0,
       sm: 600,
@@ -173,38 +173,7 @@ const themeOptions: ThemeOptions = {
       xl: 1536,
     },
   },
-<<<<<<< Updated upstream
-=======
-shadows: [
-  'none',
-  '0px 1px 3px rgba(0, 0, 0, 0.05)',
-  '0px 4px 6px rgba(0, 0, 0, 0.07)',
-  '0px 5px 15px rgba(0, 0, 0, 0.08)',
-  '0px 10px 24px rgba(0, 0, 0, 0.1)',
-  '0px 15px 35px rgba(0, 0, 0, 0.12)',
-  '0px 20px 40px rgba(0, 0, 0, 0.14)',
-  '0px 25px 50px rgba(0, 0, 0, 0.16)',
-  '0px 25px 50px rgba(0, 0, 0, 0.16)',
-  '0px 25px 50px rgba(0, 0, 0, 0.16)',
-  '0px 25px 50px rgba(0, 0, 0, 0.16)',
-  '0px 25px 50px rgba(0, 0, 0, 0.16)',
-  '0px 25px 50px rgba(0, 0, 0, 0.16)',
-  '0px 25px 50px rgba(0, 0, 0, 0.16)',
-  '0px 25px 50px rgba(0, 0, 0, 0.16)',
-  '0px 25px 50px rgba(0, 0, 0, 0.16)',
-  '0px 25px 50px rgba(0, 0, 0, 0.16)',
-  '0px 25px 50px rgba(0, 0, 0, 0.16)',
-  '0px 25px 50px rgba(0, 0, 0, 0.16)',
-  '0px 25px 50px rgba(0, 0, 0, 0.16)',
-  '0px 25px 50px rgba(0, 0, 0, 0.16)',
-  '0px 25px 50px rgba(0, 0, 0, 0.16)',
-  '0px 25px 50px rgba(0, 0, 0, 0.16)',
-  '0px 25px 50px rgba(0, 0, 0, 0.16)',
-  '0px 25px 50px rgba(0, 0, 0, 0.16)',
-],
-
->>>>>>> Stashed changes
-};
+}; // ← this closes `themeOptions`
 
 const theme = createTheme(themeOptions);
 

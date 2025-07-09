@@ -12,7 +12,7 @@ export interface Subgroup {
   
   export async function fetchSitemapSubgroups(): Promise<Subgroup[]> {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sitemap-subgroups`);
+      const response = await fetch(`${process.env.INTERNAL_API_URL}/api/sitemap-subgroups`);
       if (!response.ok) {
         throw new Error("Failed to fetch subgroups");
       }

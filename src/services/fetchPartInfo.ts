@@ -81,18 +81,28 @@ export interface Part {
 // Function to fetch part information for a given NSN
 export async function fetchPartInfo(nsn: string): Promise<Part[]> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/nsn-parts/${nsn}`);
+    const res = await fetch(`${process.env.INTERNAL_API_URL}/api/partInfo/${nsn}`);
+
+    // --- NEW DEBUGGING CODE ---
+    // Get the raw text of the response, no matter what it is
+    const rawText = await res.text();
+
+    // Log the raw response to the console. This is the crucial step.
+    console.log('--- RAW API RESPONSE FOR /api/partInfo ---');
+    console.log(rawText);
+    console.log('------------------------------------------');
+    // --- END DEBUGGING CODE ---
 
     if (!res.ok) {
-      const errorData = await res.json();
-      console.error("API response error:", errorData);
-      throw new Error(`API responded with status ${res.status}: ${errorData.message || 'Unknown error'}`);
+      // We already have the text, so we don't need to fetch it again.
+      throw new Error(`API responded with status ${res.status}. Response: ${rawText}`);
     }
 
-    const data: Part[] = await res.json();
+    // Now, try to parse the text we already received
+    const data: Part[] = JSON.parse(rawText);
     return data;
   } catch (error: any) {
-    console.error("Error fetching part info in service:", error);
-    throw new Error(`Failed to retrieve NSN part details: ${error.message}`);
-  }
+      console.error("Error fetching part info in service:", error);
+      throw new Error(`Failed to retrieve NSN part details: ${error.message}`);
+    }
 }
