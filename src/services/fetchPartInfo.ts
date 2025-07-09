@@ -81,7 +81,7 @@ export interface Part {
 // Function to fetch part information for a given NSN
 export async function fetchPartInfo(nsn: string): Promise<Part[]> {
   try {
-    const res = await fetch(`${process.env.INTERNAL_API_URL}/api/partInfo/${nsn}`);
+    const res = await fetch(`${process.env.INTERNAL_API_URL || 'http://localhost:3000'}/api/partInfo/${nsn}`);
 
     // --- NEW DEBUGGING CODE ---
     // Get the raw text of the response, no matter what it is

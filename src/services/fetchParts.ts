@@ -19,18 +19,9 @@ export interface PartResponse {
   pagination: Pagination;
 }
 
-export async function fetchParts(fsc: string, page: number = 1, limit: number = 100): Promise<PartResponse> {
-  try {
-    const res = await fetch(`${process.env.INTERNAL_API_URL}/api/parts/${fsc}?page=${page}&limit=${limit}`);
-    console.log(res);
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch parts: ${res.statusText}`);
-    }
-
-    return res.json();
-  } catch (error) {
-    console.error("Error fetching parts:", error);
-    throw new Error("Failed to fetch part list");
-  }
+export async function fetchParts(fsc: string, page = 1, limit = 100) {
+  const baseUrl = process.env.INTERNAL_API_URL || 'http://localhost:3000';
+  const res = await fetch(`${baseUrl}/api/parts/${fsc}?page=${page}&limit=${limit}`);
+  if (!res.ok) throw new Error('Failed to fetch parts');
+  return res.json();
 }

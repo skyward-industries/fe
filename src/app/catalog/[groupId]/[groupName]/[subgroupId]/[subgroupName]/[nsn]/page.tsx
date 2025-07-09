@@ -200,7 +200,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const openGraph = {
     title: pageTitle,
     description: pageDescription,
-    type: 'product' as const,
+    type: 'website' as const,
     url: `https://skywardindustries.com/catalog/${params.groupId}/${params.groupName}/${params.subgroupId}/${params.subgroupName}/${cleanNSN}`,
     images: [
       {

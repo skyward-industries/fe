@@ -10,15 +10,9 @@ export interface Subgroup {
   fsc_exclusions?: string | null;
 }
 
-export async function fetchSubgroups(fsg: string): Promise<Subgroup[]> {
-  try {
-    const response = await fetch(`${process.env.INTERNAL_API_URL}/api/subgroups/${fsg}`);
-    if (!response.ok) {
-      throw new Error("Failed to fetch subgroups");
-    }
-    return response.json();
-  } catch (error) {
-    console.error("❌ Error fetching subgroups:", error);
-    return [];
-  }
+export async function fetchSubgroups(fsg: string) {
+  const baseUrl = process.env.INTERNAL_API_URL || 'http://localhost:3000';
+  const res = await fetch(`${baseUrl}/api/subgroups/${fsg}`);
+  if (!res.ok) throw new Error('Failed to fetch subgroups');
+  return res.json();
 }
