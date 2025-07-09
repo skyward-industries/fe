@@ -1,4 +1,4 @@
-import { pool } from "/home/ec2-user/fe/src/lib/db"
+import { pool } from "@/lib/db"
 
 export async function GET(req: Request, context: { params: { fsg: string } }) {
   const { fsg } = context.params;

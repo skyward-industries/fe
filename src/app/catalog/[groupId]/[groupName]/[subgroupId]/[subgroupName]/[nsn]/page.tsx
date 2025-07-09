@@ -13,11 +13,130 @@ import {
 import { ArrowLeft } from "@mui/icons-material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Breadcrumbs from '@/components/Breadcrumbs'; // Assuming you have this component
+import Script from 'next/script';
 
 // --- A safe helper function for formatting text ---
 const formatText = (text?: string | null) => {
   if (!text) return '';
   return text.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+};
+
+// --- Helper function to generate JSON-LD structured data ---
+const generateStructuredData = (part: Part, cleanNSN: string, params: any) => {
+  const itemName = formatText(part.item_name || "Part");
+  const companyName = formatText(part.company_name || "");
+  
+  // Base product schema
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": `${itemName} - NSN ${cleanNSN}`,
+    "description": part.definition || `Detailed information for NSN ${cleanNSN} (${itemName})`,
+    "sku": cleanNSN,
+    "mpn": part.part_number,
+    "brand": {
+      "@type": "Brand",
+      "name": companyName || "Skyward Industries"
+    },
+    "category": part.fsc_title || part.fsg_title,
+    "manufacturer": {
+      "@type": "Organization",
+      "name": companyName || "Skyward Industries",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": part.street_address_1,
+        "addressLocality": part.city,
+        "addressRegion": part.state,
+        "postalCode": part.zip,
+        "addressCountry": part.country
+      }
+    },
+    "url": `https://skywardindustries.com/catalog/${params.groupId}/${params.groupName}/${params.subgroupId}/${params.subgroupName}/${cleanNSN}`,
+    "image": "https://skywardindustries.com/logo.png", // Placeholder image
+    "additionalProperty": [
+      {
+        "@type": "PropertyValue",
+        "name": "NSN",
+        "value": cleanNSN
+      },
+      {
+        "@type": "PropertyValue", 
+        "name": "CAGE Code",
+        "value": part.cage_code
+      },
+      {
+        "@type": "PropertyValue",
+        "name": "Unit of Issue",
+        "value": part.unit_of_issue
+      },
+      {
+        "@type": "PropertyValue",
+        "name": "FSC Title",
+        "value": part.fsc_title
+      },
+      {
+        "@type": "PropertyValue",
+        "name": "FSG Title", 
+        "value": part.fsg_title
+      }
+    ].filter(prop => prop.value)
+  };
+
+  // Organization schema for the company
+  const organizationSchema = companyName ? {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": companyName,
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": part.street_address_1,
+      "addressLocality": part.city,
+      "addressRegion": part.state,
+      "postalCode": part.zip,
+      "addressCountry": part.country
+    },
+    "foundingDate": part.date_est ? moment(part.date_est, "DD-MMM-YYYY").format("YYYY-MM-DD") : undefined
+  } : null;
+
+  // Breadcrumb schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://skywardindustries.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Catalog",
+        "item": "https://skywardindustries.com/catalog"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": formatText(params.groupName),
+        "item": `https://skywardindustries.com/catalog/${params.groupId}/${params.groupName}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 4,
+        "name": formatText(params.subgroupName),
+        "item": `https://skywardindustries.com/catalog/${params.groupId}/${params.groupName}/${params.subgroupId}/${params.subgroupName}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 5,
+        "name": `NSN ${cleanNSN}`,
+        "item": `https://skywardindustries.com/catalog/${params.groupId}/${params.groupName}/${params.subgroupId}/${params.subgroupName}/${cleanNSN}`
+      }
+    ]
+  };
+
+  return [productSchema, organizationSchema, breadcrumbSchema].filter(Boolean);
 };
 
 // --- Define the page properties ---
@@ -47,13 +166,68 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const itemName = formatText(sharedPartData?.item_name || "Part");
+  const companyName = formatText(sharedPartData?.company_name || "");
   const decodedSubgroupName = formatText(decodeURIComponent(subgroupName));
-  const pageTitle = `${itemName} | NSN ${cleanNSN} | Skyward Industries`;
-  const pageDescription = `Detailed information for NSN ${cleanNSN} (${itemName}) in the ${decodedSubgroupName} category.`;
+  
+  // Enhanced title with company name if available
+  const pageTitle = companyName 
+    ? `NSN ${cleanNSN} | ${itemName} | ${companyName}`
+    : `NSN ${cleanNSN} | ${itemName} | Skyward Industries`;
+  
+  // Enhanced description with definition if available
+  const definition = sharedPartData?.definition || "";
+  const pageDescription = definition 
+    ? `${itemName} - ${definition.substring(0, 150)}${definition.length > 150 ? '...' : ''}`
+    : `Detailed information for NSN ${cleanNSN} (${itemName}) in the ${decodedSubgroupName} category.`;
+
+  // Build keywords array from available data
+  const keywords = [
+    `NSN ${cleanNSN}`,
+    cleanNSN,
+    itemName,
+    sharedPartData?.part_number,
+    sharedPartData?.cage_code,
+    sharedPartData?.company_name,
+    sharedPartData?.fsc_title,
+    sharedPartData?.fsg_title,
+    decodedSubgroupName,
+    "aerospace parts",
+    "military parts",
+    "industrial supplies"
+  ].filter(Boolean) as string[];
+
+  // OpenGraph data for better social media sharing
+  const openGraph = {
+    title: pageTitle,
+    description: pageDescription,
+    type: 'product' as const,
+    url: `https://skywardindustries.com/catalog/${params.groupId}/${params.groupName}/${params.subgroupId}/${params.subgroupName}/${cleanNSN}`,
+    images: [
+      {
+        url: 'https://skywardindustries.com/logo.png', // Placeholder image URL
+        width: 1200,
+        height: 630,
+        alt: `${itemName} - NSN ${cleanNSN}`,
+      },
+    ],
+    siteName: 'Skyward Industries',
+  };
 
   return {
     title: pageTitle,
     description: pageDescription,
+    keywords: keywords,
+    openGraph: openGraph,
+    twitter: {
+      card: 'summary_large_image',
+      title: pageTitle,
+      description: pageDescription,
+      images: ['https://skywardindustries.com/logo.png'], // Placeholder image URL
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
   };
 }
 
@@ -102,11 +276,28 @@ export default async function PartInfoPage({ params }: PageProps) {
   const generalItemName = formatText(sharedPartData.item_name || "Product Details");
   
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
-      <Breadcrumbs />
-      <Button variant="outlined" sx={{ mb: 4, fontWeight: "bold" }} startIcon={<ArrowLeft />} component={Link} href={`/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}/`}>
-        Back to Subgroup
-      </Button>
+    <>
+      {/* JSON-LD Structured Data */}
+      {sharedPartData && (
+        <>
+          {generateStructuredData(sharedPartData, cleanNSN, params).map((schema, index) => (
+            <Script
+              key={index}
+              id={`structured-data-${index}`}
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify(schema),
+              }}
+            />
+          ))}
+        </>
+      )}
+      
+      <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
+        <Breadcrumbs />
+        <Button variant="outlined" sx={{ mb: 4, fontWeight: "bold" }} startIcon={<ArrowLeft />} component={Link} href={`/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}/`}>
+          Back to Subgroup
+        </Button>
 
       <Paper variant="outlined" sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 2 }}>
         <Typography component="h1" variant="h4" fontWeight="bold" textAlign="center" gutterBottom>NSN: {cleanNSN}</Typography>
@@ -137,7 +328,8 @@ export default async function PartInfoPage({ params }: PageProps) {
           </AccordionDetails>
         </Accordion>
       ))}
-    </Container>
+      </Container>
+    </>
   );
 }
 
