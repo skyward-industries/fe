@@ -2,6 +2,7 @@
 import CatalogClient from '@/components/CatalogClient';
 import { fetchGroups } from '@/services/fetchGroups';
 import type { Metadata } from 'next';
+import { Group } from "@/services/fetchGroups";
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CatalogPage() {
-  let groups = [];
+  let groups: Group[] = [];
   try {
     groups = await fetchGroups();
   } catch (error) {
