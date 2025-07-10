@@ -94,7 +94,12 @@ export default function Navbar() {
 
   return (
     <>
-      <AppBar position="static">
+      <AppBar position="static" elevation={0} sx={{
+        background: '#6b7280',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid #4b5563',
+        boxShadow: '0 2px 12px 0 rgba(0,0,0,0.10)',
+      }}>
         <Toolbar
           sx={{
             display: "flex",
@@ -103,6 +108,7 @@ export default function Navbar() {
             flexWrap: "wrap",
             gap: { xs: 1, md: 2 },
             paddingX: { xs: 1, sm: 2, md: 3 },
+            minHeight: { xs: 56, md: 64 },
           }}
         >
           {/* Left Side: Logo and Desktop Navigation */}
@@ -112,23 +118,39 @@ export default function Navbar() {
                 <Image
                   src="/logo.png"
                   alt="Skyward Industries Logo"
-                  width={160}
-                  height={40}
+                  width={140}
+                  height={32}
                   priority
+                  style={{ filter: 'brightness(1.2)', borderRadius: 8 }}
                 />
               </Box>
             </Link>
 
             {!isMobile && (
-              <Box sx={{ display: 'flex', gap: 1 }}>
+              <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
                 {navItems.map((item) => (
                   <Button
                     key={item.label}
                     component={Link}
                     href={item.href}
-                    color={item.color || "inherit"}
-                    variant={item.variant}
-                    sx={{ fontWeight: "bold", whiteSpace: 'nowrap' }}
+                    color={item.color || (item.label === 'Create RFQ' ? 'error' : 'inherit')}
+                    variant={item.variant || (item.label === 'Create RFQ' ? 'contained' : 'text')}
+                    sx={{
+                      fontWeight: 600,
+                      borderRadius: 999,
+                      px: 2.5,
+                      py: 1,
+                      fontSize: '1rem',
+                      boxShadow: 'none',
+                      textTransform: 'none',
+                      color: item.label === 'Create RFQ' ? 'white' : 'rgba(255,255,255,0.92)',
+                      background: item.label === 'Create RFQ' ? theme => theme.palette.error.main : 'transparent',
+                      '&:hover': {
+                        backgroundColor: item.label === 'Create RFQ' ? theme => theme.palette.error.dark : 'rgba(255,255,255,0.08)',
+                        color: 'white',
+                      },
+                      transition: 'background 0.2s',
+                    }}
                   >
                     {item.label}
                   </Button>
@@ -147,6 +169,10 @@ export default function Navbar() {
                 display: "flex",
                 alignItems: "center",
                 gap: 1,
+                background: 'rgba(255,255,255,0.10)',
+                borderRadius: 999,
+                px: 1,
+                boxShadow: 'none',
               }}
             >
               <TextField
@@ -156,26 +182,37 @@ export default function Navbar() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 sx={{
-                  width: { xs: '150px', sm: '200px', md: '300px' },
+                  width: { xs: '120px', sm: '180px', md: '240px' },
                   '.MuiOutlinedInput-root': {
-                    backgroundColor: 'white',
+                    backgroundColor: 'transparent',
+                    borderRadius: 999,
                     '&:hover .MuiOutlinedInput-notchedOutline': {
                       borderColor: theme.palette.primary.main,
                     },
                   },
                   '.MuiInputBase-input': {
-                    color: 'black',
+                    color: 'white',
+                    fontSize: '0.98rem',
+                  },
+                  '.MuiOutlinedInput-notchedOutline': {
+                    border: 'none',
                   },
                 }}
+                InputProps={{
+                  style: { color: 'white' },
+                }}
+                inputProps={{
+                  style: { color: 'white' },
+                }}
               />
-              <Button type="submit" variant="contained" color="primary" aria-label="Search" sx={{ minWidth: 'auto', p: 1 }}>
+              <Button type="submit" variant="contained" color="primary" aria-label="Search" sx={{ minWidth: 'auto', p: 1, borderRadius: 999, boxShadow: 1 }}>
                 <SearchIcon />
               </Button>
             </Box>
 
-            <IconButton color="inherit" component={Link} href="/cart" aria-label="View Cart">
+            <IconButton color="inherit" component={Link} href="/cart" aria-label="View Cart" sx={{ borderRadius: 999, boxShadow: 1, ml: 1 }}>
               <Badge badgeContent={selectedCount} color="error">
-                <ShoppingCartIcon />
+                <ShoppingCartIcon sx={{ color: 'white' }} />
               </Badge>
             </IconButton>
 
@@ -185,8 +222,9 @@ export default function Navbar() {
                 aria-label="open drawer"
                 edge="end"
                 onClick={toggleDrawer(true)}
+                sx={{ borderRadius: 999, boxShadow: 1 }}
               >
-                <MenuIcon />
+                <MenuIcon sx={{ color: 'white' }} />
               </IconButton>
             )}
           </Box>

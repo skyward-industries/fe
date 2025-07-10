@@ -63,13 +63,10 @@ export default function AboutPage() {
                 <Typography color="textSecondary">
                   Skyward Industries was founded by three friends who share a
                   passion for aerospace and a deep-rooted connection to the
-                  Space Coast. Recognizing a gap in the industry for a modern
-                  and seamless approach to sourcing aerospace parts, we began
-                  our company to revolutionize how businesses obtain the
-                  components they need. As a small business with a vast network,
-                  we pride ourselves on our customer-first approach, ensuring
-                  quick turnaround times on quotes and exceptional service that
-                  distinguishes us from our competitors.
+                  Space Coast. We revolutionize how government parts are sourced
+                  by offering fast, customer-first service and access to a vast
+                  network of reliable manufacturers. Whether you're a Fortune 500
+                  company or a small repair shop, we're here to help.
                 </Typography>
               </CardContent>
             </Card>
