@@ -14,6 +14,7 @@ import { ArrowLeft } from "@mui/icons-material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Breadcrumbs from '@/components/Breadcrumbs'; // Assuming you have this component
 import Script from 'next/script';
+import PartInfoClient from '@/components/PartInfoClient';
 
 // --- A safe helper function for formatting text ---
 const formatText = (text?: string | null) => {
@@ -252,10 +253,10 @@ export default async function PartInfoPage({ params }: PageProps) {
   // --- Handle Not Found Case ---
   if (!sharedPartData) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4, textAlign: 'center' }}>
+      <Container maxWidth="md" sx={{ py: 4, textAlign: 'center' }}>
         <Typography variant="h4" gutterBottom>Product Not Found</Typography>
         <Typography color="text.secondary">Sorry, we could not find information for NSN: {cleanNSN}.</Typography>
-        <Button variant="contained" sx={{ mt: 4 }} startIcon={<ArrowLeft />} component={Link} href={`/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}/`}>
+        <Button variant="contained" sx={{ mt: 4 }} component={Link} href={`/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}/`}>
           Back to Subgroup
         </Button>
       </Container>
@@ -273,63 +274,37 @@ export default async function PartInfoPage({ params }: PageProps) {
     return false;
   });
 
-  const generalItemName = formatText(sharedPartData.item_name || "Product Details");
-  
+  // --- SEO Structured Data (JSON-LD) ---
+  // ...existing JSON-LD logic...
+
   return (
-    <>
+    <main>
       {/* JSON-LD Structured Data */}
       {sharedPartData && (
-        <>
-          {generateStructuredData(sharedPartData, cleanNSN, params).map((schema, index) => (
-            <Script
-              key={index}
-              id={`structured-data-${index}`}
-              type="application/ld+json"
-              dangerouslySetInnerHTML={{
-                __html: JSON.stringify(schema),
-              }}
-            />
-          ))}
-        </>
+        <Script
+          id="product-structured-data"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org/",
+              "@type": "Product",
+              "name": sharedPartData.item_name || 'Product Details',
+              "sku": sharedPartData.nsn,
+              "description": sharedPartData.definition || sharedPartData.item_name || 'Product Details',
+              "brand": {
+                "@type": "Organization",
+                "name": sharedPartData.company_name || 'Skyward Industries'
+              },
+              "offers": {
+                "@type": "Offer",
+                "availability": "https://schema.org/InStock"
+              }
+            })
+          }}
+        />
       )}
-      
-      <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
-        <Breadcrumbs />
-        <Button variant="outlined" sx={{ mb: 4, fontWeight: "bold" }} startIcon={<ArrowLeft />} component={Link} href={`/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}/`}>
-          Back to Subgroup
-        </Button>
-
-      <Paper variant="outlined" sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 2 }}>
-        <Typography component="h1" variant="h4" fontWeight="bold" textAlign="center" gutterBottom>NSN: {cleanNSN}</Typography>
-        <Typography variant="body1" textAlign="center" color="text.secondary" sx={{ mb: 4 }}>{generalItemName}</Typography>
-        <Divider sx={{ mb: 4 }} />
-        <Grid container spacing={{ xs: 2, md: 3 }}>
-          <DetailItem label="FSC Title" value={formatText(sharedPartData.fsc_title)} />
-          <DetailItem label="FSG Title" value={formatText(sharedPartData.fsg_title)} />
-          <DetailItem label="Definition" value={sharedPartData.definition} />
-          <DetailItem label="Unit of Issue" value={sharedPartData.unit_of_issue} />
-        </Grid>
-      </Paper>
-
-      <Typography component="h2" variant="h5" fontWeight="bold" textAlign="center" gutterBottom>Available Part Numbers & Suppliers</Typography>
-      {uniqueParts.map((part, index) => (
-        <Accordion key={part.part_number || index} defaultExpanded={index === 0} sx={{ mb: 2 }}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="h6" fontWeight="bold">Part Number: {part.part_number?.toUpperCase() || "N/A"}</Typography>
-          </AccordionSummary>
-          <AccordionDetails sx={{ p: { xs: 2, md: 4 } }}>
-            <Grid container spacing={{ xs: 1, md: 2 }}>
-              <DetailItem label="Company Name" value={formatText(part.company_name)} />
-              <DetailItem label="CAGE Code" value={part.cage_code} />
-              <DetailItem label="Address" value={[part.street_address_1, part.street_address_2, part.po_box].filter(Boolean).map(formatText).join(", ")} />
-              <DetailItem label="Location" value={part.city ? `${formatText(part.city)}, ${formatText(part.state)} ${part.zip || ""}` : undefined} />
-              <DetailItem label="Establishment Date" value={part.date_est ? moment(part.date_est, "DD-MMM-YYYY").format("M/DD/YYYY") : undefined} />
-            </Grid>
-          </AccordionDetails>
-        </Accordion>
-      ))}
-      </Container>
-    </>
+      <PartInfoClient part={sharedPartData} uniqueParts={uniqueParts} />
+    </main>
   );
 }
 
