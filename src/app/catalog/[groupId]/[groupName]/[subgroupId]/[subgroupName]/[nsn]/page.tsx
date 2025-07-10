@@ -153,7 +153,7 @@ type PageProps = {
 
 // --- SEO: Dynamic Metadata Function ---
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { nsn, subgroupName } = params;
+  const { nsn, subgroupName, groupId, groupName, subgroupId } = params;
   const cleanNSN = nsn.replace(/^nsn[-]?/i, "");
   
   let sharedPartData: Part | null = null;
@@ -175,11 +175,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     ? `NSN ${cleanNSN} | ${itemName} | ${companyName}`
     : `NSN ${cleanNSN} | ${itemName} | Skyward Industries`;
   
-  // Enhanced description with definition if available
-  const definition = sharedPartData?.definition || "";
-  const pageDescription = definition 
-    ? `${itemName} - ${definition.substring(0, 150)}${definition.length > 150 ? '...' : ''}`
-    : `Detailed information for NSN ${cleanNSN} (${itemName}) in the ${decodedSubgroupName} category.`;
+  // --- Short meta description ---
+  let metaDescription = '';
+  if (sharedPartData?.definition) {
+    metaDescription = `${itemName} (NSN ${cleanNSN}): ${sharedPartData.definition}`;
+  } else {
+    metaDescription = `Buy ${itemName} (NSN ${cleanNSN}) for aerospace, defense, and industrial needs.`;
+  }
+  if (metaDescription.length > 160) {
+    metaDescription = metaDescription.slice(0, 157) + '...';
+  }
+  // --- Canonical URL ---
+  const canonicalUrl = `https://skywardparts.com/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}/${nsn}`;
 
   // Build keywords array from available data
   const keywords = [
@@ -200,7 +207,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // OpenGraph data for better social media sharing
   const openGraph = {
     title: pageTitle,
-    description: pageDescription,
+    description: metaDescription,
     type: 'website' as const,
     url: `https://skywardindustries.com/catalog/${params.groupId}/${params.groupName}/${params.subgroupId}/${params.subgroupName}/${cleanNSN}`,
     images: [
@@ -216,18 +223,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     title: pageTitle,
-    description: pageDescription,
+    description: metaDescription,
     keywords: keywords,
     openGraph: openGraph,
     twitter: {
       card: 'summary_large_image',
       title: pageTitle,
-      description: pageDescription,
+      description: metaDescription,
       images: ['https://skywardindustries.com/logo.png'], // Placeholder image URL
     },
     robots: {
       index: true,
       follow: true,
+    },
+    alternates: {
+      canonical: canonicalUrl,
     },
   };
 }
@@ -278,33 +288,43 @@ export default async function PartInfoPage({ params }: PageProps) {
   // ...existing JSON-LD logic...
 
   return (
-    <main>
-      {/* JSON-LD Structured Data */}
-      {sharedPartData && (
-        <Script
-          id="product-structured-data"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org/",
-              "@type": "Product",
-              "name": sharedPartData.item_name || 'Product Details',
-              "sku": sharedPartData.nsn,
-              "description": sharedPartData.definition || sharedPartData.item_name || 'Product Details',
-              "brand": {
-                "@type": "Organization",
-                "name": sharedPartData.company_name || 'Skyward Industries'
-              },
-              "offers": {
-                "@type": "Offer",
-                "availability": "https://schema.org/InStock"
-              }
-            })
-          }}
-        />
-      )}
-      <PartInfoClient part={sharedPartData} uniqueParts={uniqueParts} />
-    </main>
+    <>
+      <main>
+        {/* JSON-LD Structured Data */}
+        {sharedPartData && (
+          <Script
+            id="product-structured-data"
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org/",
+                "@type": "Product",
+                "name": sharedPartData.item_name || 'Product Details',
+                "sku": sharedPartData.nsn,
+                "description": sharedPartData.definition || sharedPartData.item_name || 'Product Details',
+                "brand": {
+                  "@type": "Organization",
+                  "name": sharedPartData.company_name || 'Skyward Industries'
+                },
+                "offers": {
+                  "@type": "Offer",
+                  "availability": "https://schema.org/InStock"
+                }
+              })
+            }}
+          />
+        )}
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Breadcrumbs />
+          <Box mb={3}>
+            <h1 style={{ fontSize: '2.2rem', fontWeight: 700, margin: 0 }}>
+              NSN: {sharedPartData.nsn} – {sharedPartData.item_name || 'Product Details'}
+            </h1>
+          </Box>
+          <PartInfoClient part={sharedPartData} uniqueParts={uniqueParts} />
+        </Container>
+      </main>
+    </>
   );
 }
 
