@@ -63,7 +63,7 @@ export async function GET(
 
   try {
     const result = await pool.query(query, [nsn]);
-    const parts = result.rows;
+    const parts: any[] = result.rows;
     // Batch fetch all characteristics for all relevant niins
     const niins = parts.map(p => p.niin).filter(Boolean);
     let charMap = {};
