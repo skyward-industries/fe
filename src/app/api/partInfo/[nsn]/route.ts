@@ -66,7 +66,7 @@ export async function GET(
     const parts: any[] = result.rows;
     // Batch fetch all characteristics for all relevant niins
     const niins = parts.map(p => p.niin).filter(Boolean);
-    let charMap = {};
+    let charMap: { [niin: string]: Array<{ mrc: string; requirements_statement: string; clear_text_reply: string }> } = {};
     if (niins.length > 0) {
       const charRes = await pool.query(
         `SELECT niin, mrc, requirements_statement, clear_text_reply FROM char_data WHERE niin = ANY($1)`,
