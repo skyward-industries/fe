@@ -86,6 +86,49 @@ export default function PartInfoClient({ part, uniqueParts }: PartInfoClientProp
           );
         })}
       </section>
+      {/* Freight Info Section: Only show if any freight fields are present */}
+      {(part.activity_code || part.nmfc_number || part.nmfc_subcode || part.uniform_freight_class || part.ltl_class || part.wcc || part.tcc || part.shc || part.adc || part.acc || part.nmf_desc) && (
+        <Paper variant="outlined" sx={{ p: { xs: 2, md: 4 }, borderRadius: 3, boxShadow: 1, mb: 4 }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom>Freight Information</Typography>
+          <Grid container spacing={2}>
+            {part.activity_code && <DetailItem label="Activity Code" value={part.activity_code} />}
+            {part.nmfc_number && <DetailItem label="NMFC Number" value={part.nmfc_number} />}
+            {part.nmfc_subcode && <DetailItem label="NMFC Subcode" value={part.nmfc_subcode} />}
+            {part.uniform_freight_class && <DetailItem label="Uniform Freight Class" value={part.uniform_freight_class} />}
+            {part.ltl_class && <DetailItem label="LTL Class" value={part.ltl_class} />}
+            {part.wcc && <DetailItem label="WCC" value={part.wcc} />}
+            {part.tcc && <DetailItem label="TCC" value={part.tcc} />}
+            {part.shc && <DetailItem label="SHC" value={part.shc} />}
+            {part.adc && <DetailItem label="ADC" value={part.adc} />}
+            {part.acc && <DetailItem label="ACC" value={part.acc} />}
+            {part.nmf_desc && <DetailItem label="NMF Description" value={part.nmf_desc} />}
+          </Grid>
+        </Paper>
+      )}
+      {/* Technical Characteristics Section: Only show if characteristics are present */}
+      {Array.isArray(part.characteristics) && part.characteristics.length > 0 && (
+        <Paper variant="outlined" sx={{ p: { xs: 2, md: 4 }, borderRadius: 3, boxShadow: 1, mb: 4 }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom>Technical Characteristics</Typography>
+          <Box sx={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ccc' }}>Characteristic</th>
+                  <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ccc' }}>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                {part.characteristics.map((char, idx) => (
+                  <tr key={idx}>
+                    <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{char.requirements_statement}</td>
+                    <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{char.clear_text_reply}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Box>
+        </Paper>
+      )}
     </Container>
   );
 }
