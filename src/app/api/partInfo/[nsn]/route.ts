@@ -64,13 +64,25 @@ export async function GET(
   try {
     const result = await pool.query(query, [nsn]);
     const parts = result.rows;
-    // For each part, fetch characteristics from char_data
-    for (const part of parts) {
+    // Batch fetch all characteristics for all relevant niins
+    const niins = parts.map(p => p.niin).filter(Boolean);
+    let charMap = {};
+    if (niins.length > 0) {
       const charRes = await pool.query(
-        `SELECT mrc, requirements_statement, clear_text_reply FROM char_data WHERE niin = $1`,
-        [part.niin]
+        `SELECT niin, mrc, requirements_statement, clear_text_reply FROM char_data WHERE niin = ANY($1)`,
+        [niins]
       );
-      part.characteristics = charRes.rows;
+      for (const row of charRes.rows) {
+        if (!charMap[row.niin]) charMap[row.niin] = [];
+        charMap[row.niin].push({
+          mrc: row.mrc,
+          requirements_statement: row.requirements_statement,
+          clear_text_reply: row.clear_text_reply,
+        });
+      }
+    }
+    for (const part of parts) {
+      part.characteristics = charMap[part.niin] || [];
     }
     console.log(`✅ Found ${result.rowCount} record(s) for NSN: ${rawNsn}`);
     return NextResponse.json(parts);

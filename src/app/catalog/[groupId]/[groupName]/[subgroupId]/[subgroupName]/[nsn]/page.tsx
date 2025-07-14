@@ -15,6 +15,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Breadcrumbs from '@/components/Breadcrumbs'; // Assuming you have this component
 import Script from 'next/script';
 import PartInfoClient from '@/components/PartInfoClient';
+import Head from 'next/head';
 
 // --- A safe helper function for formatting text ---
 const formatText = (text?: string | null) => {
@@ -169,7 +170,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const itemName = formatText(sharedPartData?.item_name || "Part");
   const companyName = formatText(sharedPartData?.company_name || "");
   const decodedSubgroupName = formatText(decodeURIComponent(subgroupName));
-  
+  const partNumber = sharedPartData?.part_number || '';
+  const cageCode = sharedPartData?.cage_code || '';
+  const manufacturer = companyName || 'Skyward Industries';
+  const fscTitle = sharedPartData?.fsc_title || '';
+  const fsgTitle = sharedPartData?.fsg_title || '';
+  const unitOfIssue = sharedPartData?.unit_of_issue || '';
+  const technicalSummary = Array.isArray(sharedPartData?.characteristics)
+    ? sharedPartData.characteristics.map(c => `${c.requirements_statement}: ${c.clear_text_reply}`).join('; ')
+    : '';
+
   // Enhanced title with company name if available
   const pageTitle = companyName 
     ? `NSN ${cleanNSN} | ${itemName} | ${companyName}`
@@ -193,11 +203,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     `NSN ${cleanNSN}`,
     cleanNSN,
     itemName,
-    sharedPartData?.part_number,
-    sharedPartData?.cage_code,
-    sharedPartData?.company_name,
-    sharedPartData?.fsc_title,
-    sharedPartData?.fsg_title,
+    partNumber,
+    cageCode,
+    manufacturer,
+    fscTitle,
+    fsgTitle,
     decodedSubgroupName,
     "aerospace parts",
     "military parts",
@@ -209,7 +219,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: pageTitle,
     description: metaDescription,
     type: 'website' as const,
-    url: `https://skywardindustries.com/catalog/${params.groupId}/${params.groupName}/${params.subgroupId}/${params.subgroupName}/${cleanNSN}`,
+    url: canonicalUrl,
     images: [
       {
         url: 'https://skywardindustries.com/logo.png', // Placeholder image URL
@@ -239,6 +249,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     alternates: {
       canonical: canonicalUrl,
     },
+    other: {
+      'author': manufacturer,
+      'publisher': manufacturer,
+      'copyright': `© ${new Date().getFullYear()} ${manufacturer}`,
+      'part_number': partNumber,
+      'cage_code': cageCode,
+      'unit_of_issue': unitOfIssue,
+      'fsc_title': fscTitle,
+      'fsg_title': fsgTitle,
+      'technical_characteristics': technicalSummary,
+    }
   };
 }
 
@@ -289,6 +310,17 @@ export default async function PartInfoPage({ params }: PageProps) {
 
   return (
     <>
+      <Head>
+        <meta name="author" content={sharedPartData.company_name || 'Skyward Industries'} />
+        <meta name="publisher" content={sharedPartData.company_name || 'Skyward Industries'} />
+        <meta name="copyright" content={`© ${new Date().getFullYear()} ${sharedPartData.company_name || 'Skyward Industries'}`} />
+        <meta name="part_number" content={sharedPartData.part_number || ''} />
+        <meta name="cage_code" content={sharedPartData.cage_code || ''} />
+        <meta name="unit_of_issue" content={sharedPartData.unit_of_issue || ''} />
+        <meta name="fsc_title" content={sharedPartData.fsc_title || ''} />
+        <meta name="fsg_title" content={sharedPartData.fsg_title || ''} />
+        <meta name="technical_characteristics" content={Array.isArray(sharedPartData?.characteristics) ? sharedPartData.characteristics.map(c => `${c.requirements_statement}: ${c.clear_text_reply}`).join('; ') : ''} />
+      </Head>
       <main>
         {/* JSON-LD Structured Data */}
         {sharedPartData && (
