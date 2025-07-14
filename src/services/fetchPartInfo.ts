@@ -59,7 +59,7 @@ export interface Part {
   shc?: string | null;
   adc?: string | null;
   acc?: string | null;
-  nmfc_description?: string | null; // Matches SQL alias and frontend
+  nmf_desc?: string | null; // Matches SQL alias and frontend
 
   // Other fields you might have from pi (part_info)
   niin?: string | null; // part_info has niin
@@ -76,6 +76,11 @@ export interface Part {
   clear_text_reply?: string | null;
   related_inc?: string | null;
   related_item_name?: string | null;
+  characteristics?: Array<{
+    mrc: string;
+    requirements_statement: string;
+    clear_text_reply: string;
+  }>;
 }
 
 // Function to fetch part information for a given NSN

@@ -18,10 +18,8 @@ export async function GET(
       pi.fsc,
       fsgs.fsg_title,
       fsgs.fsc_title,
-
       pn.part_number,
       pn.cage_code,
-
       addr.company_name,
       addr.street_address_1,
       addr.street_address_2,
@@ -52,8 +50,8 @@ export async function GET(
       fi.shc,
       fi.adc,
       fi.acc,
-      fi.nmf_desc
-
+      fi.nmf_desc,
+      pi.niin
     FROM part_info pi
     LEFT JOIN part_numbers pn ON pi.nsn = pn.nsn
     LEFT JOIN wp_cage_addresses addr ON pn.cage_code = addr.cage_code
@@ -65,8 +63,17 @@ export async function GET(
 
   try {
     const result = await pool.query(query, [nsn]);
+    const parts = result.rows;
+    // For each part, fetch characteristics from char_data
+    for (const part of parts) {
+      const charRes = await pool.query(
+        `SELECT mrc, requirements_statement, clear_text_reply FROM char_data WHERE niin = $1`,
+        [part.niin]
+      );
+      part.characteristics = charRes.rows;
+    }
     console.log(`✅ Found ${result.rowCount} record(s) for NSN: ${rawNsn}`);
-    return NextResponse.json(result.rows);
+    return NextResponse.json(parts);
   } catch (error: any) {
     console.error("❌ DB query failed:", error.message || error);
     return NextResponse.json(

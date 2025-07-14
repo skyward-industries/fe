@@ -7,6 +7,9 @@ import { Pool } from 'pg'; // Use ES Module import
 // -----------------------------------------------------------------------------
 // PostgreSQL Connection Pool Setup
 // -----------------------------------------------------------------------------
+const isProduction = process.env.NODE_ENV === 'production';
+const isRds = (process.env.PGHOST || '').includes('amazonaws.com');
+
 const pool = new Pool({
   // Use process.env directly (variables are loaded by Next.js/Vercel environment)
   host: process.env.PGHOST,
@@ -14,7 +17,7 @@ const pool = new Pool({
   database: process.env.PGDATABASE,
   user: process.env.PGUSER,
   password: process.env.PGPASSWORD,
-  ssl: { rejectUnauthorized: false }, // Force SSL for RDS
+  ssl: isRds ? { rejectUnauthorized: false } : (isProduction ? { rejectUnauthorized: false } : false),
 });
 
 pool.on('connect', () => {
