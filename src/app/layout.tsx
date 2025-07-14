@@ -16,6 +16,7 @@ import { SelectionProvider } from '@/context/SelectionContext';
 import Navbar from '@/components/NavBar';
 // @ts-ignore
 import Footer from '@/components/Footer'; // Import the dedicated Footer component
+import Script from 'next/script';
 
 // Import global styles
 import './globals.css';
@@ -66,6 +67,21 @@ export default function RootLayout({
   console.log('Layout Component: Rendering on server.');
   return (
     <html lang="en" className={inter.className}>
+      <head>
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-1XNJ1ZBK6W"
+          strategy="afterInteractive"
+        />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-1XNJ1ZBK6W');
+          `}
+        </Script>
+      </head>
       <body>
         {/* ThemeRegistry is a client component and handles the theme instantiation */}
         <ThemeRegistry>
