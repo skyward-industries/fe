@@ -1,16 +1,11 @@
-// @ts-ignore
-import {pool} from '@/lib/db';
+import { NextResponse } from 'next/server';
+import { getGroups } from '@/lib/db';
 
 export async function GET() {
   try {
-    const result = await pool.query('SELECT * FROM part_info LIMIT 10');
-    return new Response(JSON.stringify({ time: result.rows[0] }), {
-      status: 200,
-    });
-  } catch (err) {
-    console.error('❌ DB Error:', err);
-    return new Response(JSON.stringify({ error: 'DB connection failed' }), {
-      status: 500,
-    });
+    const groups = await getGroups();
+    return NextResponse.json(groups);
+  } catch (error: any) {
+    return NextResponse.json({ error: 'Failed to fetch product groups', detail: error.message || error }, { status: 500 });
   }
 }
