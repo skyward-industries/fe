@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import Link from "next/link";
 import moment from "moment";
 import { fetchPartInfo, Part } from "@/services/fetchPartInfo";
+import { fetchParts } from '@/services/fetchParts';
 import {
   Box, Button, Container, Divider, Paper, Typography, Accordion,
   AccordionSummary, AccordionDetails, Grid,
@@ -281,6 +282,17 @@ export default async function PartInfoPage({ params }: PageProps) {
 
   const sharedPartData = parts.length > 0 ? parts[0] : null;
 
+  // --- Fetch related products in the same subgroup (excluding current NSN) ---
+  let relatedProducts: Part[] = [];
+  try {
+    const relatedRes = await fetchParts(subgroupId, 1, 8); // Fetch up to 8 related
+    if (relatedRes && Array.isArray(relatedRes.data)) {
+      relatedProducts = relatedRes.data.filter((p: Part) => p.nsn !== cleanNSN);
+    }
+  } catch (error) {
+    console.error("Failed to fetch related products for subgroup:", subgroupId, error);
+  }
+
   // --- Handle Not Found Case ---
   if (!sharedPartData) {
     return (
@@ -354,6 +366,40 @@ export default async function PartInfoPage({ params }: PageProps) {
             </h1>
           </Box>
           <PartInfoClient part={sharedPartData} uniqueParts={uniqueParts} />
+
+          {/* Internal Linking Section */}
+          <Divider sx={{ my: 4 }} />
+          <Box mb={3}>
+            <Typography variant="h6" fontWeight="bold" gutterBottom>Explore More</Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
+              <Button component={Link} href={`/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}`} variant="outlined">Back to Subgroup</Button>
+              <Button component={Link} href={`/catalog/${groupId}/${groupName}`} variant="outlined">Back to Group</Button>
+              <Button component={Link} href="/catalog" variant="outlined">Back to Catalog</Button>
+            </Box>
+          </Box>
+
+          {/* Related Products Section */}
+          {relatedProducts.length > 0 && (
+            <Box mb={4}>
+              <Typography variant="h6" fontWeight="bold" gutterBottom>Related Products in This Subgroup</Typography>
+              <Grid container spacing={2}>
+                {relatedProducts.map((prod) => (
+                  <Grid item xs={12} sm={6} md={3} key={prod.nsn}>
+                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 2, height: '100%' }}>
+                      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                        <Link href={`/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}/${prod.nsn}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                          {prod.nsn}
+                        </Link>
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {prod.fsc_title || prod.fsg_title || 'Product'}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+          )}
         </Container>
       </main>
     </>
