@@ -60,7 +60,7 @@ async function getPartsByNSN(nsn) {
     LEFT JOIN public.part_numbers pn ON pi.nsn = pn.nsn
     LEFT JOIN public.wp_cage_addresses addr ON pn.cage_code = addr.cage_code
     LEFT JOIN public.v_flis_management vfm ON pi.niin = vfm.niin
-    LEFT JOIN public.wp_fsgs fsgs ON pi.fsg = fsgs.fsg AND pi.fsc = fsgs.fsc
+    LEFT JOIN public.wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg AND pi.fsc = fsgs.fsc
     LEFT JOIN public.freight_info fi ON pi.niin = fi.niin
     WHERE pi.nsn = $1;
   `;
@@ -92,7 +92,7 @@ async function getGroups() {
       -- for each group, ensuring that GROUP BY returns a single, unique row per FSG.
       -- Assuming a description column named 'fsg_notes'. Change if your column name is different.
       MAX(fsg_notes) AS description
-    FROM public.wp_fsgs
+    FROM public.wp_fsgs_new
     -- Filter out any entries that lack a proper title for cleaner data.
     WHERE fsg_title IS NOT NULL AND fsg_title <> ''
     -- Group by the unique identifier (fsg) and its title.
@@ -124,7 +124,7 @@ async function getSubgroupsByGroup(fsg) {
       fsc,
       fsc_title,
       fsc_notes AS description
-    FROM public.wp_fsgs
+    FROM public.wp_fsgs_new
     WHERE fsg = $1
       AND fsc_title IS NOT NULL AND fsc_title <> ''
     ORDER BY fsc ASC;
