@@ -16,7 +16,7 @@ export async function GET(req: Request, context: { params: { fsg: string } }) {
         fsc_notes,
         fsc_inclusions,
         fsc_exclusions
-      FROM wp_fsgs
+      FROM wp_fsgs_new
       WHERE fsg = $1
       ORDER BY fsc
       `,

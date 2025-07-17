@@ -56,7 +56,7 @@ export async function GET(
     LEFT JOIN part_numbers pn ON pi.nsn = pn.nsn
     LEFT JOIN wp_cage_addresses addr ON pn.cage_code = addr.cage_code
     LEFT JOIN v_flis_management vfm ON vfm.niin = pi.niin
-    LEFT JOIN wp_fsgs fsgs ON pi.fsg = fsgs.fsg
+    LEFT JOIN wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg
     LEFT JOIN freight_info fi ON pi.niin = fi.niin
     WHERE REPLACE(pi.nsn, '-', '') = $1
   `;
