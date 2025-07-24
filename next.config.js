@@ -14,6 +14,15 @@ const nextConfig = {
   images: {
     domains: [], // Add domains if you're loading images from external URLs
   },
+  async redirects() {
+    return [
+      {
+        source: '/sitemap-index.xml',
+        destination: '/sitemap.xml',
+        permanent: true,
+      },
+    ];
+  },
   // Add 'experimental' section if you use 'use client' or 'use server'
   // in files outside of 'src/app' or 'src/pages/api'
   experimental: {

@@ -11,18 +11,18 @@ const isProduction = process.env.NODE_ENV === 'production';
 const isRds = (process.env.PGHOST || '').includes('amazonaws.com');
 
 const pool = new Pool({
-  // Use process.env directly (variables are loaded by Next.js/Vercel environment)
   host: process.env.PGHOST,
   port: parseInt(process.env.PGPORT || '5432', 10),
   database: process.env.PGDATABASE,
   user: process.env.PGUSER,
   password: process.env.PGPASSWORD,
-  ssl: isRds ? { rejectUnauthorized: false } : (isProduction ? { rejectUnauthorized: false } : false),
+  ssl: process.env.PGSSLMODE === 'require' ? { rejectUnauthorized: false } : false,
 });
 
 pool.on('connect', () => {
   console.log('[FE DB] PostgreSQL client connected successfully!');
 });
+
 pool.on('error', (err) => {
   console.error('[FE DB] Unexpected error on idle PostgreSQL client', err);
 });

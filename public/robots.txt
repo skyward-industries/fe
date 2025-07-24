@@ -4,7 +4,8 @@ Disallow: /cage-code
 Disallow: /cage-code/
 Disallow: /cage-code-details
 Disallow: /cage-code-details/
-
+Disallow: /product/
+Disallow: */undefined/
 # Host
 Host: https://skywardparts.com
 
