@@ -212,7 +212,7 @@ export async function GET(request: Request) {
         
         // Update parts with titles
         parts.forEach((part: any) => {
-          const titles = titlesMap.get(part.fsg);
+          const titles: any = titlesMap.get(part.fsg);
           if (titles) {
             part.fsg_title = titles.fsg_title;
             part.fsc_title = titles.fsc_title;
