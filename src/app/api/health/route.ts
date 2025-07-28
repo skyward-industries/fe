@@ -8,6 +8,7 @@ export async function GET() {
     timestamp: new Date().toISOString(),
     database: {
       connected: false,
+      responseTime: 0,
       poolStats: {
         total: pool.totalCount,
         idle: pool.idleCount,
