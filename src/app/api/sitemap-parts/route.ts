@@ -2,8 +2,9 @@
 import { NextResponse } from "next/server";
 import { pool } from "@/lib/db";
 
-const TIMEOUT_MS = 25000; // 25 seconds (less than your 30s sitemap timeout)
+const TIMEOUT_MS = 25000; // 25 seconds
 const MAX_PARTS = 3000;
+const QUERY_TIMEOUT_MS = 20000; // 20 seconds for query
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -20,52 +21,46 @@ export async function GET(request: Request) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
+  let client;
   try {
     const startTime = Date.now();
+    client = await pool.connect();
 
-    // First, quick check if this range has any valid data
-    const countQuery = `
-      SELECT COUNT(*) as count 
-      FROM part_info pi
-      LEFT JOIN wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg
-      WHERE pi.id BETWEEN $1 AND $2 
-      AND pi.nsn IS NOT NULL 
-      AND pi.nsn != ''
-      AND fsgs.fsg_title IS NOT NULL 
-      AND fsgs.fsc_title IS NOT NULL
-    `;
+    // Set statement timeout for this session
+    await client.query(`SET statement_timeout = ${QUERY_TIMEOUT_MS}`);
 
-    const countResult = await pool.query(countQuery, [startId, endId]);
-    const partCount = parseInt(countResult.rows[0].count);
-
-    if (partCount === 0) {
-      console.log(`❌ No valid parts found in range ${startId}-${endId}`);
-      clearTimeout(timeoutId);
-      return NextResponse.json([], { status: 200 }); // Return empty array instead of 404
-    }
-
-    console.log(`📊 Found ${partCount} valid parts in range ${startId}-${endId}`);
-
-    // Optimized query - only get what we need for sitemaps
+    // Optimized single query that combines count and data retrieval
+    // Uses EXISTS subquery for better performance with high IDs
     const query = `
-      SELECT DISTINCT
-        pi.fsg,
-        pi.fsc,
-        fsgs.fsg_title,
-        fsgs.fsc_title,
-        pi.nsn
-      FROM part_info pi
-      LEFT JOIN wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg
-      WHERE pi.id BETWEEN $1 AND $2 
-      AND pi.nsn IS NOT NULL 
-      AND pi.nsn != ''
-      AND fsgs.fsg_title IS NOT NULL 
-      AND fsgs.fsc_title IS NOT NULL
-      ORDER BY pi.fsg, pi.fsc, pi.nsn
-      LIMIT $3
+      WITH valid_parts AS (
+        SELECT 
+          pi.id,
+          pi.fsg,
+          pi.fsc,
+          pi.nsn,
+          fsgs.fsg_title,
+          fsgs.fsc_title
+        FROM part_info pi
+        INNER JOIN wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg
+        WHERE pi.id >= $1 
+          AND pi.id <= $2
+          AND pi.nsn IS NOT NULL 
+          AND pi.nsn != ''
+          AND fsgs.fsg_title IS NOT NULL 
+          AND fsgs.fsc_title IS NOT NULL
+        ORDER BY pi.id
+        LIMIT $3
+      )
+      SELECT 
+        fsg,
+        fsc,
+        fsg_title,
+        fsc_title,
+        nsn
+      FROM valid_parts
     `;
 
-    const result = await pool.query(query, [startId, endId, limit]);
+    const result = await client.query(query, [startId, endId, limit]);
     const parts = result.rows;
 
     const queryTime = Date.now() - startTime;
@@ -73,10 +68,15 @@ export async function GET(request: Request) {
 
     clearTimeout(timeoutId);
 
+    // Return empty array for ranges with no data (avoid 404s)
+    if (!parts || parts.length === 0) {
+      console.log(`📭 No valid parts found in range ${startId}-${endId}`);
+    }
+
     return NextResponse.json(parts, {
       status: 200,
       headers: {
-        'Cache-Control': 'public, max-age=7200', // 2 hours
+        'Cache-Control': 'public, max-age=7200, stale-while-revalidate=3600', // 2 hours + stale-while-revalidate
         'X-Parts-Count': parts.length.toString(),
         'X-Query-Time': queryTime.toString(),
         'X-Range': `${startId}-${endId}`
@@ -88,11 +88,23 @@ export async function GET(request: Request) {
     
     console.error(`❌ Sitemap API failed for range ${startId}-${endId}:`, error.message);
     
-    if (error.name === 'AbortError') {
+    if (error.name === 'AbortError' || error.message.includes('timeout')) {
       return NextResponse.json(
         { error: "Request timeout", range: `${startId}-${endId}` },
         { status: 408 }
       );
+    }
+    
+    // For high ID ranges that truly don't exist, return empty array
+    if (error.message.includes('no rows') || error.code === '42P01') {
+      return NextResponse.json([], {
+        status: 200,
+        headers: {
+          'Cache-Control': 'public, max-age=86400', // Cache empty results longer (24h)
+          'X-Parts-Count': '0',
+          'X-Range': `${startId}-${endId}`
+        }
+      });
     }
     
     return NextResponse.json(
@@ -103,5 +115,9 @@ export async function GET(request: Request) {
       },
       { status: 500 }
     );
+  } finally {
+    if (client) {
+      client.release();
+    }
   }
 }

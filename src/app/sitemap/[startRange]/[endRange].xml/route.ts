@@ -77,7 +77,7 @@ export async function GET(
     
     // Set timeout for fetch (shorter than API timeout)
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 23000); // 23s timeout (slightly less than API's 25s)
     
     const res = await fetch(apiUrl, {
       signal: controller.signal,
@@ -115,10 +115,24 @@ export async function GET(
     return new Response("Error connecting to API", { status: 500 });
   }
 
-  // Return 404 for ranges with no data (this is correct behavior)
+  // For empty ranges, return an empty sitemap instead of 404
+  // This prevents search engines from repeatedly trying to fetch "missing" sitemaps
   if (!parts || parts.length === 0) {
-    console.log(`📭 No data found for range ${startRange}-${endRange}`);
-    return new Response("No data for this sitemap range", { status: 404 });
+    console.log(`📭 No data found for range ${startRange}-${endRange} - returning empty sitemap`);
+    const emptySitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+</urlset>`;
+    
+    return new Response(emptySitemap, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/xml; charset=utf-8",
+        "Cache-Control": "public, max-age=86400", // Cache empty sitemaps for 24 hours
+        "X-Content-Type-Options": "nosniff",
+        "X-Parts-Count": "0",
+        "X-Empty-Sitemap": "true"
+      },
+    });
   }
 
   // Filter out any invalid parts before generating XML
@@ -131,8 +145,21 @@ export async function GET(
   );
 
   if (validParts.length === 0) {
-    console.log(`📭 No valid parts after filtering for range ${startRange}-${endRange}`);
-    return new Response("No valid parts in this range", { status: 404 });
+    console.log(`📭 No valid parts after filtering for range ${startRange}-${endRange} - returning empty sitemap`);
+    const emptySitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+</urlset>`;
+    
+    return new Response(emptySitemap, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/xml; charset=utf-8",
+        "Cache-Control": "public, max-age=86400", // Cache empty sitemaps for 24 hours
+        "X-Content-Type-Options": "nosniff",
+        "X-Parts-Count": "0",
+        "X-Empty-Sitemap": "true"
+      },
+    });
   }
 
   console.log(`✅ Generating sitemap with ${validParts.length} valid parts`);
@@ -143,7 +170,7 @@ export async function GET(
     status: 200,
     headers: {
       "Content-Type": "application/xml; charset=utf-8",
-      "Cache-Control": "public, max-age=7200", // 2 hours (reduced from 24 hours)
+      "Cache-Control": "public, max-age=7200, stale-while-revalidate=3600", // 2 hours + stale-while-revalidate
       "X-Content-Type-Options": "nosniff",
       "X-Parts-Count": validParts.length.toString(),
       "X-Generation-Time": Date.now().toString()
