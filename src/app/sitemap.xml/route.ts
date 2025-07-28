@@ -1,29 +1,18 @@
-// File: src/app/sitemap.xml/route.ts
-
-import { NextResponse } from "next/server";
-
-export const revalidate = 86400; // Re-generate this sitemap once a day
+export const dynamic = 'force-static'; // ✅ Force static generation
 
 export async function GET() {
-  const totalParts = 7_200_000; 
-  const batchSize = 3_000;
+  const totalParts = 7200000;
+  const batchSize = 3000;
   const totalSitemaps = Math.ceil(totalParts / batchSize);
+  const today = new Date().toISOString();
 
-  // Use a fixed date or a date that updates less frequently (like daily)
-  const today = new Date().toISOString(); 
+  let sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
 
-  let sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-`;
-
-  // --- ADD ENTRY FOR GROUPS SITEMAP ---
   sitemapIndex += `
   <sitemap>
     <loc>https://skywardparts.com/sitemap-groups.xml</loc>
-    <lastmod>${today}</lastmod> // Use today's date or last update date for groups
-  </sitemap>
-`;
-  // --- END ADDITION ---
+    <lastmod>${today}</lastmod>
+  </sitemap>\n`;
 
   for (let i = 0; i < totalSitemaps; i++) {
     const startRange = i * batchSize + 1;
@@ -32,14 +21,13 @@ export async function GET() {
     sitemapIndex += `
   <sitemap>
     <loc>https://skywardparts.com/sitemap/${startRange}/${endRange}.xml</loc>
-    <lastmod>${today}</lastmod> // Using today's date for part sitemap index entries is fine
-  </sitemap>
-`;
+    <lastmod>${today}</lastmod>
+  </sitemap>\n`;
   }
 
   sitemapIndex += `</sitemapindex>`;
 
-  return new NextResponse(sitemapIndex, {
+  return new Response(sitemapIndex, {
     headers: {
       "Content-Type": "application/xml; charset=utf-8",
       "Cache-Control": "public, max-age=86400",

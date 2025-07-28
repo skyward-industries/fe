@@ -29,7 +29,8 @@ module.exports = {
         // It's the base domain, without "/api", because your fetch call adds "/api/send-email"
         NEXT_PUBLIC_API_URL: 'https://skywardparts.com',
         // Next.js specific build variable:
-        NEXT_PUBLIC_VAR_EXAMPLE: 'https://skywardparts.com' // Ensure it's correctly exposed to client-side.
+        NEXT_PUBLIC_VAR_EXAMPLE: 'https://skywardparts.com', // Ensure it's correctly exposed to client-side.
+        NODE_TLS_REJECT_UNAUTHORIZED: '0'
       }
     },
     {

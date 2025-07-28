@@ -6,8 +6,16 @@ Disallow: /cage-code-details
 Disallow: /cage-code-details/
 Disallow: /product/
 Disallow: */undefined/
+Disallow: /_next/static/
+Disallow: /_next/image/
+
 # Host
 Host: https://skywardparts.com
 
-# Sitemap Index
-Sitemap: https://skywardparts.com/sitemap.xml
+# Optimized Sitemap Index (2,840 valid ranges with 7.1M NSNs)
+# Replaces the old sitemap.xml with targeted, working sitemaps only
+Sitemap: https://skywardparts.com/sitemap_index.xml
+
+# Individual sitemaps available at:
+# https://skywardparts.com/sitemap/{start}/{end}.xml
+# All ranges guaranteed to contain valid NSN data
