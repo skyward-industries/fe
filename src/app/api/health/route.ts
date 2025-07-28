@@ -4,7 +4,7 @@ import { pool } from "@/lib/db";
 
 export async function GET() {
   const health = {
-    status: "ok",
+    status: "ok" as "ok" | "warning" | "error",
     timestamp: new Date().toISOString(),
     database: {
       connected: false,
@@ -15,7 +15,7 @@ export async function GET() {
         waiting: pool.waitingCount,
       }
     },
-    errors: []
+    errors: [] as Array<{ component: string; message: string }>
   };
 
   // Check database connection
