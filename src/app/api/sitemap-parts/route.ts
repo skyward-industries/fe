@@ -208,10 +208,10 @@ export async function GET(request: Request) {
           WHERE fsg = ANY($1)
         `;
         const titlesResult = await client.query(titlesQuery, [fsgs]);
-        const titlesMap = new Map(titlesResult.rows.map(r => [r.fsg, r]));
+        const titlesMap = new Map(titlesResult.rows.map((r: any) => [r.fsg, r]));
         
         // Update parts with titles
-        parts.forEach(part => {
+        parts.forEach((part: any) => {
           const titles = titlesMap.get(part.fsg);
           if (titles) {
             part.fsg_title = titles.fsg_title;
