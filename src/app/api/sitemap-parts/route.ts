@@ -200,7 +200,7 @@ export async function GET(request: Request) {
     // For very high ranges with no titles, populate them
     if (startId > VERY_HIGH_ID_THRESHOLD && parts.length > 0) {
       // Get titles in bulk
-      const fsgs = [...new Set(parts.map(p => p.fsg))];
+      const fsgs = Array.from(new Set(parts.map(p => p.fsg)));
       if (fsgs.length > 0) {
         const titlesQuery = `
           SELECT DISTINCT fsg, fsg_title, fsc_title 
