@@ -17,6 +17,11 @@ const pool = new Pool({
   user: process.env.PGUSER,
   password: process.env.PGPASSWORD,
   ssl: process.env.PGSSLMODE === 'require' ? { rejectUnauthorized: false } : false,
+  // Connection pool configuration for better performance
+  max: 20, // Maximum number of clients in the pool
+  idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
+  connectionTimeoutMillis: 5000, // Return an error after 5 seconds if connection could not be established
+  maxUses: 7500, // Close and replace a connection after it has been used 7500 times
 });
 
 pool.on('connect', () => {
@@ -25,6 +30,20 @@ pool.on('connect', () => {
 
 pool.on('error', (err) => {
   console.error('[FE DB] Unexpected error on idle PostgreSQL client', err);
+});
+
+// Pool monitoring
+let poolCheckInterval;
+if (process.env.NODE_ENV === 'production') {
+  poolCheckInterval = setInterval(() => {
+    console.log(`[FE DB Pool] Total: ${pool.totalCount}, Idle: ${pool.idleCount}, Waiting: ${pool.waitingCount}`);
+  }, 30000); // Log every 30 seconds
+}
+
+// Clean up on exit
+process.on('SIGTERM', async () => {
+  if (poolCheckInterval) clearInterval(poolCheckInterval);
+  await pool.end();
 });
 
 

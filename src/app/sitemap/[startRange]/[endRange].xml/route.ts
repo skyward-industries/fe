@@ -93,6 +93,22 @@ export async function GET(
     if (!res.ok) {
       console.error(`⚠️ API error: ${res.status} ${res.statusText} (${fetchTime}ms)`);
       
+      // For high ranges, return empty sitemap instead of error
+      if (startRange > 10000000) {
+        console.log(`📭 High range API error, returning empty sitemap for ${startRange}-${endRange}`);
+        const emptySitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n</urlset>`;
+        return new Response(emptySitemap, {
+          status: 200,
+          headers: {
+            "Content-Type": "application/xml; charset=utf-8",
+            "Cache-Control": "public, max-age=86400",
+            "X-Parts-Count": "0",
+            "X-Empty-Sitemap": "true",
+            "X-API-Error": res.status.toString()
+          },
+        });
+      }
+      
       if (res.status === 408) {
         return new Response("Sitemap generation timeout", { status: 504 });
       }
@@ -107,6 +123,22 @@ export async function GET(
 
   } catch (err: any) {
     console.error(`❌ Failed to fetch sitemap parts for range ${startRange}-${endRange}:`, err.message);
+    
+    // For high ranges, return empty sitemap on any error
+    if (startRange > 10000000) {
+      console.log(`📭 High range fetch error, returning empty sitemap for ${startRange}-${endRange}`);
+      const emptySitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n</urlset>`;
+      return new Response(emptySitemap, {
+        status: 200,
+        headers: {
+          "Content-Type": "application/xml; charset=utf-8",
+          "Cache-Control": "public, max-age=86400",
+          "X-Parts-Count": "0",
+          "X-Empty-Sitemap": "true",
+          "X-Fetch-Error": "true"
+        },
+      });
+    }
     
     if (err.name === 'AbortError') {
       return new Response("Sitemap generation timeout", { status: 504 });
