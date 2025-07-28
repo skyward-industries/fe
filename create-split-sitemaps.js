@@ -7,8 +7,8 @@ const fs = require('fs');
 const https = require('https');
 const { performance } = require('perf_hooks');
 
-const MAX_SITEMAPS_PER_INDEX = 100; // GSC recommends keeping indexes smaller
-const TEST_TIMEOUT = 10000; // 10 seconds to test each sitemap
+const MAX_SITEMAPS_PER_INDEX = 20; // Very small chunks for testing
+const TEST_TIMEOUT = 8000; // 8 seconds to test each sitemap
 
 // Test if a sitemap URL is accessible
 function testSitemap(url) {
@@ -64,8 +64,8 @@ async function createSplitSitemaps() {
   const workingRanges = [];
   const failingRanges = [];
   
-  // Test first 200 ranges to identify the pattern
-  const testRanges = ranges.slice(0, 200);
+  // Test first 100 ranges to identify the pattern faster
+  const testRanges = ranges.slice(0, 100);
   console.log(`Testing first ${testRanges.length} ranges to identify working patterns...`);
   
   for (let i = 0; i < testRanges.length; i += 10) {
