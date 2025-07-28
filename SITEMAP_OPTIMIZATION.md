@@ -6,6 +6,9 @@ This document describes the optimizations made to fix sitemap generation issues 
 ## Update: Enhanced High ID Range Optimizations
 Additional optimizations have been added to handle very high and sparse ID ranges more efficiently.
 
+## Latest Update: 2.8M+ Range Timeout Fix
+Specific optimizations added to handle the timeout issues occurring around 2.8 million IDs.
+
 ## Changes Made
 
 ### 1. Database Query Optimization (`src/app/api/sitemap-parts/route.ts`)
@@ -87,8 +90,33 @@ Run `optimize_high_id_indexes.sql` for high ID range optimization:
 4. Check query performance: Use EXPLAIN ANALYZE on the sitemap query
 5. Consider using the generated `valid-id-ranges.json` to skip empty ranges
 
+### 6. 2.8M+ Range Specific Optimizations
+- **VERY_HIGH_ID_THRESHOLD (2.8M)**: Special handling for problematic range
+- **Quick existence check**: 2-second timeout check before full query
+- **Known empty ranges**: Pre-configured empty ranges skip queries entirely
+- **Ultra-fast queries**: Minimal joins and EXISTS subqueries for 2.8M+
+- **Aggressive caching**: 1-week cache for empty results
+
+## Tools for Managing Empty Ranges
+
+### Identify Empty Ranges
+```bash
+# Analyze your database to find empty ranges
+node identify-empty-ranges.js
+```
+This generates:
+- `empty-ranges-config.json`: Complete empty range analysis
+- `src/app/api/sitemap-parts/empty-ranges.ts`: TypeScript configuration
+
+### Database Optimizations for 2.8M Range
+```bash
+# Run specific optimizations for the problematic range
+psql -d your_database -f optimize_2_8m_range.sql
+```
+
 ### If getting timeouts:
 1. The system now returns empty sitemaps on timeout (not errors)
-2. Run `optimize_high_id_indexes.sql` for better performance
-3. Use the ID range analysis to identify truly empty ranges
-4. Consider pre-generating sitemaps only for ranges with data
+2. Run `optimize_2_8m_range.sql` for 2.8M+ range optimization
+3. Run `identify-empty-ranges.js` to map truly empty ranges
+4. Update the KNOWN_EMPTY_RANGES array in the API with your findings
+5. Consider using the materialized view `mv_valid_id_ranges` for lookups
