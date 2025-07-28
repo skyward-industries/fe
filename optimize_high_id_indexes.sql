@@ -59,7 +59,7 @@ SELECT
     schemaname,
     tablename,
     indexname,
-    pg_size_pretty(pg_relation_size(indexrelid)) AS index_size
-FROM pg_stat_user_indexes
+    pg_size_pretty(pg_total_relation_size(schemaname||'.'||indexname)) AS index_size
+FROM pg_indexes
 WHERE tablename = 'part_info'
-ORDER BY pg_relation_size(indexrelid) DESC;
+ORDER BY pg_total_relation_size(schemaname||'.'||indexname) DESC;
