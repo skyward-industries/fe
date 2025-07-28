@@ -3,6 +3,9 @@
 ## Overview
 This document describes the optimizations made to fix sitemap generation issues with high ID ranges that were causing 404s and timeouts.
 
+## Update: Enhanced High ID Range Optimizations
+Additional optimizations have been added to handle very high and sparse ID ranges more efficiently.
+
 ## Changes Made
 
 ### 1. Database Query Optimization (`src/app/api/sitemap-parts/route.ts`)
@@ -53,15 +56,39 @@ Check the logs for:
 - High ID ranges with no data return empty sitemaps (200 OK) instantly
 - Caching reduces load for frequently accessed ranges
 
+### 4. Enhanced High ID Range Handling
+- **Pre-check for existence**: Quick EXISTS query for high ID ranges before full query
+- **Different query strategies**: Optimized queries for very high IDs (>10M)
+- **Graceful timeout handling**: Return empty results instead of errors on timeout
+- **BRIN indexes**: Added for efficient scanning of large ID ranges
+
+### 5. ID Range Analysis Tool (`analyze-valid-id-ranges.js`)
+Identifies which ID ranges actually contain data:
+```bash
+node analyze-valid-id-ranges.js
+```
+This generates:
+- `valid-id-ranges.json`: Complete analysis of ID distribution
+- `sitemap-index-entries.txt`: Pre-generated sitemap index entries
+
+## Additional Database Indexes
+
+Run `optimize_high_id_indexes.sql` for high ID range optimization:
+- Partial indexes for high ID ranges
+- BRIN index for efficient large range scans
+- Optimized table statistics
+
 ## Troubleshooting
 
 ### If sitemaps are still slow:
-1. Check if indexes are created: `SELECT * FROM pg_indexes WHERE tablename = 'part_info';`
-2. Update table statistics: `ANALYZE part_info; ANALYZE wp_fsgs_new;`
-3. Check query performance: Use EXPLAIN ANALYZE on the sitemap query
-4. Consider partitioning the part_info table by ID ranges
+1. Run the ID range analysis: `node analyze-valid-id-ranges.js`
+2. Check if all indexes are created: `SELECT * FROM pg_indexes WHERE tablename = 'part_info';`
+3. Update table statistics: `VACUUM ANALYZE part_info;`
+4. Check query performance: Use EXPLAIN ANALYZE on the sitemap query
+5. Consider using the generated `valid-id-ranges.json` to skip empty ranges
 
 ### If getting timeouts:
-1. Reduce batch size in sitemap-parts API
-2. Add more specific indexes for problematic ID ranges
-3. Consider pre-generating sitemaps for known ranges
+1. The system now returns empty sitemaps on timeout (not errors)
+2. Run `optimize_high_id_indexes.sql` for better performance
+3. Use the ID range analysis to identify truly empty ranges
+4. Consider pre-generating sitemaps only for ranges with data
