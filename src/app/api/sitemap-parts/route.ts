@@ -14,7 +14,9 @@ const KNOWN_EMPTY_RANGES = [
   { start: 5500000, end: 10000000 },
   { start: 15000000, end: 20000000 },
   { start: 25000000, end: 50000000 },
-  { start: 60000000, end: 100000000 }
+  { start: 60000000, end: 100000000 },
+  // Add problematic ranges that consistently timeout
+  { start: 4300000, end: 4400000 }
 ];
 
 function isInKnownEmptyRange(startId: number, endId: number): boolean {
@@ -59,7 +61,7 @@ export async function GET(request: Request) {
     client = await pool.connect();
 
     // More aggressive timeout for very high IDs
-    const queryTimeout = startId > VERY_HIGH_ID_THRESHOLD ? 10000 : QUERY_TIMEOUT_MS;
+    const queryTimeout = startId > VERY_HIGH_ID_THRESHOLD ? 5000 : QUERY_TIMEOUT_MS;
     await client.query(`SET statement_timeout = ${queryTimeout}`);
     
     // For very high ID ranges (2.8M+), use ultra-fast existence check
