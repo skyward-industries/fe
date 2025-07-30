@@ -3,10 +3,11 @@ import { NextResponse } from "next/server";
 import { pool } from "@/lib/db";
 
 const TIMEOUT_MS = 25000; // 25 seconds
-const MAX_PARTS = 3000;
+const MAX_PARTS = 2000; // Optimized for fast loading
 const QUERY_TIMEOUT_MS = 20000; // 20 seconds for query
 const HIGH_ID_THRESHOLD = 1000000; // IDs above this use different strategy
 const VERY_HIGH_ID_THRESHOLD = 2500000; // IDs above this get special treatment
+const PRIORITY_ID_THRESHOLD = 4000000; // IDs above this are high-priority, most important
 
 // Known empty ranges based on data analysis
 const KNOWN_EMPTY_RANGES = [
@@ -62,141 +63,40 @@ export async function GET(request: Request) {
     const startTime = Date.now();
     client = await pool.connect();
 
-    // More aggressive timeout for very high IDs
-    const queryTimeout = startId > VERY_HIGH_ID_THRESHOLD ? 3000 : QUERY_TIMEOUT_MS;
+    // Universal fast timeout - all ranges get optimized treatment
+    const queryTimeout = 10000; // 10s for all ranges - fast and consistent
     await client.query(`SET statement_timeout = ${queryTimeout}`);
     
-    // For very high ID ranges (2.8M+), use ultra-fast existence check
-    if (startId > VERY_HIGH_ID_THRESHOLD) {
-      // Super fast check - just see if ANY record exists in this range
-      const quickCheckQuery = `
-        SELECT 1
-        FROM part_info pi
-        WHERE pi.id >= $1 
-          AND pi.id <= $2
-          AND pi.nsn IS NOT NULL 
-        LIMIT 1
-      `;
-      
-      try {
-        const quickResult = await client.query({
-          text: quickCheckQuery,
-          values: [startId, endId],
-          query_timeout: 1000 // 1 second timeout for quick check
-        });
-        
-        if (quickResult.rows.length === 0) {
-          console.log(`📭 Quick check: No parts in very high range ${startId}-${endId}`);
-          clearTimeout(timeoutId);
-          return NextResponse.json([], {
-            status: 200,
-            headers: {
-              'Cache-Control': 'public, max-age=604800', // Cache for 1 week
-              'X-Parts-Count': '0',
-              'X-Query-Time': (Date.now() - startTime).toString(),
-              'X-Range': `${startId}-${endId}`,
-              'X-Very-High-Range': 'true',
-              'X-Quick-Check': 'empty'
-            }
-          });
-        }
-      } catch (quickError) {
-        // If even the quick check times out, assume empty
-        console.log(`⏱️ Quick check timeout for range ${startId}-${endId}, assuming empty`);
-        clearTimeout(timeoutId);
-        return NextResponse.json([], {
-          status: 200,
-          headers: {
-            'Cache-Control': 'public, max-age=604800',
-            'X-Parts-Count': '0',
-            'X-Range': `${startId}-${endId}`,
-            'X-Quick-Check-Timeout': 'true'
-          }
-        });
-      }
-    }
+    // Skip existence checks entirely - go straight to optimized query for all ranges
+    console.log(`🚀 Fast query for range ${startId}-${endId}: skipping existence check`);
 
-    // Use different query strategies based on ID range
-    let query;
-    
-    if (startId > VERY_HIGH_ID_THRESHOLD) {
-      // For very high IDs (2.8M+), use minimal query with no joins
-      query = `
+    // Universal optimized query for all ranges - no ID-based branching
+    const query = `
+      /*+ INDEX(part_info part_info_pkey) */
+      WITH fast_parts AS (
         SELECT 
           pi.fsg,
           pi.fsc,
-          pi.nsn,
-          '' as fsg_title,
-          '' as fsc_title
+          pi.nsn
         FROM part_info pi
         WHERE pi.id >= $1 
           AND pi.id <= $2
           AND pi.nsn IS NOT NULL 
           AND pi.nsn != ''
-          AND EXISTS (
-            SELECT 1 FROM wp_fsgs_new fsgs 
-            WHERE fsgs.fsg = pi.fsg 
-            AND fsgs.fsg_title IS NOT NULL
-            LIMIT 1
-          )
         ORDER BY pi.id
         LIMIT $3
-      `;
-    } else if (startId > HIGH_ID_THRESHOLD * 10) {
-      // For high IDs (10M+), use index-only scan with minimal joins
-      query = `
-        WITH id_range AS (
-          SELECT pi.id, pi.fsg, pi.fsc, pi.nsn
-          FROM part_info pi
-          WHERE pi.id >= $1 
-            AND pi.id <= $2
-            AND pi.nsn IS NOT NULL 
-            AND pi.nsn != ''
-          ORDER BY pi.id
-          LIMIT $3
-        )
-        SELECT 
-          ir.fsg,
-          ir.fsc,
-          ir.nsn,
-          fsgs.fsg_title,
-          fsgs.fsc_title
-        FROM id_range ir
-        LEFT JOIN wp_fsgs_new fsgs ON ir.fsg = fsgs.fsg
-        WHERE fsgs.fsg_title IS NOT NULL 
-          AND fsgs.fsc_title IS NOT NULL
-      `;
-    } else {
-      // Standard query for normal ID ranges
-      query = `
-        WITH valid_parts AS (
-          SELECT 
-            pi.id,
-            pi.fsg,
-            pi.fsc,
-            pi.nsn,
-            fsgs.fsg_title,
-            fsgs.fsc_title
-          FROM part_info pi
-          INNER JOIN wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg
-          WHERE pi.id >= $1 
-            AND pi.id <= $2
-            AND pi.nsn IS NOT NULL 
-            AND pi.nsn != ''
-            AND fsgs.fsg_title IS NOT NULL 
-            AND fsgs.fsc_title IS NOT NULL
-          ORDER BY pi.id
-          LIMIT $3
-        )
-        SELECT 
-          fsg,
-          fsc,
-          fsg_title,
-          fsc_title,
-          nsn
-        FROM valid_parts
-      `;
-    }
+      )
+      SELECT 
+        fp.fsg,
+        fp.fsc,
+        fp.nsn,
+        fsgs.fsg_title,
+        fsgs.fsc_title
+      FROM fast_parts fp
+      INNER JOIN wp_fsgs_new fsgs ON fp.fsg = fsgs.fsg
+      WHERE fsgs.fsg_title IS NOT NULL 
+        AND fsgs.fsc_title IS NOT NULL
+    `;
 
     const result = await client.query(query, [startId, endId, limit]);
     const parts = result.rows;
