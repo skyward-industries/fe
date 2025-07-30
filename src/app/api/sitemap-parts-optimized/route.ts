@@ -4,9 +4,9 @@ import { pool } from "@/lib/db";
 
 export const maxDuration = 60; // 60 seconds for high ID ranges
 
-const TIMEOUT_MS = 45000; // 45 seconds for high ID ranges
-const MAX_PARTS = 5000; // Increase for better throughput on high ID ranges
-const QUERY_TIMEOUT_MS = 40000; // 40 seconds for query
+const TIMEOUT_MS = 50000; // 50 seconds - handle cold starts
+const MAX_PARTS = 2500; // Smaller batches for reliability
+const QUERY_TIMEOUT_MS = 30000; // 30 seconds for query
 const HIGH_ID_THRESHOLD = 1000000;
 const PARTITION_RANGES = [
   { partition: 'part_info_p1', start: 1, end: 500000 },
@@ -81,11 +81,19 @@ export async function GET(request: Request) {
     
     // Query function that we'll potentially retry
     const executeQuery = async () => {
+      // Add warmup query for cold starts
       client = await pool.connect();
       
-      // Set appropriate timeout based on ID range - longer for 3M+ ranges
-      const queryTimeout = startId >= 3000000 ? 35000 : 
-                           startId > HIGH_ID_THRESHOLD ? 25000 : QUERY_TIMEOUT_MS;
+      try {
+        // Quick warmup query to establish connection
+        await client.query('SELECT 1');
+      } catch (warmupError) {
+        console.log('⚡ Connection warmup skipped:', warmupError.message);
+      }
+      
+      // Set appropriate timeout based on ID range - handle cold starts
+      const queryTimeout = startId >= 3000000 ? 25000 : 
+                           startId > HIGH_ID_THRESHOLD ? 20000 : QUERY_TIMEOUT_MS;
       await client.query(`SET statement_timeout = ${queryTimeout}`);
       
       // For high ID ranges above 3M, skip existence check and use direct partition query
