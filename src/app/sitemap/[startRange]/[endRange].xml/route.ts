@@ -116,33 +116,61 @@ export async function GET(
     if (!res.ok) {
       console.error(`⚠️ API error: ${res.status} ${res.statusText} (${fetchTime}ms)`);
       
-      // For high ranges, return empty sitemap instead of error
-      if (startRange > 10000000) {
-        console.log(`📭 High range API error, returning empty sitemap for ${startRange}-${endRange}`);
-        const emptySitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n</urlset>`;
-        return new Response(emptySitemap, {
-          status: 200,
-          headers: {
-            "Content-Type": "application/xml; charset=utf-8",
-            "Cache-Control": "public, max-age=86400",
-            "X-Parts-Count": "0",
-            "X-Empty-Sitemap": "true",
-            "X-API-Error": res.status.toString()
-          },
-        });
+      // If optimized API returns 404, try fallback to regular API
+      if (res.status === 404 && useOptimized) {
+        console.log(`🔄 Optimized API not found, falling back to regular API for ${startRange}-${endRange}`);
+        const fallbackUrl = `${baseUrl}/api/sitemap-parts?limit=${batchSize}&offset=${offset}`;
+        
+        try {
+          const fallbackRes = await fetch(fallbackUrl, {
+            signal: controller.signal,
+            headers: {
+              'Accept': 'application/json',
+              'User-Agent': 'Sitemap-Generator/1.0'
+            }
+          });
+          
+          if (fallbackRes.ok) {
+            const fallbackRaw = await fallbackRes.json();
+            parts = Array.isArray(fallbackRaw) ? fallbackRaw : fallbackRaw?.data || [];
+            console.log(`✅ Fallback API retrieved ${parts.length} parts for range ${startRange}-${endRange}`);
+          } else {
+            console.error(`❌ Fallback API also failed: ${fallbackRes.status}`);
+            return new Response("Failed to fetch sitemap data", { status: 502 });
+          }
+        } catch (fallbackError) {
+          console.error(`❌ Fallback fetch failed:`, fallbackError);
+          return new Response("Failed to fetch sitemap data", { status: 502 });
+        }
+      } else {
+        // For high ranges, return empty sitemap instead of error
+        if (startRange > 10000000) {
+          console.log(`📭 High range API error, returning empty sitemap for ${startRange}-${endRange}`);
+          const emptySitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n</urlset>`;
+          return new Response(emptySitemap, {
+            status: 200,
+            headers: {
+              "Content-Type": "application/xml; charset=utf-8",
+              "Cache-Control": "public, max-age=86400",
+              "X-Parts-Count": "0",
+              "X-Empty-Sitemap": "true",
+              "X-API-Error": res.status.toString()
+            },
+          });
+        }
+        
+        if (res.status === 408) {
+          return new Response("Sitemap generation timeout", { status: 504 });
+        }
+        
+        return new Response("Failed to fetch sitemap data", { status: 502 });
       }
-      
-      if (res.status === 408) {
-        return new Response("Sitemap generation timeout", { status: 504 });
-      }
-      
-      return new Response("Failed to fetch sitemap data", { status: 502 });
+    } else {
+      const raw = await res.json();
+      parts = Array.isArray(raw) ? raw : raw?.data || [];
+      console.log(`📊 Retrieved ${parts.length} parts in ${fetchTime}ms for range ${startRange}-${endRange}`);
     }
 
-    const raw = await res.json();
-    parts = Array.isArray(raw) ? raw : raw?.data || [];
-
-    console.log(`📊 Retrieved ${parts.length} parts in ${fetchTime}ms for range ${startRange}-${endRange}`);
 
   } catch (err: any) {
     console.error(`❌ Failed to fetch sitemap parts for range ${startRange}-${endRange}:`, err.message);
