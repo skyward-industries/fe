@@ -87,7 +87,7 @@ export async function GET(request: Request) {
       try {
         // Quick warmup query to establish connection
         await client.query('SELECT 1');
-      } catch (warmupError) {
+      } catch (warmupError: any) {
         console.log('⚡ Connection warmup skipped:', warmupError.message);
       }
       
