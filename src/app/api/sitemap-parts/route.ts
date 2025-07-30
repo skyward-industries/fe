@@ -19,7 +19,7 @@ const KNOWN_EMPTY_RANGES = [
   // Add problematic ranges that consistently timeout
   { start: 4300000, end: 4400000 },
   // High ID ranges that frequently timeout (2.6M-2.9M range)
-  { start: 2650000, end: 2950000 }
+  { start: 2650000, end: 2950000 },
 ];
 
 function isInKnownEmptyRange(startId: number, endId: number): boolean {
@@ -63,15 +63,33 @@ export async function GET(request: Request) {
     const startTime = Date.now();
     client = await pool.connect();
 
-    // Universal fast timeout - all ranges get optimized treatment
-    const queryTimeout = 10000; // 10s for all ranges - fast and consistent
+    // Adaptive timeout based on range - problematic ranges get more time
+    const isProblematicRange = startId >= 870000 && startId <= 890000;
+    const queryTimeout = isProblematicRange ? 5000 : 10000; // Shorter timeout for slow ranges
     await client.query(`SET statement_timeout = ${queryTimeout}`);
     
     // Skip existence checks entirely - go straight to optimized query for all ranges
     console.log(`🚀 Fast query for range ${startId}-${endId}: skipping existence check`);
 
-    // Universal optimized query for all ranges - no ID-based branching
-    const query = `
+    // Adaptive query strategy based on range performance
+    const query = isProblematicRange ? `
+      SELECT 
+        pi.fsg,
+        pi.fsc,
+        pi.nsn,
+        fsgs.fsg_title,
+        fsgs.fsc_title
+      FROM part_info pi
+      INNER JOIN wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg
+      WHERE pi.id >= $1 
+        AND pi.id <= $2
+        AND pi.nsn IS NOT NULL 
+        AND pi.nsn != ''
+        AND fsgs.fsg_title IS NOT NULL 
+        AND fsgs.fsc_title IS NOT NULL
+      ORDER BY pi.id
+      LIMIT $3
+    ` : `
       /*+ INDEX(part_info part_info_pkey) */
       WITH fast_parts AS (
         SELECT 

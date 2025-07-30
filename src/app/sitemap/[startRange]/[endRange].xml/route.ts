@@ -97,9 +97,9 @@ export async function GET(
     
     const startTime = Date.now();
     
-    // Universal timeout for all ranges - match maxDuration
+    // Universal fast timeout for all ranges
     const controller = new AbortController();
-    const fetchTimeout = 55000; // 55s - just under maxDuration of 60s
+    const fetchTimeout = 15000; // 15s for all ranges - fast and consistent
     const timeoutId = setTimeout(() => controller.abort(), fetchTimeout);
     
     const res = await fetch(apiUrl, {
