@@ -13,7 +13,8 @@ Allow: /
 Host: https://skywardparts.com
 
 # Sitemap Index
-Sitemap: https://skywardparts.com/api/sitemap-index.xml
+Sitemap: https://skywardparts.com/sitemap.xml
+Sitemap: https://skywardparts.com/sitemap-priority.xml
 
 # Generated Sitemaps
 `;
