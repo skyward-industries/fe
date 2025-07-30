@@ -1,0 +1,1 @@
+export const maxDuration = 300; // 5 minutes for large dataset analysis 
