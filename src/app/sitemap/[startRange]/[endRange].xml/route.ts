@@ -54,6 +54,29 @@ export async function GET(
 
   console.log(`🚀 FAST Sitemap request for range: ${startRange.toLocaleString()}-${endRange.toLocaleString()}`);
 
+  // Handle redirects for old 3000-row sitemaps
+  const oldBatchSize = 3000;
+  if ((endRange - startRange + 1) === oldBatchSize) {
+    console.log(`🔄 Redirecting old 3000-row sitemap to new 2000-row format`);
+    
+    // Calculate the closest 2000-row sitemap
+    const newStartRange = Math.floor((startRange - 1) / batchSize) * batchSize + 1;
+    const newEndRange = newStartRange + batchSize - 1;
+    
+    const redirectUrl = `/sitemap/${newStartRange}/${newEndRange}.xml`;
+    
+    return new Response(null, {
+      status: 301, // Permanent redirect
+      headers: {
+        'Location': redirectUrl,
+        'Cache-Control': 'public, max-age=86400', // Cache redirect for 24 hours
+        'X-Redirect': 'old-3000-to-new-2000',
+        'X-Old-Range': `${startRange}-${endRange}`,
+        'X-New-Range': `${newStartRange}-${newEndRange}`
+      }
+    });
+  }
+
   // Send early headers to prevent browser timeout
   const headers = new Headers({
     "Content-Type": "application/xml; charset=utf-8",
