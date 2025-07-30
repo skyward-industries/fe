@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { pool } from "@/lib/db";
 
 const TIMEOUT_MS = 30000; // 30 seconds
-const MAX_PARTS = 3000;
+const MAX_PARTS = 5000; // Increase for better throughput on high ID ranges
 const QUERY_TIMEOUT_MS = 25000; // 25 seconds for query
 const HIGH_ID_THRESHOLD = 1000000;
 const PARTITION_RANGES = [
@@ -85,54 +85,63 @@ export async function GET(request: Request) {
       const queryTimeout = startId > HIGH_ID_THRESHOLD ? 20000 : QUERY_TIMEOUT_MS;
       await client.query(`SET statement_timeout = ${queryTimeout}`);
       
-      // For high ID ranges, first check if any data exists
-      if (startId > HIGH_ID_THRESHOLD) {
-        const checkQuery = usePartition
-          ? `SELECT EXISTS(SELECT 1 FROM ${partition} WHERE id >= $1 AND id <= $2 AND nsn IS NOT NULL LIMIT 1)`
-          : `SELECT EXISTS(SELECT 1 FROM part_info WHERE id >= $1 AND id <= $2 AND nsn IS NOT NULL LIMIT 1)`;
-        
-        const checkResult = await client.query({
-          text: checkQuery,
-          values: [startId, endId]
-        });
-        
-        if (!checkResult.rows[0].exists) {
-          console.log(`📭 No data exists in range ${startId}-${endId}`);
-          return { rows: [] };
-        }
-      }
+      // For high ID ranges above 3M, skip existence check and use direct partition query
+      // The check itself can be slow for very high ranges
       
       // Build optimized query based on partition availability
       let query;
       
       if (usePartition) {
-        // Query specific partition directly
-        query = `
-          WITH partition_data AS (
+        // For 3M+ ranges, use optimized partition query with index hints
+        if (startId >= 3000000) {
+          query = `
+            /*+ PARALLEL(pi 4) INDEX(pi part_info_id_idx) */
             SELECT 
-              pi.id,
               pi.fsg,
               pi.fsc,
-              pi.nsn
+              pi.nsn,
+              fsgs.fsg_title,
+              fsgs.fsc_title
             FROM ${partition} pi
+            INNER JOIN wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg AND pi.fsc = fsgs.fsc
             WHERE pi.id >= $1 
               AND pi.id <= $2
               AND pi.nsn IS NOT NULL 
               AND pi.nsn != ''
+              AND fsgs.fsg_title IS NOT NULL 
+              AND fsgs.fsc_title IS NOT NULL
             ORDER BY pi.id
             LIMIT $3
-          )
-          SELECT 
-            pd.fsg,
-            pd.fsc,
-            pd.nsn,
-            fsgs.fsg_title,
-            fsgs.fsc_title
-          FROM partition_data pd
-          LEFT JOIN wp_fsgs_new fsgs ON pd.fsg = fsgs.fsg
-          WHERE fsgs.fsg_title IS NOT NULL 
-            AND fsgs.fsc_title IS NOT NULL
-        `;
+          `;
+        } else {
+          // Standard partition query for lower ranges
+          query = `
+            WITH partition_data AS (
+              SELECT 
+                pi.id,
+                pi.fsg,
+                pi.fsc,
+                pi.nsn
+              FROM ${partition} pi
+              WHERE pi.id >= $1 
+                AND pi.id <= $2
+                AND pi.nsn IS NOT NULL 
+                AND pi.nsn != ''
+              ORDER BY pi.id
+              LIMIT $3
+            )
+            SELECT 
+              pd.fsg,
+              pd.fsc,
+              pd.nsn,
+              fsgs.fsg_title,
+              fsgs.fsc_title
+            FROM partition_data pd
+            LEFT JOIN wp_fsgs_new fsgs ON pd.fsg = fsgs.fsg
+            WHERE fsgs.fsg_title IS NOT NULL 
+              AND fsgs.fsc_title IS NOT NULL
+          `;
+        }
       } else {
         // Fallback to regular table query with index hints
         query = `
