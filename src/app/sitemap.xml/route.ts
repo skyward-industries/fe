@@ -1,14 +1,18 @@
-export const dynamic = 'force-static'; // ✅ Force static generation
+export const dynamic = 'force-dynamic'; // ✅ Generate fresh with new batch size
 
 export async function GET() {
   const totalParts = 7200000;
-  const batchSize = 3000;
+  const batchSize = 2000; // Must match the sitemap route batch size
   const totalSitemaps = Math.ceil(totalParts / batchSize);
   const today = new Date().toISOString();
 
   let sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
 
   sitemapIndex += `
+  <sitemap>
+    <loc>https://skywardparts.com/sitemap-priority.xml</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>
   <sitemap>
     <loc>https://skywardparts.com/sitemap-groups.xml</loc>
     <lastmod>${today}</lastmod>
