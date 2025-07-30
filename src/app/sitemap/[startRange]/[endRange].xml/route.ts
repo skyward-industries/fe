@@ -52,7 +52,7 @@ export async function GET(
   const endRange = parseInt(params.endRange, 10);
   const batchSize = 3000; // Standard batch size for sitemap generation
 
-  console.log(`📥 Sitemap request for range: ${startRange.toLocaleString()}-${endRange.toLocaleString()}`);
+  console.log(`🚀 FAST Sitemap request for range: ${startRange.toLocaleString()}-${endRange.toLocaleString()}`);
 
   // Send early headers to prevent browser timeout
   const headers = new Headers({
@@ -97,9 +97,9 @@ export async function GET(
     
     const startTime = Date.now();
     
-    // Set timeout for fetch - handle serverless cold starts
+    // Universal fast timeout for all ranges
     const controller = new AbortController();
-    const fetchTimeout = offset >= 3000000 ? 35000 : 20000; // Longer for cold starts
+    const fetchTimeout = 15000; // 15s for all ranges - fast and consistent
     const timeoutId = setTimeout(() => controller.abort(), fetchTimeout);
     
     const res = await fetch(apiUrl, {
