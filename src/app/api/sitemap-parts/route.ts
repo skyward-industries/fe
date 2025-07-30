@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { pool } from "@/lib/db";
 
 const TIMEOUT_MS = 25000; // 25 seconds
-const MAX_PARTS = 3000;
+const MAX_PARTS = 2000; // Optimized for fast loading
 const QUERY_TIMEOUT_MS = 20000; // 20 seconds for query
 const HIGH_ID_THRESHOLD = 1000000; // IDs above this use different strategy
 const VERY_HIGH_ID_THRESHOLD = 2500000; // IDs above this get special treatment

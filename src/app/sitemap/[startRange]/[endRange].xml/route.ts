@@ -50,7 +50,7 @@ export async function GET(
   const params = await props.params;
   const startRange = parseInt(params.startRange, 10);
   const endRange = parseInt(params.endRange, 10);
-  const batchSize = 3000; // Standard batch size for sitemap generation
+  const batchSize = 2000; // Optimized batch size for fast loading
 
   console.log(`🚀 FAST Sitemap request for range: ${startRange.toLocaleString()}-${endRange.toLocaleString()}`);
 
