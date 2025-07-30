@@ -30,18 +30,33 @@ pool.on('connect', () => {
 
 pool.on('error', (err) => {
   console.error('[FE DB] Unexpected error on idle client', err);
-  process.exit(-1);
+  // Don't exit the process, just log the error
+});
+
+pool.on('acquire', () => {
+  console.log('[FE DB] Client acquired from pool');
+});
+
+pool.on('release', () => {
+  console.log('[FE DB] Client released back to pool');
 });
 
 // Monitor pool status
-setInterval(() => {
+const poolCheckInterval = setInterval(() => {
   console.log(`[FE DB Pool] Total: ${pool.totalCount}, Idle: ${pool.idleCount}, Waiting: ${pool.waitingCount}`);
 }, 30000); // Log every 30 seconds
 
 // Clean up on exit
-process.on('SIGTERM', async () => {
-  if (poolCheckInterval) clearInterval(poolCheckInterval);
-  await pool.end();
+process.on('SIGINT', () => {
+  clearInterval(poolCheckInterval);
+  pool.end();
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  clearInterval(poolCheckInterval);
+  pool.end();
+  process.exit(0);
 });
 
 
