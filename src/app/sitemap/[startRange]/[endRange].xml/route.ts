@@ -24,7 +24,7 @@ ${parts
     const formattedNsn = formatNSN(part.nsn);
     
     return `  <url>
-    <loc>${baseUrl}/catalog/${part.fsg}/${fsgSlug}/${part.fsc}/nsn-${fscSlug}/nsn-${formattedNsn}</loc>
+    <loc>${baseUrl}/catalog/${part.fsg}/${fsgSlug}/${part.fsc}/${fscSlug}/${formattedNsn}</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
