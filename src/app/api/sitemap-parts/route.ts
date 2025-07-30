@@ -6,7 +6,7 @@ const TIMEOUT_MS = 25000; // 25 seconds
 const MAX_PARTS = 3000;
 const QUERY_TIMEOUT_MS = 20000; // 20 seconds for query
 const HIGH_ID_THRESHOLD = 1000000; // IDs above this use different strategy
-const VERY_HIGH_ID_THRESHOLD = 2800000; // IDs above this get special treatment
+const VERY_HIGH_ID_THRESHOLD = 2500000; // IDs above this get special treatment
 
 // Known empty ranges based on data analysis
 const KNOWN_EMPTY_RANGES = [
@@ -16,7 +16,9 @@ const KNOWN_EMPTY_RANGES = [
   { start: 25000000, end: 50000000 },
   { start: 60000000, end: 100000000 },
   // Add problematic ranges that consistently timeout
-  { start: 4300000, end: 4400000 }
+  { start: 4300000, end: 4400000 },
+  // High ID ranges that frequently timeout (2.6M-2.9M range)
+  { start: 2650000, end: 2950000 }
 ];
 
 function isInKnownEmptyRange(startId: number, endId: number): boolean {
@@ -61,7 +63,7 @@ export async function GET(request: Request) {
     client = await pool.connect();
 
     // More aggressive timeout for very high IDs
-    const queryTimeout = startId > VERY_HIGH_ID_THRESHOLD ? 5000 : QUERY_TIMEOUT_MS;
+    const queryTimeout = startId > VERY_HIGH_ID_THRESHOLD ? 3000 : QUERY_TIMEOUT_MS;
     await client.query(`SET statement_timeout = ${queryTimeout}`);
     
     // For very high ID ranges (2.8M+), use ultra-fast existence check
@@ -80,7 +82,7 @@ export async function GET(request: Request) {
         const quickResult = await client.query({
           text: quickCheckQuery,
           values: [startId, endId],
-          query_timeout: 2000 // 2 second timeout for quick check
+          query_timeout: 1000 // 1 second timeout for quick check
         });
         
         if (quickResult.rows.length === 0) {
