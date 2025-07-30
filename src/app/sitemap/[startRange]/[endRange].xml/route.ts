@@ -2,6 +2,7 @@
 import { slugify } from "@/utils/slugify";
 
 export const dynamic = "force-dynamic"; // Always generate fresh
+export const maxDuration = 60; // 60 seconds for high ID sitemap generation
 
 type SitemapPart = {
   fsg: string;
@@ -70,14 +71,24 @@ export async function GET(
   let parts: SitemapPart[] = [];
 
   try {
-    const apiUrl = `${baseUrl}/api/sitemap-parts?limit=${batchSize}&offset=${offset}`;
-    console.log(`🔗 Calling API: ${apiUrl}`);
+    // Use optimized endpoint for high ID ranges
+    const useOptimized = offset >= 1000000;
+    const endpoint = useOptimized 
+      ? `${baseUrl}/api/sitemap-parts-optimized`
+      : `${baseUrl}/api/sitemap-parts`;
+    
+    // Add retry parameter for very high ranges
+    const retryParam = offset >= 2500000 ? '&retry=true' : '';
+    const apiUrl = `${endpoint}?limit=${batchSize}&offset=${offset}${retryParam}`;
+    
+    console.log(`🔗 Calling API: ${apiUrl} (${useOptimized ? 'optimized' : 'standard'})`);
     
     const startTime = Date.now();
     
-    // Set timeout for fetch (shorter than API timeout)
+    // Set timeout for fetch (shorter than API timeout) - longer for high ID ranges
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 23000); // 23s timeout (slightly less than API's 25s)
+    const fetchTimeout = offset >= 3000000 ? 42000 : 23000; // 42s for 3M+ ranges, 23s for others
+    const timeoutId = setTimeout(() => controller.abort(), fetchTimeout);
     
     const res = await fetch(apiUrl, {
       signal: controller.signal,
