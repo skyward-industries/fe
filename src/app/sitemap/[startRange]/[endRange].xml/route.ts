@@ -50,7 +50,7 @@ export async function GET(
   const params = await props.params;
   const startRange = parseInt(params.startRange, 10);
   const endRange = parseInt(params.endRange, 10);
-  const batchSize = 3000;
+  const batchSize = 2000; // Smaller batches for faster initial response
 
   console.log(`📥 Sitemap request for range: ${startRange.toLocaleString()}-${endRange.toLocaleString()}`);
 
@@ -85,9 +85,9 @@ export async function GET(
     
     const startTime = Date.now();
     
-    // Set timeout for fetch (shorter than API timeout) - longer for high ID ranges
+    // Set timeout for fetch - optimized for production deployment
     const controller = new AbortController();
-    const fetchTimeout = offset >= 3000000 ? 42000 : 23000; // 42s for 3M+ ranges, 23s for others
+    const fetchTimeout = offset >= 3000000 ? 25000 : 15000; // 25s for 3M+ ranges, 15s for others
     const timeoutId = setTimeout(() => controller.abort(), fetchTimeout);
     
     const res = await fetch(apiUrl, {
@@ -213,10 +213,11 @@ export async function GET(
     status: 200,
     headers: {
       "Content-Type": "application/xml; charset=utf-8",
-      "Cache-Control": "public, max-age=7200, stale-while-revalidate=3600", // 2 hours + stale-while-revalidate
+      "Cache-Control": "public, max-age=3600, stale-while-revalidate=1800", // Shorter cache for faster updates
       "X-Content-Type-Options": "nosniff",
       "X-Parts-Count": validParts.length.toString(),
-      "X-Generation-Time": Date.now().toString()
+      "X-Generation-Time": Date.now().toString(),
+      "Connection": "keep-alive" // Keep connection alive for faster response
     },
   });
 }

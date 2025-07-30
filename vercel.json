@@ -1,0 +1,22 @@
+{
+  "functions": {
+    "src/app/sitemap/[startRange]/[endRange].xml/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/sitemap-parts-optimized/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/sitemap-parts/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/sitemap-parts-stream/route.ts": {
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/sitemap/:startRange/:endRange.xml",
+      "destination": "/sitemap/:startRange/:endRange.xml"
+    }
+  ]
+}
