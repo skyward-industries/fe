@@ -121,7 +121,7 @@ export default async function SubgroupPage(props: SubgroupPageProps) {
                     <Link
                       href={`/catalog/${groupId}/${slugify(groupName)}/${
                         subgroup.fsc
-                      }/nsn-${slugify(subgroup.fsc_title)}`}
+                      }/${slugify(subgroup.fsc_title)}`}
                       style={{ textDecoration: "none", color: "inherit" }}
                     >
                       View NSN

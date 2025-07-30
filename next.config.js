@@ -24,6 +24,24 @@ const nextConfig = {
     // If you encounter issues with server/client module boundaries later, this might be a place to look.
     // serverComponentsExternalPackages: ['pg'], // Example for server components using pg
   },
+
+  // Redirects for old URL structure to maintain SEO rankings
+  async redirects() {
+    return [
+      // Redirect old URLs with 'nsn-' prefix in subgroup names and NSN
+      {
+        source: '/catalog/:groupId/:groupName/:subgroupId/nsn-:subgroupName/nsn-:nsn',
+        destination: '/catalog/:groupId/:groupName/:subgroupId/:subgroupName/:nsn',
+        permanent: true,
+      },
+      // Redirect old URLs with just 'nsn-' prefix in NSN
+      {
+        source: '/catalog/:groupId/:groupName/:subgroupId/:subgroupName/nsn-:nsn',
+        destination: '/catalog/:groupId/:groupName/:subgroupId/:subgroupName/:nsn',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig; // Use export default instead of module.exports

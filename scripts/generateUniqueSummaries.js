@@ -1,0 +1,276 @@
+import { Pool } from 'pg';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
+
+// Database connection
+const pool = new Pool({
+  host: process.env.PGHOST,
+  port: parseInt(process.env.PGPORT || '5432', 10),
+  database: process.env.PGDATABASE,
+  user: process.env.PGUSER,
+  password: process.env.PGPASSWORD,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
+// Variation templates for different aspects
+const variations = {
+  intro: {
+    aerospace: [
+      "Essential for modern aviation systems,",
+      "Critical to aerospace operations,",
+      "Integral to aircraft functionality,",
+      "Vital for aviation maintenance,",
+      "Key component in aerospace applications,",
+      "Fundamental to flight operations,",
+      "Crucial for aircraft systems,",
+      "Important for aerospace equipment,"
+    ],
+    defense: [
+      "Essential for military operations,",
+      "Critical to defense readiness,",
+      "Vital for tactical systems,",
+      "Key to military equipment functionality,",
+      "Integral to defense logistics,",
+      "Crucial for operational capability,",
+      "Important for military maintenance,",
+      "Fundamental to defense systems,"
+    ],
+    industrial: [
+      "Essential for industrial operations,",
+      "Critical to manufacturing processes,",
+      "Vital for equipment maintenance,",
+      "Key to operational efficiency,",
+      "Integral to industrial systems,",
+      "Crucial for production continuity,",
+      "Important for facility operations,",
+      "Fundamental to industrial applications,"
+    ]
+  },
+  
+  purpose: [
+    "designed to meet exacting specifications",
+    "engineered for reliable performance",
+    "manufactured to precise tolerances",
+    "built for demanding environments",
+    "created for mission-critical applications",
+    "developed for specialized requirements",
+    "produced to industry standards",
+    "crafted for professional use"
+  ],
+  
+  quality: [
+    "ensuring consistent performance",
+    "delivering operational reliability",
+    "providing dependable service",
+    "maintaining high standards",
+    "achieving optimal functionality",
+    "supporting continuous operations",
+    "enabling efficient performance",
+    "facilitating reliable operation"
+  ],
+  
+  procurement: [
+    "Our procurement team specializes in",
+    "We excel at sourcing",
+    "Our supply chain experts handle",
+    "We provide comprehensive support for",
+    "Our logistics specialists manage",
+    "We offer streamlined procurement of",
+    "Our team facilitates acquisition of",
+    "We ensure efficient sourcing of"
+  ],
+  
+  benefits: [
+    "competitive pricing and rapid fulfillment",
+    "cost-effective solutions and timely delivery",
+    "favorable terms and expedited shipping",
+    "strategic sourcing and reliable supply",
+    "optimal pricing and dependable logistics",
+    "efficient procurement and fast turnaround",
+    "value pricing and prompt service",
+    "competitive rates and quick delivery"
+  ]
+};
+
+// Hash function to generate consistent but varied selection
+function hashString(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash);
+}
+
+// Select variation based on NSN hash
+function selectVariation(nsn, variations) {
+  const hash = hashString(nsn);
+  return variations[hash % variations.length];
+}
+
+// Generate unique summary based on part data
+const generateUniqueSummary = (part) => {
+  const sections = [];
+  
+  // Determine category
+  let category = 'industrial';
+  const fsgNum = parseInt(part.fsg);
+  if (fsgNum >= 10 && fsgNum <= 19) {
+    category = 'defense';
+  } else if ([15, 16, 17, 20, 25, 28, 29].includes(fsgNum)) {
+    category = 'aerospace';
+  }
+  
+  // Build unique introduction
+  const intro = selectVariation(part.nsn, variations.intro[category]);
+  const purpose = selectVariation(part.nsn + '1', variations.purpose);
+  
+  sections.push(`${intro} the ${part.item_name || 'component'} (NSN ${part.nsn}) is ${purpose}.`);
+  
+  // Add technical details with variations
+  if (part.part_number) {
+    const mfrVariations = [
+      `Manufactured as part number ${part.part_number}`,
+      `Identified by manufacturer part ${part.part_number}`,
+      `Cataloged under part number ${part.part_number}`,
+      `Referenced as ${part.part_number}`,
+      `Designated ${part.part_number} by the manufacturer`
+    ];
+    sections.push(selectVariation(part.nsn + '2', mfrVariations) + 
+      (part.cage_code ? ` with CAGE code ${part.cage_code}` : '') + '.');
+  }
+  
+  // Classification with context
+  if (part.fsc_title) {
+    const classVariations = [
+      `This item falls within the ${part.fsc_title} category`,
+      `Classified under ${part.fsc_title}`,
+      `Belonging to the ${part.fsc_title} classification`,
+      `Categorized as ${part.fsc_title}`,
+      `Part of the ${part.fsc_title} family`
+    ];
+    sections.push(selectVariation(part.nsn + '3', classVariations) + 
+      `, ${selectVariation(part.nsn + '4', variations.quality)} in ${category} applications.`);
+  }
+  
+  // Company-specific details
+  if (part.company_name) {
+    const companyVariations = [
+      `${part.company_name} maintains strict quality controls`,
+      `Production by ${part.company_name} ensures reliability`,
+      `${part.company_name} brings expertise to manufacturing`,
+      `With ${part.company_name} as the source`,
+      `${part.company_name}'s commitment to excellence`
+    ];
+    sections.push(selectVariation(part.nsn + '5', companyVariations) + 
+      ` for this ${part.unit_of_issue || 'item'}.`);
+  }
+  
+  // Technical specifications vary by part
+  const specs = [];
+  if (part.unit_of_issue && part.unit_of_issue !== 'EA') {
+    specs.push(`supplied in ${part.unit_of_issue}`);
+  }
+  if (part.shelf_life_code && !['0', 'NA'].includes(part.shelf_life_code)) {
+    specs.push(`shelf-life code ${part.shelf_life_code}`);
+  }
+  if (part.aac) {
+    specs.push(`acquisition advice ${part.aac}`);
+  }
+  
+  if (specs.length > 0) {
+    const specVariations = [
+      `Technical specifications include`,
+      `Key attributes encompass`,
+      `Important characteristics feature`,
+      `Notable specifications cover`,
+      `Essential details include`
+    ];
+    sections.push(`${selectVariation(part.nsn + '6', specVariations)} ${specs.join(', ')}.`);
+  }
+  
+  // Unique closing based on NSN
+  const procurement = selectVariation(part.nsn + '7', variations.procurement);
+  const benefits = selectVariation(part.nsn + '8', variations.benefits);
+  
+  sections.push(`${procurement} this NSN ${part.nsn} item, offering ${benefits}. Contact our team for current availability and detailed specifications.`);
+  
+  return sections.join(' ');
+};
+
+// Test generation with examples
+async function testUniqueGeneration() {
+  const client = await pool.connect();
+  
+  try {
+    console.log('Testing unique summary generation...\n');
+    
+    // Get 10 sample parts to show variation
+    const result = await client.query(`
+      SELECT DISTINCT ON (pi.nsn)
+        pi.nsn, pi.fsg, pi.fsc, pi.niin,
+        fsgs.fsg_title, fsgs.fsc_title,
+        pn.part_number, pn.cage_code,
+        addr.company_name,
+        vfm.unit_of_issue, vfm.shelf_life_code, vfm.aac,
+        (SELECT item_name FROM public.nsn_with_inc WHERE nsn = pi.nsn LIMIT 1) AS item_name
+      FROM public.part_info pi
+      LEFT JOIN public.part_numbers pn ON pi.nsn = pn.nsn
+      LEFT JOIN public.wp_cage_addresses addr ON pn.cage_code = addr.cage_code
+      LEFT JOIN public.v_flis_management vfm ON pi.niin = vfm.niin
+      LEFT JOIN public.wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg AND pi.fsc = fsgs.fsc
+      WHERE pi.nsn IS NOT NULL
+        AND fsgs.fsc_title IS NOT NULL
+      ORDER BY pi.nsn
+      LIMIT 10;
+    `);
+    
+    console.log(`Generating ${result.rows.length} unique summaries...\n`);
+    
+    const summaries = [];
+    
+    for (const part of result.rows) {
+      const summary = generateUniqueSummary(part);
+      summaries.push({
+        nsn: part.nsn,
+        summary: summary,
+        wordCount: summary.split(' ').length
+      });
+      
+      console.log(`NSN ${part.nsn}:`);
+      console.log(summary.substring(0, 150) + '...');
+      console.log(`Words: ${summary.split(' ').length}\n`);
+    }
+    
+    // Check uniqueness
+    console.log('\nUNIQUENESS ANALYSIS:');
+    console.log('='.repeat(50));
+    
+    // Compare first sentences
+    const firstSentences = summaries.map(s => s.summary.split('.')[0]);
+    const uniqueFirstSentences = new Set(firstSentences).size;
+    console.log(`Unique first sentences: ${uniqueFirstSentences}/${summaries.length}`);
+    
+    // Check for duplicate summaries
+    const uniqueSummaries = new Set(summaries.map(s => s.summary)).size;
+    console.log(`Completely unique summaries: ${uniqueSummaries}/${summaries.length}`);
+    
+    // Word count variation
+    const wordCounts = summaries.map(s => s.wordCount);
+    console.log(`Word count range: ${Math.min(...wordCounts)} - ${Math.max(...wordCounts)}`);
+    
+  } catch (error) {
+    console.error('Error:', error);
+  } finally {
+    client.release();
+    await pool.end();
+  }
+}
+
+// Run the test
+testUniqueGeneration();

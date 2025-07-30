@@ -118,7 +118,7 @@ export default async function PartsPage({ params, searchParams }: PageProps) {
                       color="primary"
                       size="small"
                       component={Link}
-                      href={`/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}/nsn-${part.nsn}`}
+                      href={`/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}/${part.nsn}`}
                     >
                       View Details
                     </Button>

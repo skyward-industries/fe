@@ -66,7 +66,7 @@ export default async function SearchResultsPage({
                   component={Link}
                   // IMPORTANT: This link goes to your *actual* NSN detail page
                   // You might need to adjust the link format if your catalog structure is different
-                  href={`/catalog/${part.fsg}/${slugify(part.fsg_title || '')}/${part.fsc}/${slugify(part.fsc_title || '')}/nsn-${part.nsn}`}
+                  href={`/catalog/${part.fsg}/${slugify(part.fsg_title || '')}/${part.fsc}/${slugify(part.fsc_title || '')}/${part.nsn}`}
                 >
                   <ListItemText
                     primary={`Part Number: ${part.part_number?.toUpperCase() || 'N/A'}`}
