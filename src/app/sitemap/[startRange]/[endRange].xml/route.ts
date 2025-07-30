@@ -50,7 +50,7 @@ export async function GET(
   const params = await props.params;
   const startRange = parseInt(params.startRange, 10);
   const endRange = parseInt(params.endRange, 10);
-  const batchSize = 2000; // Smaller batches for faster initial response
+  const batchSize = 3000; // Standard batch size for sitemap generation
 
   console.log(`📥 Sitemap request for range: ${startRange.toLocaleString()}-${endRange.toLocaleString()}`);
 
@@ -63,14 +63,17 @@ export async function GET(
     "X-Processing": "true"
   });
 
+  // Calculate actual range size
+  const rangeSize = endRange - startRange + 1;
+  
   if (
     isNaN(startRange) ||
     isNaN(endRange) ||
     startRange < 1 ||
     endRange < startRange ||
-    endRange - startRange > batchSize
+    rangeSize > batchSize
   ) {
-    console.log(`❌ Invalid parameters: ${startRange}-${endRange}`);
+    console.log(`❌ Invalid parameters: ${startRange}-${endRange} (range size: ${rangeSize}, max: ${batchSize})`);
     return new Response("Invalid sitemap parameters", { status: 400 });
   }
 
