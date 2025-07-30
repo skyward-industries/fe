@@ -67,7 +67,7 @@ export async function GET(request: Request) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-  let client;
+  let client: any;
   try {
     const startTime = Date.now();
     

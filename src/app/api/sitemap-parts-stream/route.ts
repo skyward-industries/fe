@@ -6,10 +6,9 @@ const BATCH_SIZE = 500; // Stream in smaller batches
 const MAX_PARTS = 10000; // Allow larger requests for streaming
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = request.url;
-  const params = new URLSearchParams(searchParams);
-  const limit = Math.min(parseInt(params.get("limit") || "3000"), MAX_PARTS);
-  const offset = parseInt(params.get("offset") || "0");
+  const { searchParams } = new URL(request.url);
+  const limit = Math.min(parseInt(searchParams.get("limit") || "3000"), MAX_PARTS);
+  const offset = parseInt(searchParams.get("offset") || "0");
   
   const startId = offset + 1;
   const endId = offset + limit;
