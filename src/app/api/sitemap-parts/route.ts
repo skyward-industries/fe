@@ -39,6 +39,22 @@ export async function GET(request: Request) {
   
   console.log(`📥 Sitemap API request: offset=${offset}, limit=${limit} (ID range: ${startId.toLocaleString()}-${endId.toLocaleString()})`);
 
+  // Simple rate limiting - reject if too many concurrent requests
+  const currentRequests = parseInt(process.env.CONCURRENT_REQUESTS || '0');
+  if (currentRequests > 5) {
+    console.log(`🚫 Rate limited: too many concurrent requests (${currentRequests})`);
+    return NextResponse.json([], {
+      status: 429, // Too Many Requests
+      headers: {
+        'Retry-After': '5',
+        'Cache-Control': 'public, max-age=60'
+      }
+    });
+  }
+
+  // Increment request counter
+  process.env.CONCURRENT_REQUESTS = (currentRequests + 1).toString();
+
   // Check if this is a known empty range
   if (isInKnownEmptyRange(startId, endId)) {
     console.log(`📭 Known empty range ${startId}-${endId}, returning empty immediately`);
@@ -71,7 +87,7 @@ export async function GET(request: Request) {
     ]);
 
     // Set aggressive timeout for ultra-fast response
-    await client.query(`SET statement_timeout = 3000`);
+    await client.query(`SET statement_timeout = 10000`); // 10 seconds instead of 3
     await client.query(`SET work_mem = '256MB'`);
     await client.query(`SET effective_cache_size = '4GB'`);
     
@@ -79,7 +95,6 @@ export async function GET(request: Request) {
 
     // Ultra-fast query strategy - fetch only what we need
     const query = `
-      /*+ INDEX(part_info part_info_id_idx) */
       SELECT 
         pi.fsg,
         pi.fsc,
@@ -109,7 +124,7 @@ export async function GET(request: Request) {
       headers: {
         'Cache-Control': parts.length === 0 
           ? 'public, max-age=604800' // Cache empty results for 1 week
-          : 'public, max-age=7200, stale-while-revalidate=3600', // 2h for non-empty
+          : 'public, max-age=3600, stale-while-revalidate=7200', // 1h cache, 2h stale
         'X-Parts-Count': parts.length.toString(),
         'X-Query-Time': queryTime.toString(),
         'X-Range': `${startId}-${endId}`,
@@ -124,7 +139,7 @@ export async function GET(request: Request) {
     console.error(`❌ Sitemap API failed for range ${startId}-${endId}:`, error.message);
     
     // For any error in high ranges, return empty result
-    if (startId > HIGH_ID_THRESHOLD) {
+    if (startId > HIGH_ID_THRESHOLD || error.message.includes('aborted')) {
       console.log(`⏱️ Error in high range ${startId}-${endId}, returning empty result`);
       return NextResponse.json([], {
         status: 200,
@@ -149,5 +164,8 @@ export async function GET(request: Request) {
     if (client) {
       client.release();
     }
+    // Decrement request counter
+    const currentRequests = parseInt(process.env.CONCURRENT_REQUESTS || '0');
+    process.env.CONCURRENT_REQUESTS = Math.max(0, currentRequests - 1).toString();
   }
 }
