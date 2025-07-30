@@ -71,22 +71,7 @@ export async function GET(request: Request) {
     console.log(`🚀 Ultra-fast query for range ${startId}-${endId}`);
 
     // Ultra-fast query strategy - fetch only what we need
-    const useMaterializedView = searchParams.get("mv") === "true";
-    
-    const query = useMaterializedView ? `
-      /*+ INDEX(sitemap_parts_mv sitemap_parts_mv_id_idx) */
-      SELECT 
-        fsg,
-        fsc,
-        nsn,
-        fsg_title,
-        fsc_title
-      FROM sitemap_parts_mv
-      WHERE id >= $1 
-        AND id <= $2
-      ORDER BY id
-      LIMIT $3
-    ` : `
+    const query = `
       /*+ INDEX(part_info part_info_id_idx) */
       SELECT 
         pi.fsg,
@@ -106,30 +91,6 @@ export async function GET(request: Request) {
 
     const result = await client.query(query, [startId, endId, limit]);
     const parts = result.rows;
-
-    // For very high ranges with no titles, populate them
-    if (startId > VERY_HIGH_ID_THRESHOLD && parts.length > 0) {
-      // Get titles in bulk
-      const fsgs = Array.from(new Set(parts.map((p: any) => p.fsg)));
-      if (fsgs.length > 0) {
-        const titlesQuery = `
-          SELECT DISTINCT fsg, fsg_title, fsc_title 
-          FROM wp_fsgs_new 
-          WHERE fsg = ANY($1)
-        `;
-        const titlesResult = await client.query(titlesQuery, [fsgs]);
-        const titlesMap = new Map(titlesResult.rows.map((r: any) => [r.fsg, r]));
-        
-        // Update parts with titles
-        parts.forEach((part: any) => {
-          const titles: any = titlesMap.get(part.fsg);
-          if (titles) {
-            part.fsg_title = titles.fsg_title;
-            part.fsc_title = titles.fsc_title;
-          }
-        });
-      }
-    }
 
     const queryTime = Date.now() - startTime;
     console.log(`✅ Retrieved ${parts.length} parts in ${queryTime}ms for range ${startId}-${endId}`);
