@@ -61,7 +61,14 @@ export async function GET(request: Request) {
   let client;
   try {
     const startTime = Date.now();
-    client = await pool.connect();
+    
+    // Wait for available connection with timeout
+    client = await Promise.race([
+      pool.connect(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection timeout')), 5000)
+      )
+    ]);
 
     // Set aggressive timeout for ultra-fast response
     await client.query(`SET statement_timeout = 3000`);
