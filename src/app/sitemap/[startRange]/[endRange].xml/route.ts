@@ -54,6 +54,15 @@ export async function GET(
 
   console.log(`📥 Sitemap request for range: ${startRange.toLocaleString()}-${endRange.toLocaleString()}`);
 
+  // Send early headers to prevent browser timeout
+  const headers = new Headers({
+    "Content-Type": "application/xml; charset=utf-8",
+    "Cache-Control": "public, max-age=3600, stale-while-revalidate=1800",
+    "X-Content-Type-Options": "nosniff",
+    "Connection": "keep-alive",
+    "X-Processing": "true"
+  });
+
   if (
     isNaN(startRange) ||
     isNaN(endRange) ||
@@ -85,9 +94,9 @@ export async function GET(
     
     const startTime = Date.now();
     
-    // Set timeout for fetch - optimized for production deployment
+    // Set timeout for fetch - handle serverless cold starts
     const controller = new AbortController();
-    const fetchTimeout = offset >= 3000000 ? 25000 : 15000; // 25s for 3M+ ranges, 15s for others
+    const fetchTimeout = offset >= 3000000 ? 35000 : 20000; // Longer for cold starts
     const timeoutId = setTimeout(() => controller.abort(), fetchTimeout);
     
     const res = await fetch(apiUrl, {
@@ -209,15 +218,13 @@ export async function GET(
 
   const sitemap = generateSiteMap(validParts);
 
+  // Use the pre-defined headers and add response-specific ones
+  headers.set("X-Parts-Count", validParts.length.toString());
+  headers.set("X-Generation-Time", Date.now().toString());
+  headers.delete("X-Processing"); // Remove processing indicator
+
   return new Response(sitemap, {
     status: 200,
-    headers: {
-      "Content-Type": "application/xml; charset=utf-8",
-      "Cache-Control": "public, max-age=3600, stale-while-revalidate=1800", // Shorter cache for faster updates
-      "X-Content-Type-Options": "nosniff",
-      "X-Parts-Count": validParts.length.toString(),
-      "X-Generation-Time": Date.now().toString(),
-      "Connection": "keep-alive" // Keep connection alive for faster response
-    },
+    headers: headers,
   });
 }
