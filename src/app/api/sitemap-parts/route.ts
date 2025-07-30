@@ -63,57 +63,45 @@ export async function GET(request: Request) {
     const startTime = Date.now();
     client = await pool.connect();
 
-    // Adaptive timeout based on range - problematic ranges get more time
-    const isProblematicRange = startId >= 870000 && startId <= 890000;
-    const queryTimeout = isProblematicRange ? 5000 : 10000; // Shorter timeout for slow ranges
-    await client.query(`SET statement_timeout = ${queryTimeout}`);
+    // Set aggressive timeout for ultra-fast response
+    await client.query(`SET statement_timeout = 3000`);
+    await client.query(`SET work_mem = '256MB'`);
+    await client.query(`SET effective_cache_size = '4GB'`);
     
-    // Skip existence checks entirely - go straight to optimized query for all ranges
-    console.log(`🚀 Fast query for range ${startId}-${endId}: skipping existence check`);
+    console.log(`🚀 Ultra-fast query for range ${startId}-${endId}`);
 
-    // Adaptive query strategy based on range performance
-    const query = isProblematicRange ? `
+    // Ultra-fast query strategy - fetch only what we need
+    const useMaterializedView = searchParams.get("mv") === "true";
+    
+    const query = useMaterializedView ? `
+      /*+ INDEX(sitemap_parts_mv sitemap_parts_mv_id_idx) */
+      SELECT 
+        fsg,
+        fsc,
+        nsn,
+        fsg_title,
+        fsc_title
+      FROM sitemap_parts_mv
+      WHERE id >= $1 
+        AND id <= $2
+      ORDER BY id
+      LIMIT $3
+    ` : `
+      /*+ INDEX(part_info part_info_id_idx) */
       SELECT 
         pi.fsg,
         pi.fsc,
         pi.nsn,
-        fsgs.fsg_title,
-        fsgs.fsc_title
+        COALESCE(fsgs.fsg_title, '') as fsg_title,
+        COALESCE(fsgs.fsc_title, '') as fsc_title
       FROM part_info pi
-      INNER JOIN wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg
+      LEFT JOIN wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg AND pi.fsc = fsgs.fsc
       WHERE pi.id >= $1 
         AND pi.id <= $2
         AND pi.nsn IS NOT NULL 
         AND pi.nsn != ''
-        AND fsgs.fsg_title IS NOT NULL 
-        AND fsgs.fsc_title IS NOT NULL
       ORDER BY pi.id
       LIMIT $3
-    ` : `
-      /*+ INDEX(part_info part_info_pkey) */
-      WITH fast_parts AS (
-        SELECT 
-          pi.fsg,
-          pi.fsc,
-          pi.nsn
-        FROM part_info pi
-        WHERE pi.id >= $1 
-          AND pi.id <= $2
-          AND pi.nsn IS NOT NULL 
-          AND pi.nsn != ''
-        ORDER BY pi.id
-        LIMIT $3
-      )
-      SELECT 
-        fp.fsg,
-        fp.fsc,
-        fp.nsn,
-        fsgs.fsg_title,
-        fsgs.fsc_title
-      FROM fast_parts fp
-      INNER JOIN wp_fsgs_new fsgs ON fp.fsg = fsgs.fsg
-      WHERE fsgs.fsg_title IS NOT NULL 
-        AND fsgs.fsc_title IS NOT NULL
     `;
 
     const result = await client.query(query, [startId, endId, limit]);
