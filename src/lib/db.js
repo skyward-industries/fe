@@ -11,17 +11,17 @@ const isProduction = process.env.NODE_ENV === 'production';
 const isRds = (process.env.PGHOST || '').includes('amazonaws.com');
 
 const pool = new Pool({
+  // Use process.env directly (variables are loaded by Next.js/Vercel environment)
   host: process.env.PGHOST,
   port: parseInt(process.env.PGPORT || '5432', 10),
   database: process.env.PGDATABASE,
   user: process.env.PGUSER,
   password: process.env.PGPASSWORD,
-  ssl: process.env.PGSSLMODE === 'require' ? { rejectUnauthorized: false } : false,
-  // Connection pool configuration for better performance
-  max: 20, // Maximum number of clients in the pool
-  idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-  connectionTimeoutMillis: 5000, // Return an error after 5 seconds if connection could not be established
-  maxUses: 7500, // Close and replace a connection after it has been used 7500 times
+  ssl: isRds ? { rejectUnauthorized: false } : (isProduction ? { rejectUnauthorized: false } : false),
+  // Increase pool size for better concurrency
+  max: 20, // Maximum number of connections
+  idleTimeoutMillis: 30000, // Close idle connections after 30 seconds
+  connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
 });
 
 pool.on('connect', () => {
@@ -29,16 +29,14 @@ pool.on('connect', () => {
 });
 
 pool.on('error', (err) => {
-  console.error('[FE DB] Unexpected error on idle PostgreSQL client', err);
+  console.error('[FE DB] Unexpected error on idle client', err);
+  process.exit(-1);
 });
 
-// Pool monitoring
-let poolCheckInterval;
-if (process.env.NODE_ENV === 'production') {
-  poolCheckInterval = setInterval(() => {
-    console.log(`[FE DB Pool] Total: ${pool.totalCount}, Idle: ${pool.idleCount}, Waiting: ${pool.waitingCount}`);
-  }, 30000); // Log every 30 seconds
-}
+// Monitor pool status
+setInterval(() => {
+  console.log(`[FE DB Pool] Total: ${pool.totalCount}, Idle: ${pool.idleCount}, Waiting: ${pool.waitingCount}`);
+}, 30000); // Log every 30 seconds
 
 // Clean up on exit
 process.on('SIGTERM', async () => {
