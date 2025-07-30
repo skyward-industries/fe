@@ -25,31 +25,35 @@ export async function GET() {
    ID range: ${parseInt(stats.min_id).toLocaleString()} - ${parseInt(stats.max_id).toLocaleString()}
    NSN percentage: ${((stats.parts_with_nsn / stats.total_parts) * 100).toFixed(1)}%`);
 
-    // Find valid ranges for sitemaps
+    // Find valid ranges for sitemaps - OPTIMIZED VERSION
     console.log("🔍 Analyzing valid sitemap ranges...");
     const rangeQuery = `
-      WITH range_analysis AS (
+      /*+ INDEX(part_info part_info_id_idx) INDEX(wp_fsgs_new wp_fsgs_new_fsg_fsc_idx) */
+      WITH sample_ranges AS (
         SELECT 
-          FLOOR(pi.id/3000)*3000 + 1 as start_id,
-          FLOOR(pi.id/3000)*3000 + 3000 as end_id,
-          COUNT(DISTINCT pi.nsn) as valid_nsn_count
-        FROM part_info pi
-        LEFT JOIN wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg AND pi.fsc = fsgs.fsc
-        WHERE pi.nsn IS NOT NULL 
+          FLOOR(id/3000)*3000 + 1 as start_id,
+          FLOOR(id/3000)*3000 + 3000 as end_id
+        FROM part_info 
+        WHERE id % 3000 = 1 
+        AND nsn IS NOT NULL 
+        AND nsn != ''
+        LIMIT 100
+      )
+      SELECT 
+        sr.start_id,
+        sr.end_id,
+        COUNT(DISTINCT pi.nsn) as valid_nsn_count,
+        ROUND(COUNT(DISTINCT pi.nsn) * 100.0 / 3000, 2) as density_percent
+      FROM sample_ranges sr
+      INNER JOIN part_info pi ON pi.id BETWEEN sr.start_id AND sr.end_id
+      LEFT JOIN wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg AND pi.fsc = fsgs.fsc
+      WHERE pi.nsn IS NOT NULL 
         AND pi.nsn != ''
         AND fsgs.fsg_title IS NOT NULL 
         AND fsgs.fsc_title IS NOT NULL
-        GROUP BY FLOOR(pi.id/3000)
-        HAVING COUNT(DISTINCT pi.nsn) > 0
-      )
-      SELECT 
-        start_id,
-        end_id,
-        valid_nsn_count,
-        ROUND(valid_nsn_count * 100.0 / 3000, 2) as density_percent
-      FROM range_analysis
-      ORDER BY start_id
-      LIMIT 100
+      GROUP BY sr.start_id, sr.end_id
+      HAVING COUNT(DISTINCT pi.nsn) > 0
+      ORDER BY sr.start_id
     `;
 
     const rangeResult = await pool.query(rangeQuery);
