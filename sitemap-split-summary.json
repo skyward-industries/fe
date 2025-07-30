@@ -1,0 +1,40 @@
+{
+  "created": "2025-07-28T05:52:48.046Z",
+  "totalWorkingRanges": 100,
+  "totalFailingRanges": 0,
+  "sitemapIndexesCreated": 5,
+  "maxSitemapsPerIndex": 20,
+  "indexes": [
+    {
+      "filename": "public/sitemap-index-1.xml",
+      "ranges": 20,
+      "startRange": 1,
+      "endRange": 60000
+    },
+    {
+      "filename": "public/sitemap-index-2.xml",
+      "ranges": 20,
+      "startRange": 60001,
+      "endRange": 120000
+    },
+    {
+      "filename": "public/sitemap-index-3.xml",
+      "ranges": 20,
+      "startRange": 120001,
+      "endRange": 180000
+    },
+    {
+      "filename": "public/sitemap-index-4.xml",
+      "ranges": 20,
+      "startRange": 180001,
+      "endRange": 240000
+    },
+    {
+      "filename": "public/sitemap-index-5.xml",
+      "ranges": 20,
+      "startRange": 240001,
+      "endRange": 300000
+    }
+  ],
+  "failingRanges": []
+}

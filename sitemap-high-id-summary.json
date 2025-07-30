@@ -1,0 +1,290 @@
+{
+  "created": "2025-07-28T18:13:46.087Z",
+  "startRange": 1560001,
+  "totalWorkingRanges": 469,
+  "totalFailingRanges": 1531,
+  "successRate": "23.4%",
+  "sitemapIndexesCreated": 24,
+  "indexRange": "27-50",
+  "maxSitemapsPerIndex": 20,
+  "testSettings": {
+    "timeout": 6000,
+    "retries": 2,
+    "batchSize": 15
+  },
+  "errorAnalysis": {
+    "timeout_after_retries": 1531
+  },
+  "indexes": [
+    {
+      "filename": "public/sitemap-index-27.xml",
+      "indexNum": 27,
+      "ranges": 20,
+      "startRange": 1560001,
+      "endRange": 1620000
+    },
+    {
+      "filename": "public/sitemap-index-28.xml",
+      "indexNum": 28,
+      "ranges": 20,
+      "startRange": 1620001,
+      "endRange": 1680000
+    },
+    {
+      "filename": "public/sitemap-index-29.xml",
+      "indexNum": 29,
+      "ranges": 20,
+      "startRange": 1680001,
+      "endRange": 1740000
+    },
+    {
+      "filename": "public/sitemap-index-30.xml",
+      "indexNum": 30,
+      "ranges": 20,
+      "startRange": 1740001,
+      "endRange": 1800000
+    },
+    {
+      "filename": "public/sitemap-index-31.xml",
+      "indexNum": 31,
+      "ranges": 20,
+      "startRange": 1800001,
+      "endRange": 1860000
+    },
+    {
+      "filename": "public/sitemap-index-32.xml",
+      "indexNum": 32,
+      "ranges": 20,
+      "startRange": 1860001,
+      "endRange": 1920000
+    },
+    {
+      "filename": "public/sitemap-index-33.xml",
+      "indexNum": 33,
+      "ranges": 20,
+      "startRange": 1920001,
+      "endRange": 1980000
+    },
+    {
+      "filename": "public/sitemap-index-34.xml",
+      "indexNum": 34,
+      "ranges": 20,
+      "startRange": 1980001,
+      "endRange": 2040000
+    },
+    {
+      "filename": "public/sitemap-index-35.xml",
+      "indexNum": 35,
+      "ranges": 20,
+      "startRange": 2040001,
+      "endRange": 2100000
+    },
+    {
+      "filename": "public/sitemap-index-36.xml",
+      "indexNum": 36,
+      "ranges": 20,
+      "startRange": 2100001,
+      "endRange": 2160000
+    },
+    {
+      "filename": "public/sitemap-index-37.xml",
+      "indexNum": 37,
+      "ranges": 20,
+      "startRange": 2160001,
+      "endRange": 2220000
+    },
+    {
+      "filename": "public/sitemap-index-38.xml",
+      "indexNum": 38,
+      "ranges": 20,
+      "startRange": 2220001,
+      "endRange": 2280000
+    },
+    {
+      "filename": "public/sitemap-index-39.xml",
+      "indexNum": 39,
+      "ranges": 20,
+      "startRange": 2280001,
+      "endRange": 2340000
+    },
+    {
+      "filename": "public/sitemap-index-40.xml",
+      "indexNum": 40,
+      "ranges": 20,
+      "startRange": 2340001,
+      "endRange": 2400000
+    },
+    {
+      "filename": "public/sitemap-index-41.xml",
+      "indexNum": 41,
+      "ranges": 20,
+      "startRange": 2400001,
+      "endRange": 2460000
+    },
+    {
+      "filename": "public/sitemap-index-42.xml",
+      "indexNum": 42,
+      "ranges": 20,
+      "startRange": 2460001,
+      "endRange": 2520000
+    },
+    {
+      "filename": "public/sitemap-index-43.xml",
+      "indexNum": 43,
+      "ranges": 20,
+      "startRange": 2520001,
+      "endRange": 2580000
+    },
+    {
+      "filename": "public/sitemap-index-44.xml",
+      "indexNum": 44,
+      "ranges": 20,
+      "startRange": 2580001,
+      "endRange": 2640000
+    },
+    {
+      "filename": "public/sitemap-index-45.xml",
+      "indexNum": 45,
+      "ranges": 20,
+      "startRange": 2640001,
+      "endRange": 2703000
+    },
+    {
+      "filename": "public/sitemap-index-46.xml",
+      "indexNum": 46,
+      "ranges": 20,
+      "startRange": 2703001,
+      "endRange": 2790000
+    },
+    {
+      "filename": "public/sitemap-index-47.xml",
+      "indexNum": 47,
+      "ranges": 20,
+      "startRange": 2790001,
+      "endRange": 2859000
+    },
+    {
+      "filename": "public/sitemap-index-48.xml",
+      "indexNum": 48,
+      "ranges": 20,
+      "startRange": 2859001,
+      "endRange": 2985000
+    },
+    {
+      "filename": "public/sitemap-index-49.xml",
+      "indexNum": 49,
+      "ranges": 20,
+      "startRange": 2988001,
+      "endRange": 3462000
+    },
+    {
+      "filename": "public/sitemap-index-50.xml",
+      "indexNum": 50,
+      "ranges": 9,
+      "startRange": 3468001,
+      "endRange": 3519000
+    }
+  ],
+  "failingRangesSample": [
+    {
+      "start": 2679001,
+      "end": 2682000,
+      "error": "timeout_after_retries"
+    },
+    {
+      "start": 2712001,
+      "end": 2715000,
+      "error": "timeout_after_retries"
+    },
+    {
+      "start": 2715001,
+      "end": 2718000,
+      "error": "timeout_after_retries"
+    },
+    {
+      "start": 2748001,
+      "end": 2751000,
+      "error": "timeout_after_retries"
+    },
+    {
+      "start": 2751001,
+      "end": 2754000,
+      "error": "timeout_after_retries"
+    },
+    {
+      "start": 2754001,
+      "end": 2757000,
+      "error": "timeout_after_retries"
+    },
+    {
+      "start": 2757001,
+      "end": 2760000,
+      "error": "timeout_after_retries"
+    },
+    {
+      "start": 2772001,
+      "end": 2775000,
+      "error": "timeout_after_retries"
+    },
+    {
+      "start": 2775001,
+      "end": 2778000,
+      "error": "timeout_after_retries"
+    },
+    {
+      "start": 2781001,
+      "end": 2784000,
+      "error": "timeout_after_retries"
+    },
+    {
+      "start": 2796001,
+      "end": 2799000,
+      "error": "timeout_after_retries"
+    },
+    {
+      "start": 2799001,
+      "end": 2802000,
+      "error": "timeout_after_retries"
+    },
+    {
+      "start": 2823001,
+      "end": 2826000,
+      "error": "timeout_after_retries"
+    },
+    {
+      "start": 2868001,
+      "end": 2871000,
+      "error": "timeout_after_retries"
+    },
+    {
+      "start": 2871001,
+      "end": 2874000,
+      "error": "timeout_after_retries"
+    },
+    {
+      "start": 2898001,
+      "end": 2901000,
+      "error": "timeout_after_retries"
+    },
+    {
+      "start": 2901001,
+      "end": 2904000,
+      "error": "timeout_after_retries"
+    },
+    {
+      "start": 2904001,
+      "end": 2907000,
+      "error": "timeout_after_retries"
+    },
+    {
+      "start": 2907001,
+      "end": 2910000,
+      "error": "timeout_after_retries"
+    },
+    {
+      "start": 2922001,
+      "end": 2925000,
+      "error": "timeout_after_retries"
+    }
+  ]
+}

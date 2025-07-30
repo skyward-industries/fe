@@ -1,0 +1,366 @@
+{
+  "created": "2025-07-28T05:53:57.753Z",
+  "startRange": 300001,
+  "totalWorkingRanges": 419,
+  "totalFailingRanges": 1,
+  "sitemapIndexesCreated": 21,
+  "indexRange": "6-26",
+  "maxSitemapsPerIndex": 20,
+  "indexes": [
+    {
+      "filename": "public/sitemap-index-6.xml",
+      "indexNum": 6,
+      "ranges": 20,
+      "startRange": 300001,
+      "endRange": 360000
+    },
+    {
+      "filename": "public/sitemap-index-7.xml",
+      "indexNum": 7,
+      "ranges": 20,
+      "startRange": 360001,
+      "endRange": 420000
+    },
+    {
+      "filename": "public/sitemap-index-8.xml",
+      "indexNum": 8,
+      "ranges": 20,
+      "startRange": 420001,
+      "endRange": 480000
+    },
+    {
+      "filename": "public/sitemap-index-9.xml",
+      "indexNum": 9,
+      "ranges": 20,
+      "startRange": 480001,
+      "endRange": 540000
+    },
+    {
+      "filename": "public/sitemap-index-10.xml",
+      "indexNum": 10,
+      "ranges": 20,
+      "startRange": 540001,
+      "endRange": 600000
+    },
+    {
+      "filename": "public/sitemap-index-11.xml",
+      "indexNum": 11,
+      "ranges": 20,
+      "startRange": 600001,
+      "endRange": 660000
+    },
+    {
+      "filename": "public/sitemap-index-12.xml",
+      "indexNum": 12,
+      "ranges": 20,
+      "startRange": 660001,
+      "endRange": 720000
+    },
+    {
+      "filename": "public/sitemap-index-13.xml",
+      "indexNum": 13,
+      "ranges": 20,
+      "startRange": 720001,
+      "endRange": 783000
+    },
+    {
+      "filename": "public/sitemap-index-14.xml",
+      "indexNum": 14,
+      "ranges": 20,
+      "startRange": 783001,
+      "endRange": 843000
+    },
+    {
+      "filename": "public/sitemap-index-15.xml",
+      "indexNum": 15,
+      "ranges": 20,
+      "startRange": 843001,
+      "endRange": 903000
+    },
+    {
+      "filename": "public/sitemap-index-16.xml",
+      "indexNum": 16,
+      "ranges": 20,
+      "startRange": 903001,
+      "endRange": 963000
+    },
+    {
+      "filename": "public/sitemap-index-17.xml",
+      "indexNum": 17,
+      "ranges": 20,
+      "startRange": 963001,
+      "endRange": 1023000
+    },
+    {
+      "filename": "public/sitemap-index-18.xml",
+      "indexNum": 18,
+      "ranges": 20,
+      "startRange": 1023001,
+      "endRange": 1083000
+    },
+    {
+      "filename": "public/sitemap-index-19.xml",
+      "indexNum": 19,
+      "ranges": 20,
+      "startRange": 1083001,
+      "endRange": 1143000
+    },
+    {
+      "filename": "public/sitemap-index-20.xml",
+      "indexNum": 20,
+      "ranges": 20,
+      "startRange": 1143001,
+      "endRange": 1203000
+    },
+    {
+      "filename": "public/sitemap-index-21.xml",
+      "indexNum": 21,
+      "ranges": 20,
+      "startRange": 1203001,
+      "endRange": 1263000
+    },
+    {
+      "filename": "public/sitemap-index-22.xml",
+      "indexNum": 22,
+      "ranges": 20,
+      "startRange": 1263001,
+      "endRange": 1323000
+    },
+    {
+      "filename": "public/sitemap-index-23.xml",
+      "indexNum": 23,
+      "ranges": 20,
+      "startRange": 1323001,
+      "endRange": 1383000
+    },
+    {
+      "filename": "public/sitemap-index-24.xml",
+      "indexNum": 24,
+      "ranges": 20,
+      "startRange": 1383001,
+      "endRange": 1443000
+    },
+    {
+      "filename": "public/sitemap-index-25.xml",
+      "indexNum": 25,
+      "ranges": 20,
+      "startRange": 1443001,
+      "endRange": 1503000
+    },
+    {
+      "filename": "public/sitemap-index-26.xml",
+      "indexNum": 26,
+      "ranges": 19,
+      "startRange": 1503001,
+      "endRange": 1560000
+    }
+  ],
+  "workingRanges": [
+    {
+      "start": 300001,
+      "end": 303000
+    },
+    {
+      "start": 303001,
+      "end": 306000
+    },
+    {
+      "start": 306001,
+      "end": 309000
+    },
+    {
+      "start": 309001,
+      "end": 312000
+    },
+    {
+      "start": 312001,
+      "end": 315000
+    },
+    {
+      "start": 315001,
+      "end": 318000
+    },
+    {
+      "start": 318001,
+      "end": 321000
+    },
+    {
+      "start": 321001,
+      "end": 324000
+    },
+    {
+      "start": 324001,
+      "end": 327000
+    },
+    {
+      "start": 327001,
+      "end": 330000
+    },
+    {
+      "start": 330001,
+      "end": 333000
+    },
+    {
+      "start": 333001,
+      "end": 336000
+    },
+    {
+      "start": 336001,
+      "end": 339000
+    },
+    {
+      "start": 339001,
+      "end": 342000
+    },
+    {
+      "start": 342001,
+      "end": 345000
+    },
+    {
+      "start": 345001,
+      "end": 348000
+    },
+    {
+      "start": 348001,
+      "end": 351000
+    },
+    {
+      "start": 351001,
+      "end": 354000
+    },
+    {
+      "start": 354001,
+      "end": 357000
+    },
+    {
+      "start": 357001,
+      "end": 360000
+    },
+    {
+      "start": 360001,
+      "end": 363000
+    },
+    {
+      "start": 363001,
+      "end": 366000
+    },
+    {
+      "start": 366001,
+      "end": 369000
+    },
+    {
+      "start": 369001,
+      "end": 372000
+    },
+    {
+      "start": 372001,
+      "end": 375000
+    },
+    {
+      "start": 375001,
+      "end": 378000
+    },
+    {
+      "start": 378001,
+      "end": 381000
+    },
+    {
+      "start": 381001,
+      "end": 384000
+    },
+    {
+      "start": 384001,
+      "end": 387000
+    },
+    {
+      "start": 387001,
+      "end": 390000
+    },
+    {
+      "start": 390001,
+      "end": 393000
+    },
+    {
+      "start": 393001,
+      "end": 396000
+    },
+    {
+      "start": 396001,
+      "end": 399000
+    },
+    {
+      "start": 399001,
+      "end": 402000
+    },
+    {
+      "start": 402001,
+      "end": 405000
+    },
+    {
+      "start": 405001,
+      "end": 408000
+    },
+    {
+      "start": 408001,
+      "end": 411000
+    },
+    {
+      "start": 411001,
+      "end": 414000
+    },
+    {
+      "start": 414001,
+      "end": 417000
+    },
+    {
+      "start": 417001,
+      "end": 420000
+    },
+    {
+      "start": 420001,
+      "end": 423000
+    },
+    {
+      "start": 423001,
+      "end": 426000
+    },
+    {
+      "start": 426001,
+      "end": 429000
+    },
+    {
+      "start": 429001,
+      "end": 432000
+    },
+    {
+      "start": 432001,
+      "end": 435000
+    },
+    {
+      "start": 435001,
+      "end": 438000
+    },
+    {
+      "start": 438001,
+      "end": 441000
+    },
+    {
+      "start": 441001,
+      "end": 444000
+    },
+    {
+      "start": 444001,
+      "end": 447000
+    },
+    {
+      "start": 447001,
+      "end": 450000
+    }
+  ],
+  "failingRanges": [
+    {
+      "start": 726001,
+      "end": 729000
+    }
+  ]
+}
