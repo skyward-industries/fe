@@ -99,37 +99,23 @@ async function generateStaticSitemaps() {
   }
   
   try {
-    // Get total count of parts using the correct table structure
-    const countQuery = `
-      SELECT COUNT(DISTINCT pi.nsn) as total 
-      FROM part_info pi
-      JOIN wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg AND pi.fsc = fsgs.fsc
-      WHERE pi.nsn IS NOT NULL 
-        AND pi.fsg IS NOT NULL 
-        AND pi.fsc IS NOT NULL
-        AND fsgs.fsg_title IS NOT NULL 
-        AND fsgs.fsc_title IS NOT NULL
-        AND LENGTH(TRIM(pi.nsn)) = 16
-    `;
-    
-    const countResult = await pool.query(countQuery);
-    const totalParts = parseInt(countResult.rows[0].total);
-    const totalBatches = Math.ceil(totalParts / batchSize);
-    
-    console.log(`📊 Total parts: ${totalParts.toLocaleString()}`);
-    console.log(`📦 Total batches: ${totalBatches.toLocaleString()}`);
+    // Skip expensive COUNT query - generate sitemaps until we run out of data
+    console.log('📊 Generating sitemaps incrementally (no upfront count)');
     
     // Generate sitemap index - we'll populate this as we create files
     const sitemapIndexUrls = [];
     const lastmod = new Date().toISOString();
     
+    let batchIndex = 0;
+    let hasMoreData = true;
+    
     // Generate individual sitemap files
-    for (let i = 0; i < totalBatches; i++) {
-      const startRange = i * batchSize + 1;
-      const endRange = Math.min((i + 1) * batchSize, totalParts);
-      const offset = startRange - 1;
+    while (hasMoreData) {
+      const startRange = batchIndex * batchSize + 1;
+      const endRange = (batchIndex + 1) * batchSize;
+      const offset = batchIndex * batchSize;
       
-      console.log(`📄 Generating sitemap ${i + 1}/${totalBatches} (${startRange}-${endRange})`);
+      console.log(`📄 Generating sitemap batch ${batchIndex + 1} (offset ${offset})`);
       
       const query = `
         SELECT DISTINCT
@@ -162,9 +148,18 @@ async function generateStaticSitemaps() {
         sitemapIndexUrls.push(`https://skywardparts.com/${filename}`);
         
         console.log(`   ✅ Generated ${filename} with ${parts.length} parts`);
+        
+        // If we got fewer parts than requested, we've reached the end
+        if (parts.length < batchSize) {
+          hasMoreData = false;
+        }
       } else {
-        console.log(`   📭 Skipped empty range ${startRange}-${endRange}`);
+        // No more data
+        hasMoreData = false;
+        console.log(`   📭 No more data - stopping at batch ${batchIndex + 1}`);
       }
+      
+      batchIndex++;
       
       // Small delay to avoid overwhelming the database
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -183,7 +178,7 @@ ${sitemapIndexUrls.map(url => `  <sitemap>
     console.log(`✅ Generated sitemap index with ${sitemapIndexUrls.length} sitemap files`);
     
     console.log('🎉 Static sitemap generation complete!');
-    console.log(`📊 Generated ${sitemapIndexUrls.length} sitemap files with ${totalParts.toLocaleString()} total parts`);
+    console.log(`📊 Generated ${sitemapIndexUrls.length} sitemap files`);
     
   } catch (error) {
     console.error('❌ Error generating sitemaps:', error);
