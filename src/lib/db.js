@@ -147,7 +147,7 @@ async function getPartsByNSN(nsn) {
     LEFT JOIN public.v_flis_management vfm ON pi.niin = vfm.niin
     LEFT JOIN public.wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg AND pi.fsc = fsgs.fsc
     LEFT JOIN public.freight_info fi ON pi.niin = fi.niin
-    WHERE pi.nsn = $1;
+    WHERE REPLACE(pi.nsn, '-', '') = $1;
   `;
   
   let client;
