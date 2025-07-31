@@ -34,7 +34,7 @@ const pool = new Pool({
   idleTimeoutMillis: 60000,
   connectionTimeoutMillis: 60000,
   acquireTimeoutMillis: 30000,
-  statement_timeout: 120000, // 2 minutes for sitemap generation
+  statement_timeout: 300000, // 5 minutes for sitemap generation
 });
 
 function slugify(text) {
@@ -80,7 +80,13 @@ async function generateStaticSitemaps() {
   const publicDir = path.join(process.cwd(), 'public');
   const batchSize = 2000; // Keep consistent with existing GSC submissions
   
+  // Allow resuming from a specific batch via command line argument
+  const startFromBatch = process.argv[2] ? parseInt(process.argv[2]) : 0;
+  
   console.log('🚀 Starting static sitemap generation...');
+  if (startFromBatch > 0) {
+    console.log(`🔄 Resuming from batch ${startFromBatch + 1} (offset ${startFromBatch * batchSize})`);
+  }
   console.log('📋 Database config:', {
     host: process.env.PGHOST,
     port: process.env.PGPORT,
@@ -106,7 +112,24 @@ async function generateStaticSitemaps() {
     const sitemapIndexUrls = [];
     const lastmod = new Date().toISOString();
     
-    let batchIndex = 0;
+    // If resuming, add existing sitemap files to the index
+    if (startFromBatch > 0) {
+      const existingFiles = fs.readdirSync(publicDir)
+        .filter(file => file.startsWith('sitemap-') && file.endsWith('.xml'))
+        .sort((a, b) => {
+          const aNum = parseInt(a.match(/sitemap-(\d+)-/)?.[1] || '0');
+          const bNum = parseInt(b.match(/sitemap-(\d+)-/)?.[1] || '0');
+          return aNum - bNum;
+        });
+      
+      existingFiles.forEach(file => {
+        sitemapIndexUrls.push(`https://skywardparts.com/${file}`);
+      });
+      
+      console.log(`📁 Found ${existingFiles.length} existing sitemap files`);
+    }
+    
+    let batchIndex = startFromBatch;
     let hasMoreData = true;
     
     // Generate individual sitemap files
@@ -138,7 +161,7 @@ async function generateStaticSitemaps() {
       const client = await pool.connect();
       
       try {
-        await client.query('SET statement_timeout = 120000'); // 2 minutes
+        await client.query('SET statement_timeout = 300000'); // 5 minutes
         const result = await client.query(query, [batchSize, offset]);
         const parts = result.rows;
         
