@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { pool } from "@/lib/db";
 
-const TIMEOUT_MS = 25000; // 25 seconds
+const TIMEOUT_MS = 8000; // Reduced to 8 seconds - fail fast
 const MAX_PARTS = 2000; // Optimized for fast loading
-const QUERY_TIMEOUT_MS = 20000; // 20 seconds for query
+const QUERY_TIMEOUT_MS = 5000; // Reduced to 5 seconds for query - fail fast
 
-// Known empty ranges based on data analysis
+// Known empty ranges based on data analysis and production logs
 const KNOWN_EMPTY_RANGES = [
   { start: 3000000, end: 5000000 },
   { start: 5500000, end: 10000000 },
@@ -16,8 +16,13 @@ const KNOWN_EMPTY_RANGES = [
   { start: 4300000, end: 4400000 },
   // High ID ranges that frequently timeout (2.6M-2.9M range)
   { start: 2650000, end: 2950000 },
-  // Range around 720k that's timing out
+  // Range around 720k that's timing out (from production logs)
   { start: 700000, end: 750000 },
+  // Range around 1M that's timing out (from production logs)
+  { start: 1000000, end: 1100000 },
+  // Additional high-ID ranges that are likely sparse
+  { start: 1500000, end: 2000000 },
+  { start: 2200000, end: 2500000 },
 ];
 
 function isInKnownEmptyRange(startId: number, endId: number): boolean {
@@ -107,10 +112,11 @@ export async function GET(request: Request) {
     // Get database connection
     client = await pool.connect();
 
-    // Set aggressive timeout for ultra-fast response
+    // Set ultra-aggressive timeout for fail-fast response
     await client.query(`SET statement_timeout = ${QUERY_TIMEOUT_MS}`);
-    await client.query(`SET work_mem = '256MB'`); // Increased for better sorting
+    await client.query(`SET work_mem = '128MB'`); // Reduced to avoid memory issues
     await client.query(`SET enable_seqscan = OFF`); // Force index usage
+    await client.query(`SET random_page_cost = 1.1`); // Favor index scans
 
     // Get FSG/FSC cache
     const cache = await getFsgFscCache(client);
@@ -165,16 +171,17 @@ export async function GET(request: Request) {
   } catch (error: any) {
     console.error(`❌ Sitemap API failed for range ${startId}-${endId}:`, error.message);
 
-    // For any error in high ranges, return empty result
-    if (startId > 1000000 || error.message.includes('timeout')) {
-      console.log(`⏱️ Error in range ${startId}-${endId}, returning empty result`);
+    // For any error in high ranges or timeout, return empty result immediately
+    if (startId > 500000 || error.message.includes('timeout') || error.message.includes('aborted')) {
+      console.log(`⏱️ Error in range ${startId}-${endId}, returning empty result (fail-fast)`);
       return NextResponse.json([], {
         status: 200,
         headers: {
-          'Cache-Control': 'public, max-age=604800',
+          'Cache-Control': 'public, max-age=604800', // Cache empty results for 1 week
           'X-Parts-Count': '0',
           'X-Range': `${startId}-${endId}`,
-          'X-Error-Fallback': 'true'
+          'X-Error-Fallback': 'true',
+          'X-Fail-Fast': 'true'
         }
       });
     }
