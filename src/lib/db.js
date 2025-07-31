@@ -19,15 +19,17 @@ const pool = new Pool({
   user: process.env.PGUSER,
   password: process.env.PGPASSWORD,
   ssl: isRds ? { rejectUnauthorized: false } : (isProduction ? { rejectUnauthorized: false } : false),
-  max: 50, // Increased from 10 to 50 to handle 37+ sessions
-  idleTimeoutMillis: 60000, // Increased to 60 seconds to keep connections longer
-  connectionTimeoutMillis: 10000, // Increased to 10 seconds for connection timeout
+  max: 20, // Reduced from 50 to 20 - avoid overwhelming database
+  min: 2, // Keep minimum connections
+  idleTimeoutMillis: 30000, // Reduced to 30 seconds - release connections faster
+  connectionTimeoutMillis: 5000, // Reduced to 5 seconds - fail fast on connection issues
+  acquireTimeoutMillis: 10000, // Max 10 seconds to acquire connection from pool
   // Add connection reuse settings
   allowExitOnIdle: false, // Don't exit when idle
   // Add connection validation
-  maxUses: 7500,
+  maxUses: 5000, // Reduced max uses per connection
   // Add statement timeout to prevent queries from running forever
-  statement_timeout: 30000, // 30 seconds max per query
+  statement_timeout: 10000, // Reduced to 10 seconds max per query
 });
 
 pool.on('connect', () => {
@@ -65,6 +67,50 @@ process.on('SIGTERM', () => {
   process.exit(0);
 });
 
+// -----------------------------------------------------------------------------
+// In-memory cache to avoid repeated database queries under high load
+// -----------------------------------------------------------------------------
+const partInfoCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_SIZE = 10000; // Max 10k cached entries
+
+function getCacheKey(nsn) {
+  return `partinfo:${nsn}`;
+}
+
+function getCachedPartInfo(nsn) {
+  const key = getCacheKey(nsn);
+  const cached = partInfoCache.get(key);
+  
+  if (cached && (Date.now() - cached.timestamp) < CACHE_TTL) {
+    console.log(`[FE DB Cache] Cache HIT for NSN: ${nsn}`);
+    return cached.data;
+  }
+  
+  // Remove expired entry
+  if (cached) {
+    partInfoCache.delete(key);
+  }
+  
+  return null;
+}
+
+function setCachedPartInfo(nsn, data) {
+  // Implement LRU cache - remove oldest entries when cache is full
+  if (partInfoCache.size >= MAX_CACHE_SIZE) {
+    const firstKey = partInfoCache.keys().next().value;
+    partInfoCache.delete(firstKey);
+  }
+  
+  const key = getCacheKey(nsn);
+  partInfoCache.set(key, {
+    data: data,
+    timestamp: Date.now()
+  });
+  
+  console.log(`[FE DB Cache] Cached NSN: ${nsn} (cache size: ${partInfoCache.size})`);
+}
+
 
 // -----------------------------------------------------------------------------
 // Database Query Functions (Defined using standard async function syntax)
@@ -75,6 +121,12 @@ process.on('SIGTERM', () => {
  * Used by the FE Next.js app for its own data needs.
  */
 async function getPartsByNSN(nsn) {
+  // Check cache first to avoid database load
+  const cachedResult = getCachedPartInfo(nsn);
+  if (cachedResult) {
+    return cachedResult;
+  }
+  
   // OPTIMIZED QUERY: Remove expensive subqueries that were causing 25+ second timeouts
   const query = `
     SELECT
@@ -97,19 +149,47 @@ async function getPartsByNSN(nsn) {
     LEFT JOIN public.freight_info fi ON pi.niin = fi.niin
     WHERE pi.nsn = $1;
   `;
-   try {
-    const client = await pool.connect();
-    console.log(`[FE DB Query] Executing OPTIMIZED getPartsByNSN for NSN: ${nsn}`);
+  
+  let client;
+  try {
+    // Use timeout to avoid hanging on connection acquisition during high load
+    client = await Promise.race([
+      pool.connect(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection acquisition timeout')), 10000)
+      )
+    ]);
+    
+    console.log(`[FE DB Query] Executing CACHED+OPTIMIZED getPartsByNSN for NSN: ${nsn}`);
     const startTime = Date.now();
+    
+    // Set aggressive query timeout for high load scenarios
+    await client.query('SET statement_timeout = 8000'); // 8 second max
+    
     const result = await client.query(query, [nsn]);
     const queryTime = Date.now() - startTime;
-    client.release();
+    
     console.log(`[FE DB Query] getPartsByNSN found ${result.rows.length} record(s) in ${queryTime}ms.`);
-    if (result.rows.length === 0) { return []; }
+    
+    // Cache the result (even if empty) to avoid repeated queries
+    setCachedPartInfo(nsn, result.rows);
+    
     return result.rows;
    } catch (error) {
-     console.error('[FE DB Query] Error in getPartsByNSN:', error);
+     console.error(`[FE DB Query] Error in getPartsByNSN for ${nsn}:`, error.message);
+     
+     // Return cached data if available, even if expired, as fallback
+     const expiredCache = partInfoCache.get(getCacheKey(nsn));
+     if (expiredCache) {
+       console.log(`[FE DB Query] Returning expired cache for ${nsn} due to error`);
+       return expiredCache.data;
+     }
+     
      throw new Error('FE: Failed to fetch part data from the database.');
+   } finally {
+     if (client) {
+       client.release();
+     }
    }
 }
 

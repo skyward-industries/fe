@@ -1,6 +1,35 @@
 import { NextResponse } from "next/server";
-// @ts-ignore
-import {pool} from "@/lib/db";
+import { getPartsByNSN } from "@/lib/db";
+
+// Simple rate limiting to prevent database overload
+const requestCounts = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const RATE_LIMIT_MAX = 30; // Max 30 requests per minute per IP
+
+function getRateLimitKey(req: Request): string {
+  // Try to get IP from various headers (for production behind proxies)
+  const forwarded = req.headers.get('x-forwarded-for');
+  const realIp = req.headers.get('x-real-ip');
+  return forwarded?.split(',')[0] || realIp || 'unknown';
+}
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const rateLimitData = requestCounts.get(ip);
+  
+  if (!rateLimitData || now > rateLimitData.resetTime) {
+    // Reset or initialize rate limit
+    requestCounts.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return false;
+  }
+  
+  if (rateLimitData.count >= RATE_LIMIT_MAX) {
+    return true;
+  }
+  
+  rateLimitData.count++;
+  return false;
+}
 
 export async function GET(
   req: Request,
@@ -11,107 +40,58 @@ export async function GET(
 
   console.log(`📥 Incoming request for NSN: ${rawNsn} → ${nsn}`);
 
-  const query = `
-    SELECT 
-      pi.nsn,
-      pi.fsg,
-      pi.fsc,
-      fsgs.fsg_title,
-      fsgs.fsc_title,
-      pn.part_number,
-      pn.cage_code,
-      addr.company_name,
-      addr.street_address_1,
-      addr.street_address_2,
-      addr.po_box,
-      addr.city,
-      addr.state,
-      addr.zip,
-      addr.country,
-      addr.date_est,
-      vfm.moe_rule AS moe_rule_vfm,
-      vfm.aac,
-      vfm.sos,
-      vfm.sosm,
-      vfm.unit_of_issue,
-      vfm.controlled_inventory_code,
-      vfm.shelf_life_code,
-      vfm.replenishment_code,
-      vfm.management_control_code,
-      vfm.use_status_code,
-      vfm.effective_date AS row_effective_date,
-      vfm.row_observation_date AS row_obs_date_fm,
-      fi.activity_code,
-      fi.nmfc_number,
-      fi.nmfc_subcode,
-      fi.uniform_freight_class,
-      fi.ltl_class,
-      fi.wcc,
-      fi.shc,
-      fi.adc,
-      fi.acc,
-      fi.nmf_desc,
-      pi.niin
-    FROM part_info pi
-    LEFT JOIN part_numbers pn ON pi.nsn = pn.nsn
-    LEFT JOIN wp_cage_addresses addr ON pn.cage_code = addr.cage_code
-    LEFT JOIN v_flis_management vfm ON vfm.niin = pi.niin
-    LEFT JOIN wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg
-    LEFT JOIN freight_info fi ON pi.niin = fi.niin
-    WHERE REPLACE(pi.nsn, '-', '') = $1
-  `;
+  // Rate limiting check
+  const clientIp = getRateLimitKey(req);
+  if (isRateLimited(clientIp)) {
+    console.warn(`🚫 Rate limited request from ${clientIp} for NSN: ${nsn}`);
+    return NextResponse.json({
+      error: "Rate limit exceeded",
+      detail: "Too many requests. Please try again later.",
+    }, { 
+      status: 429,
+      headers: {
+        'Retry-After': '60',
+        'X-RateLimit-Limit': RATE_LIMIT_MAX.toString(),
+        'X-RateLimit-Window': (RATE_LIMIT_WINDOW / 1000).toString()
+      }
+    });
+  }
 
   try {
-    // Set a statement timeout for this specific query session
-    const client = await pool.connect();
-    try {
-      // Set 30-second timeout for this session
-      await client.query('SET statement_timeout = 30000');
-      
-      const result = await client.query(query, [nsn]);
-      const parts: any[] = result.rows;
-      
-      // Batch fetch all characteristics for all relevant niins
-      const niins = parts.map(p => p.niin).filter(Boolean);
-      let charMap: { [niin: string]: Array<{ mrc: string; requirements_statement: string; clear_text_reply: string }> } = {};
-      
-      if (niins.length > 0) {
-        const charRes = await client.query(
-          `SELECT niin, mrc, requirements_statement, clear_text_reply FROM char_data WHERE niin = ANY($1)`,
-          [niins]
-        );
-        for (const row of charRes.rows) {
-          if (!charMap[row.niin]) charMap[row.niin] = [];
-          charMap[row.niin].push({
-            mrc: row.mrc,
-            requirements_statement: row.requirements_statement,
-            clear_text_reply: row.clear_text_reply,
-          });
-        }
-      }
-      
-      for (const part of parts) {
-        part.characteristics = charMap[part.niin] || [];
-      }
-      
-      console.log(`✅ Found ${result.rowCount} record(s) for NSN: ${rawNsn}`);
-      return NextResponse.json(parts);
-    } finally {
-      // Always release the client back to the pool
-      client.release();
+    const startTime = Date.now();
+    
+    // Use the optimized cached function from db.js
+    const parts = await getPartsByNSN(nsn);
+    
+    const totalTime = Date.now() - startTime;
+    console.log(`✅ PartInfo API completed in ${totalTime}ms for NSN: ${nsn}`);
+
+    if (parts.length === 0) {
+      return NextResponse.json({
+        error: "NSN not found",
+        detail: `No records found for NSN: ${rawNsn}`,
+      }, { status: 404 });
     }
+
+    // Add empty characteristics array for compatibility
+    const partsWithCharacteristics = parts.map(part => ({
+      ...part,
+      characteristics: [] // Empty for now - can be populated separately if needed
+    }));
+
+    return NextResponse.json(partsWithCharacteristics, {
+      headers: {
+        'Cache-Control': 'public, max-age=300, s-maxage=600', // Cache for 5-10 minutes
+        'X-Query-Time': totalTime.toString(),
+        'X-Parts-Count': parts.length.toString(),
+        'X-Cached': 'true'
+      }
+    });
   } catch (error: any) {
-    if (error.code === '57014') {
-      console.error(`❌ Query timeout for NSN: ${rawNsn} - Query took longer than 30 seconds`);
-      return NextResponse.json(
-        { error: "Query timeout", detail: "The database query took too long to complete. Please try again." },
-        { status: 504 }
-      );
-    }
-    console.error("❌ DB query failed:", error.message || error);
-    return NextResponse.json(
-      { error: "DB query failed", detail: error.message || error },
-      { status: 500 }
-    );
+    console.error(`❌ PartInfo API error for NSN: ${rawNsn} - ${error.message}`);
+    return NextResponse.json({
+      error: "Database error",
+      detail: "Failed to fetch part information. Please try again later.",
+    }, { status: 500 });
   }
 }
