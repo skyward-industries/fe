@@ -25,9 +25,9 @@ const pool = new Pool({
   // Add connection reuse settings
   allowExitOnIdle: false, // Don't exit when idle
   // Add connection validation
-  connectionTimeoutMillis: 10000,
-  idleTimeoutMillis: 60000,
-  maxUses: 7500, 
+  maxUses: 7500,
+  // Add statement timeout to prevent queries from running forever
+  statement_timeout: 30000, // 30 seconds max per query
 });
 
 pool.on('connect', () => {

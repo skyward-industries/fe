@@ -62,31 +62,52 @@ export async function GET(
   `;
 
   try {
-    const result = await pool.query(query, [nsn]);
-    const parts: any[] = result.rows;
-    // Batch fetch all characteristics for all relevant niins
-    const niins = parts.map(p => p.niin).filter(Boolean);
-    let charMap: { [niin: string]: Array<{ mrc: string; requirements_statement: string; clear_text_reply: string }> } = {};
-    if (niins.length > 0) {
-      const charRes = await pool.query(
-        `SELECT niin, mrc, requirements_statement, clear_text_reply FROM char_data WHERE niin = ANY($1)`,
-        [niins]
-      );
-      for (const row of charRes.rows) {
-        if (!charMap[row.niin]) charMap[row.niin] = [];
-        charMap[row.niin].push({
-          mrc: row.mrc,
-          requirements_statement: row.requirements_statement,
-          clear_text_reply: row.clear_text_reply,
-        });
+    // Set a statement timeout for this specific query session
+    const client = await pool.connect();
+    try {
+      // Set 30-second timeout for this session
+      await client.query('SET statement_timeout = 30000');
+      
+      const result = await client.query(query, [nsn]);
+      const parts: any[] = result.rows;
+      
+      // Batch fetch all characteristics for all relevant niins
+      const niins = parts.map(p => p.niin).filter(Boolean);
+      let charMap: { [niin: string]: Array<{ mrc: string; requirements_statement: string; clear_text_reply: string }> } = {};
+      
+      if (niins.length > 0) {
+        const charRes = await client.query(
+          `SELECT niin, mrc, requirements_statement, clear_text_reply FROM char_data WHERE niin = ANY($1)`,
+          [niins]
+        );
+        for (const row of charRes.rows) {
+          if (!charMap[row.niin]) charMap[row.niin] = [];
+          charMap[row.niin].push({
+            mrc: row.mrc,
+            requirements_statement: row.requirements_statement,
+            clear_text_reply: row.clear_text_reply,
+          });
+        }
       }
+      
+      for (const part of parts) {
+        part.characteristics = charMap[part.niin] || [];
+      }
+      
+      console.log(`✅ Found ${result.rowCount} record(s) for NSN: ${rawNsn}`);
+      return NextResponse.json(parts);
+    } finally {
+      // Always release the client back to the pool
+      client.release();
     }
-    for (const part of parts) {
-      part.characteristics = charMap[part.niin] || [];
-    }
-    console.log(`✅ Found ${result.rowCount} record(s) for NSN: ${rawNsn}`);
-    return NextResponse.json(parts);
   } catch (error: any) {
+    if (error.code === '57014') {
+      console.error(`❌ Query timeout for NSN: ${rawNsn} - Query took longer than 30 seconds`);
+      return NextResponse.json(
+        { error: "Query timeout", detail: "The database query took too long to complete. Please try again." },
+        { status: 504 }
+      );
+    }
     console.error("❌ DB query failed:", error.message || error);
     return NextResponse.json(
       { error: "DB query failed", detail: error.message || error },
