@@ -75,10 +75,10 @@ process.on('SIGTERM', () => {
  * Used by the FE Next.js app for its own data needs.
  */
 async function getPartsByNSN(nsn) {
-  // ... (Your existing query and logic using 'pool') ...
+  // OPTIMIZED QUERY: Remove expensive subqueries that were causing 25+ second timeouts
   const query = `
     SELECT
-      pi.nsn, pi.fsg, pi.fsc,
+      pi.nsn, pi.fsg, pi.fsc, pi.niin,
       fsgs.fsg_title, fsgs.fsc_title,
       pn.part_number, pn.cage_code,
       addr.company_name, addr.company_name_2, addr.company_name_3, addr.company_name_4, addr.company_name_5,
@@ -88,12 +88,7 @@ async function getPartsByNSN(nsn) {
       vfm.shelf_life_code, vfm.replenishment_code, vfm.management_control_code, vfm.use_status_code,
       vfm.effective_date AS row_effective_date, vfm.row_observation_date AS row_obs_date_fm,
       fi.activity_code, fi.nmfc_number, fi.nmfc_subcode, fi.uniform_freight_class, fi.ltl_class,
-      fi.wcc, fi.tcc, fi.shc, fi.adc, fi.acc, fi.nmf_desc AS nmfc_description,
-      (SELECT item_name FROM public.nsn_with_inc WHERE nsn = pi.nsn LIMIT 1) AS item_name,
-      (SELECT end_item_name FROM public.nsn_with_inc WHERE nsn = pi.nsn LIMIT 1) AS end_item_name,
-      (SELECT mrc FROM public.char_data WHERE niin = pi.niin LIMIT 1) AS mrc,
-      (SELECT requirements_statement FROM public.char_data WHERE niin = pi.niin LIMIT 1) AS requirements_statement,
-      (SELECT clear_text_reply FROM public.char_data WHERE niin = pi.niin LIMIT 1) AS clear_text_reply
+      fi.wcc, fi.tcc, fi.shc, fi.adc, fi.acc, fi.nmf_desc AS nmfc_description
     FROM public.part_info pi
     LEFT JOIN public.part_numbers pn ON pi.nsn = pn.nsn
     LEFT JOIN public.wp_cage_addresses addr ON pn.cage_code = addr.cage_code
@@ -104,16 +99,61 @@ async function getPartsByNSN(nsn) {
   `;
    try {
     const client = await pool.connect();
-    console.log(`[FE DB Query] Executing getPartsByNSN for NSN: ${nsn}`);
+    console.log(`[FE DB Query] Executing OPTIMIZED getPartsByNSN for NSN: ${nsn}`);
+    const startTime = Date.now();
     const result = await client.query(query, [nsn]);
+    const queryTime = Date.now() - startTime;
     client.release();
-    console.log(`[FE DB Query] getPartsByNSN found ${result.rows.length} record(s).`);
+    console.log(`[FE DB Query] getPartsByNSN found ${result.rows.length} record(s) in ${queryTime}ms.`);
     if (result.rows.length === 0) { return []; }
     return result.rows;
    } catch (error) {
      console.error('[FE DB Query] Error in getPartsByNSN:', error);
      throw new Error('FE: Failed to fetch part data from the database.');
    }
+}
+
+/**
+ * Fetches additional metadata for a part (item names, characteristics) - OPTIONAL and slower
+ * This data is fetched separately to avoid blocking the main partInfo query
+ */
+async function getPartAdditionalData(nsn, niin) {
+  try {
+    const client = await pool.connect();
+    console.log(`[FE DB Query] Fetching additional data for NSN: ${nsn}`);
+    
+    // Fetch the expensive data separately with timeout protection
+    const additionalQuery = `
+      SELECT 
+        (SELECT item_name FROM public.nsn_with_inc WHERE nsn = $1 LIMIT 1) AS item_name,
+        (SELECT end_item_name FROM public.nsn_with_inc WHERE nsn = $1 LIMIT 1) AS end_item_name,
+        (SELECT mrc FROM public.char_data WHERE niin = $2 LIMIT 1) AS mrc,
+        (SELECT requirements_statement FROM public.char_data WHERE niin = $2 LIMIT 1) AS requirements_statement,
+        (SELECT clear_text_reply FROM public.char_data WHERE niin = $2 LIMIT 1) AS clear_text_reply
+    `;
+    
+    // Set a shorter timeout for this optional data
+    await client.query('SET statement_timeout = 5000'); // 5 second timeout
+    
+    const startTime = Date.now();
+    const result = await client.query(additionalQuery, [nsn, niin]);
+    const queryTime = Date.now() - startTime;
+    
+    client.release();
+    console.log(`[FE DB Query] Additional data fetched in ${queryTime}ms`);
+    
+    return result.rows[0] || {};
+  } catch (error) {
+    console.warn(`[FE DB Query] Additional data fetch failed for NSN ${nsn}:`, error.message);
+    // Return empty object instead of throwing - this data is optional
+    return {
+      item_name: null,
+      end_item_name: null,
+      mrc: null,
+      requirements_statement: null,
+      clear_text_reply: null
+    };
+  }
 }
 
 /**
@@ -185,6 +225,7 @@ async function getSubgroupsByGroup(fsg) {
 export {
     pool, // Export the pool instance
     getPartsByNSN, // Export the functions
+    getPartAdditionalData, // Export the new optional additional data function
     getGroups,
     getSubgroupsByGroup
     // Add other functions from your original db.js if needed
