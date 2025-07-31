@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
-const { Pool } = require('pg');
+import fs from 'fs';
+import path from 'path';
+import pg from 'pg';
+
+const { Pool } = pg;
 
 // Database configuration
 const pool = new Pool({
