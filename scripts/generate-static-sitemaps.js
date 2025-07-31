@@ -6,6 +6,32 @@ import pg from 'pg';
 
 const { Pool } = pg;
 
+// Simple dotenv-like function to load .env file if it exists
+function loadEnvFile() {
+  try {
+    const envPath = path.join(process.cwd(), '.env');
+    if (fs.existsSync(envPath)) {
+      const envContent = fs.readFileSync(envPath, 'utf-8');
+      envContent.split('\n').forEach(line => {
+        const trimmed = line.trim();
+        if (trimmed && !trimmed.startsWith('#')) {
+          const [key, ...valueParts] = trimmed.split('=');
+          if (key && valueParts.length > 0) {
+            const value = valueParts.join('=').replace(/^["']|["']$/g, '');
+            process.env[key.trim()] = value;
+          }
+        }
+      });
+      console.log('✅ Loaded environment variables from .env file');
+    }
+  } catch (error) {
+    console.log('⚠️ No .env file found or error loading it:', error.message);
+  }
+}
+
+// Load environment variables
+loadEnvFile();
+
 // Database configuration - match the same config as src/lib/db.js
 const isProduction = process.env.NODE_ENV === 'production';
 const isRds = (process.env.PGHOST || '').includes('amazonaws.com');
