@@ -78,7 +78,7 @@ ${parts
 
 async function generateStaticSitemaps() {
   const publicDir = path.join(process.cwd(), 'public');
-  const batchSize = 1000; // Smaller batches for faster queries
+  const batchSize = 2000; // Keep consistent with existing GSC submissions
   
   console.log('🚀 Starting static sitemap generation...');
   console.log('📋 Database config:', {
