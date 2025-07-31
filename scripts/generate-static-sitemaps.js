@@ -6,31 +6,64 @@ import pg from 'pg';
 
 const { Pool } = pg;
 
-// Simple dotenv-like function to load .env file if it exists
-function loadEnvFile() {
+// Load environment variables from ecosystem.config.cjs
+function loadEcosystemConfig() {
   try {
-    const envPath = path.join(process.cwd(), '.env');
-    if (fs.existsSync(envPath)) {
-      const envContent = fs.readFileSync(envPath, 'utf-8');
-      envContent.split('\n').forEach(line => {
-        const trimmed = line.trim();
-        if (trimmed && !trimmed.startsWith('#')) {
-          const [key, ...valueParts] = trimmed.split('=');
-          if (key && valueParts.length > 0) {
-            const value = valueParts.join('=').replace(/^["']|["']$/g, '');
-            process.env[key.trim()] = value;
+    const ecosystemPath = path.join(process.cwd(), 'ecosystem.config.cjs');
+    if (fs.existsSync(ecosystemPath)) {
+      // Clear require cache if it exists
+      delete require.cache[ecosystemPath];
+      
+      // Use dynamic import to load the CJS module
+      const ecosystemContent = fs.readFileSync(ecosystemPath, 'utf-8');
+      
+      // Extract the env variables from the frontend app config
+      const envMatch = ecosystemContent.match(/name:\s*['"]skyward-prod['"][\s\S]*?env:\s*\{([\s\S]*?)\}/);
+      if (envMatch) {
+        const envBlock = envMatch[1];
+        const envLines = envBlock.split('\n');
+        
+        envLines.forEach(line => {
+          const cleaned = line.trim().replace(/,$/, ''); // Remove trailing comma
+          if (cleaned && cleaned.includes(':') && !cleaned.startsWith('//')) {
+            const [key, ...valueParts] = cleaned.split(':');
+            if (key && valueParts.length > 0) {
+              const cleanKey = key.trim();
+              const cleanValue = valueParts.join(':').trim().replace(/^['"]|['"]$/g, '');
+              if (cleanKey && cleanValue) {
+                process.env[cleanKey] = cleanValue;
+              }
+            }
           }
-        }
-      });
-      console.log('✅ Loaded environment variables from .env file');
+        });
+        console.log('✅ Loaded environment variables from ecosystem.config.cjs');
+      }
+    } else {
+      console.log('⚠️ ecosystem.config.cjs not found, trying .env file...');
+      // Fallback to .env file
+      const envPath = path.join(process.cwd(), '.env');
+      if (fs.existsSync(envPath)) {
+        const envContent = fs.readFileSync(envPath, 'utf-8');
+        envContent.split('\n').forEach(line => {
+          const trimmed = line.trim();
+          if (trimmed && !trimmed.startsWith('#')) {
+            const [key, ...valueParts] = trimmed.split('=');
+            if (key && valueParts.length > 0) {
+              const value = valueParts.join('=').replace(/^["']|["']$/g, '');
+              process.env[key.trim()] = value;
+            }
+          }
+        });
+        console.log('✅ Loaded environment variables from .env file');
+      }
     }
   } catch (error) {
-    console.log('⚠️ No .env file found or error loading it:', error.message);
+    console.log('⚠️ Error loading environment variables:', error.message);
   }
 }
 
 // Load environment variables
-loadEnvFile();
+loadEcosystemConfig();
 
 // Database configuration - match the same config as src/lib/db.js
 const isProduction = process.env.NODE_ENV === 'production';
