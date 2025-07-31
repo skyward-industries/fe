@@ -74,7 +74,7 @@ export async function GET(
     }
 
     // Add empty characteristics array for compatibility
-    const partsWithCharacteristics = parts.map(part => ({
+    const partsWithCharacteristics = parts.map((part: any) => ({
       ...part,
       characteristics: [] // Empty for now - can be populated separately if needed
     }));
