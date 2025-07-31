@@ -265,6 +265,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 
+// Enable ISR with 1 hour revalidation
+export const revalidate = 3600; // 1 hour
+export const dynamic = 'force-static';
+
 // --- Main Page Component ---
 export default async function PartInfoPage({ params }: PageProps) {
   const { nsn, groupId, groupName, subgroupId, subgroupName } = params;

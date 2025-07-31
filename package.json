@@ -8,7 +8,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "start:prod": "npm run build && next start"
+    "start:prod": "npm run build && next start",
+    "generate-sitemaps": "node scripts/generate-static-sitemaps.js",
+    "build:with-sitemaps": "npm run generate-sitemaps && npm run build"
   },
   "dependencies": {
     "@emotion/cache": "^11.11.0",
