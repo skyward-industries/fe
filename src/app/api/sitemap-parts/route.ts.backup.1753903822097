@@ -1,0 +1,16 @@
+import { NextResponse } from 'next/server';
+
+export async function GET(request: Request) {
+  // TEMPORARILY DISABLED - Return empty responses to prevent connection overload
+  console.log('🚫 Sitemap API temporarily disabled to prevent connection overload');
+  
+  return NextResponse.json([], {
+    status: 200,
+    headers: {
+      'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
+      'X-Sitemap-Disabled': 'true',
+      'X-Disabled-Reason': 'Connection overload prevention',
+      'X-Disabled-At': new Date().toISOString()
+    }
+  });
+}

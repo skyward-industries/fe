@@ -3,6 +3,7 @@
 
 import 'server-only'; // Keep this directive for Next.js server-side code
 import { Pool } from 'pg'; // Use ES Module import
+import { NextResponse } from 'next/server';
 
 // -----------------------------------------------------------------------------
 // PostgreSQL Connection Pool Setup
@@ -18,10 +19,15 @@ const pool = new Pool({
   user: process.env.PGUSER,
   password: process.env.PGPASSWORD,
   ssl: isRds ? { rejectUnauthorized: false } : (isProduction ? { rejectUnauthorized: false } : false),
-  // Increase pool size for better concurrency
-  max: 20, // Maximum number of connections
-  idleTimeoutMillis: 30000, // Close idle connections after 30 seconds
-  connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
+  max: 50, // Increased from 10 to 50 to handle 37+ sessions
+  idleTimeoutMillis: 60000, // Increased to 60 seconds to keep connections longer
+  connectionTimeoutMillis: 10000, // Increased to 10 seconds for connection timeout
+  // Add connection reuse settings
+  allowExitOnIdle: false, // Don't exit when idle
+  // Add connection validation
+  connectionTimeoutMillis: 10000,
+  idleTimeoutMillis: 60000,
+  maxUses: 7500, 
 });
 
 pool.on('connect', () => {

@@ -8,7 +8,7 @@ const https = require('https');
 const { performance } = require('perf_hooks');
 
 const MAX_SITEMAPS_PER_INDEX = 20; // 20 sitemaps per index
-const TEST_TIMEOUT = 6000; // Shorter timeout for high ranges
+const TEST_TIMEOUT = 15000; // Shorter timeout for high ranges
 const START_RANGE = 1560001; // Start where we left off (after sitemap-index-26)
 const TARGET_INDEXES = 30; // Generate 30 more indexes (27-56)
 const MAX_RETRIES = 2; // Retry failed ranges
@@ -17,6 +17,7 @@ const MAX_RETRIES = 2; // Retry failed ranges
 function testSitemapWithRetry(url, retries = MAX_RETRIES) {
   return new Promise(async (resolve) => {
     for (let attempt = 1; attempt <= retries; attempt++) {
+      console.log(url)
       const result = await testSitemap(url);
       
       if (result.working || result.error !== 'timeout') {
@@ -115,8 +116,8 @@ async function generateHighIdSitemaps() {
   const maxRangesToTest = Math.min(totalRangesNeeded * 4, 2000); // Test up to 2000 ranges max
   
   for (let i = 0; i < maxRangesToTest; i++) {
-    const start = currentStart + (i * 3000);
-    const end = start + 2999;
+    const start = currentStart + (i * 2000);
+    const end = start + 1999;
     ranges.push({ start, end });
   }
   

@@ -2,9 +2,9 @@ const fs = require('fs');
 const path = require('path');
 
 const totalParts = 7200000;
-const batchSize = 3000;
+const batchSize = 2000;
 const totalSitemaps = Math.ceil(totalParts / batchSize);
-const maxSitemapsPerIndex = 500;
+const maxSitemapsPerIndex = 20;
 
 const today = new Date().toISOString();
 const publicDir = path.join(__dirname, 'public');

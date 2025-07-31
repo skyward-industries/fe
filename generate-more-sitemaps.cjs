@@ -9,7 +9,7 @@ const { performance } = require('perf_hooks');
 const MAX_SITEMAPS_PER_INDEX = 20; // 20 sitemaps per index
 const TEST_TIMEOUT = 8000; // 8 seconds to test each sitemap
 const START_RANGE = 300001; // Start where we left off (after sitemap-index-5)
-const TARGET_INDEXES = 20; // Generate indexes 6-25 (20 more indexes)
+const TARGET_INDEXES = 2000; // Generate indexes 6-25 (20 more indexes)
 
 // Test if a sitemap URL is accessible
 function testSitemap(url) {

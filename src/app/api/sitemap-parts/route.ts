@@ -1,4 +1,3 @@
-// File: src/app/api/sitemap-parts/route.ts
 import { NextResponse } from "next/server";
 import { pool } from "@/lib/db";
 
@@ -7,7 +6,8 @@ const MAX_PARTS = 2000; // Optimized for fast loading
 const QUERY_TIMEOUT_MS = 20000; // 20 seconds for query
 const HIGH_ID_THRESHOLD = 1000000; // IDs above this use different strategy
 const VERY_HIGH_ID_THRESHOLD = 2500000; // IDs above this get special treatment
-const PRIORITY_ID_THRESHOLD = 4000000; // IDs above this are high-priority, most important
+const PRIORITY_ID_THRESHOLD = 4000000; // IDs above this are high-priority, most 
+
 
 // Known empty ranges based on data analysis
 const KNOWN_EMPTY_RANGES = [
@@ -20,36 +20,46 @@ const KNOWN_EMPTY_RANGES = [
   { start: 4300000, end: 4400000 },
   // High ID ranges that frequently timeout (2.6M-2.9M range)
   { start: 2650000, end: 2950000 },
+  // Range around 720k that's timing out
+  { start: 700000, end: 750000 },
 ];
 
 function isInKnownEmptyRange(startId: number, endId: number): boolean {
-  return KNOWN_EMPTY_RANGES.some(range => 
+  return KNOWN_EMPTY_RANGES.some(range =>
     startId >= range.start && endId <= range.end
   );
 }
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const limit = Math.min(parseInt(searchParams.get("limit") || "3000"), MAX_PARTS);
+  const limit = Math.min(parseInt(searchParams.get("limit") || "3000"),
+MAX_PARTS);
   const offset = parseInt(searchParams.get("offset") || "0");
-  
+
   // Calculate the actual ID range from offset
   const startId = offset + 1;
   const endId = offset + limit;
-  
-  console.log(`📥 Sitemap API request: offset=${offset}, limit=${limit} (ID range: ${startId.toLocaleString()}-${endId.toLocaleString()})`);
 
-  // Simple rate limiting - reject if too many concurrent requests
+  console.log(`📥 Sitemap API request: offset=${offset}, limit=${limit} (ID 
+range: ${startId.toLocaleString()}-${endId.toLocaleString()})`);
+
+  // Simple rate limiting - allow more concurrent requests for Google
   const currentRequests = parseInt(process.env.CONCURRENT_REQUESTS || '0');
-  if (currentRequests > 5) {
-    console.log(`🚫 Rate limited: too many concurrent requests (${currentRequests})`);
+  if (currentRequests > 10) { // Increased to allow more concurrent requests
+    console.log(`🚫 Rate limited: too many concurrent requests 
+(${currentRequests})`);
     return NextResponse.json([], {
       status: 429, // Too Many Requests
       headers: {
-        'Retry-After': '5',
-        'Cache-Control': 'public, max-age=60'
+        'Retry-After': '5', // Reduced retry time
+        'Cache-Control': 'public, max-age=300' // 5 minute cache
       }
     });
+  }
+
+  // Add small delay for high-load periods
+  if (currentRequests > 1) {
+    await new Promise(resolve => setTimeout(resolve, 100)); // 100ms delay
   }
 
   // Increment request counter
@@ -57,7 +67,8 @@ export async function GET(request: Request) {
 
   // Check if this is a known empty range
   if (isInKnownEmptyRange(startId, endId)) {
-    console.log(`📭 Known empty range ${startId}-${endId}, returning empty immediately`);
+    console.log(`📭 Known empty range ${startId}-${endId}, returning empty 
+immediately`);
     return NextResponse.json([], {
       status: 200,
       headers: {
@@ -77,20 +88,23 @@ export async function GET(request: Request) {
   let client;
   try {
     const startTime = Date.now();
-    
+
     // Wait for available connection with timeout
     client = await Promise.race([
       pool.connect(),
-      new Promise((_, reject) => 
+      new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Connection timeout')), 5000)
       )
     ]);
 
     // Set aggressive timeout for ultra-fast response
-    await client.query(`SET statement_timeout = 10000`); // 10 seconds instead of 3
-    await client.query(`SET work_mem = '256MB'`);
-    await client.query(`SET effective_cache_size = '4GB'`);
-    
+    await client.query(`SET statement_timeout = 3000`); // Further reduced to 3 
+
+    await client.query(`SET work_mem = '64MB'`); // Reduced to prevent memory 
+
+    await client.query(`SET effective_cache_size = '1GB'`); // Conservative cache
+
+
     console.log(`🚀 Ultra-fast query for range ${startId}-${endId}`);
 
     // Ultra-fast query strategy - fetch only what we need
@@ -115,32 +129,37 @@ export async function GET(request: Request) {
     const parts = result.rows;
 
     const queryTime = Date.now() - startTime;
-    console.log(`✅ Retrieved ${parts.length} parts in ${queryTime}ms for range ${startId}-${endId}`);
+    console.log(`✅ Retrieved ${parts.length} parts in ${queryTime}ms for range 
+${startId}-${endId}`);
 
     clearTimeout(timeoutId);
 
     return NextResponse.json(parts, {
       status: 200,
       headers: {
-        'Cache-Control': parts.length === 0 
+        'Cache-Control': parts.length === 0
           ? 'public, max-age=604800' // Cache empty results for 1 week
-          : 'public, max-age=3600, stale-while-revalidate=7200', // 1h cache, 2h stale
+          : 'public, max-age=3600, stale-while-revalidate=7200', // 1h cache, 2h 
+
         'X-Parts-Count': parts.length.toString(),
         'X-Query-Time': queryTime.toString(),
         'X-Range': `${startId}-${endId}`,
-        'X-Query-Strategy': startId > VERY_HIGH_ID_THRESHOLD ? 'very-high-id' : 
-                           startId > HIGH_ID_THRESHOLD * 10 ? 'high-id' : 'standard'
+        'X-Query-Strategy': startId > VERY_HIGH_ID_THRESHOLD ? 'very-high-id' :
+                          startId > HIGH_ID_THRESHOLD * 10 ? 'high-id' :
+'standard'
       }
     });
 
   } catch (error: any) {
     clearTimeout(timeoutId);
-    
-    console.error(`❌ Sitemap API failed for range ${startId}-${endId}:`, error.message);
-    
+
+    console.error(`❌ Sitemap API failed for range ${startId}-${endId}:`,
+error.message);
+
     // For any error in high ranges, return empty result
     if (startId > HIGH_ID_THRESHOLD || error.message.includes('aborted')) {
-      console.log(`⏱️ Error in high range ${startId}-${endId}, returning empty result`);
+      console.log(`⏱️ Error in high range ${startId}-${endId}, returning empty 
+result`);
       return NextResponse.json([], {
         status: 200,
         headers: {
@@ -151,12 +170,12 @@ export async function GET(request: Request) {
         }
       });
     }
-    
+
     return NextResponse.json(
-      { 
-        error: "Database query failed", 
+      {
+        error: "Database query failed",
         range: `${startId}-${endId}`,
-        detail: error.message 
+        detail: error.message
       },
       { status: 500 }
     );
@@ -166,6 +185,7 @@ export async function GET(request: Request) {
     }
     // Decrement request counter
     const currentRequests = parseInt(process.env.CONCURRENT_REQUESTS || '0');
-    process.env.CONCURRENT_REQUESTS = Math.max(0, currentRequests - 1).toString();
+    process.env.CONCURRENT_REQUESTS = Math.max(0, currentRequests -
+1).toString();
   }
 }

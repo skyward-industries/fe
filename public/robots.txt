@@ -1,5 +1,15 @@
+#Block aggressive bots
+User-agent: AhrefsBot
+Disallow: /
+User-agent: SemrushBot
+Disallow: /
+User-agent: DotBot
+Disallow: /
+User-agent: MJ12bot
+Disallow: /
 User-agent: *
 Disallow: /?s=
+Crawl-delay: 10
 Disallow: /cage-code
 Disallow: /cage-code/
 Disallow: /cage-code-details
@@ -8,6 +18,7 @@ Disallow: /product/
 Disallow: */undefined/
 Disallow: /_next/static/
 Disallow: /_next/image/
+Disallow: /api/
 
 # Host
 Host: https://skywardparts.com
