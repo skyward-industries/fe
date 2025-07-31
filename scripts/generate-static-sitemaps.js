@@ -48,10 +48,9 @@ function slugify(text) {
 }
 
 function formatNSN(nsn) {
-  if (nsn && nsn.length === 13) {
-    return `${nsn.slice(0, 4)}-${nsn.slice(4, 6)}-${nsn.slice(6, 9)}-${nsn.slice(9)}`;
-  }
-  return nsn;
+  // NSNs are already formatted with hyphens in the database (e.g., "3010-01-172-3064")
+  // Just return as-is after trimming any whitespace
+  return nsn ? nsn.trim() : nsn;
 }
 
 function generateSiteMap(parts) {
@@ -110,7 +109,7 @@ async function generateStaticSitemaps() {
         AND pi.fsc IS NOT NULL
         AND fsgs.fsg_title IS NOT NULL 
         AND fsgs.fsc_title IS NOT NULL
-        AND LENGTH(TRIM(pi.nsn)) = 13
+        AND LENGTH(TRIM(pi.nsn)) = 16
     `;
     
     const countResult = await pool.query(countQuery);
@@ -146,7 +145,7 @@ async function generateStaticSitemaps() {
           AND pi.fsc IS NOT NULL
           AND fsgs.fsg_title IS NOT NULL 
           AND fsgs.fsc_title IS NOT NULL
-          AND LENGTH(TRIM(pi.nsn)) = 13
+          AND LENGTH(TRIM(pi.nsn)) = 16
         ORDER BY pi.nsn
         LIMIT $1 OFFSET $2
       `;
