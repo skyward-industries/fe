@@ -40,9 +40,10 @@ const pool = new Pool({
 function slugify(text) {
   return text
     .toLowerCase()
-    .replace(/[^a-z0-9 -]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
+    .replace(/[^a-z0-9 -]/g, '') // Remove special characters except spaces and hyphens
+    .replace(/\s+/g, '-')        // Replace spaces with hyphens
+    .replace(/-+/g, '-')         // Replace multiple hyphens with single hyphen
+    .replace(/^-+|-+$/g, '')     // Remove leading/trailing hyphens
     .trim();
 }
 
@@ -91,19 +92,25 @@ async function generateStaticSitemaps() {
     isRds,
     sslConfig: isRds ? { rejectUnauthorized: false } : (isProduction ? { rejectUnauthorized: false } : false)
   });
+
+  // Ensure public directory exists
+  if (!fs.existsSync(publicDir)) {
+    fs.mkdirSync(publicDir, { recursive: true });
+    console.log('📁 Created public directory');
+  }
   
   try {
-    // Get total count of parts
+    // Get total count of parts using the correct table structure
     const countQuery = `
-      SELECT COUNT(*) as total 
+      SELECT COUNT(DISTINCT pi.nsn) as total 
       FROM part_info pi
-      JOIN fsg_mapping fm ON pi.fsg = fm.fsg 
-      JOIN fsc_mapping fc ON pi.fsc = fc.fsc
+      JOIN wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg AND pi.fsc = fsgs.fsc
       WHERE pi.nsn IS NOT NULL 
         AND pi.fsg IS NOT NULL 
         AND pi.fsc IS NOT NULL
-        AND fm.fsg_title IS NOT NULL 
-        AND fc.fsc_title IS NOT NULL
+        AND fsgs.fsg_title IS NOT NULL 
+        AND fsgs.fsc_title IS NOT NULL
+        AND LENGTH(TRIM(pi.nsn)) = 13
     `;
     
     const countResult = await pool.query(countQuery);
@@ -113,24 +120,9 @@ async function generateStaticSitemaps() {
     console.log(`📊 Total parts: ${totalParts.toLocaleString()}`);
     console.log(`📦 Total batches: ${totalBatches.toLocaleString()}`);
     
-    // Generate sitemap index
+    // Generate sitemap index - we'll populate this as we create files
     const sitemapIndexUrls = [];
-    for (let i = 0; i < totalBatches; i++) {
-      const startRange = i * batchSize + 1;
-      const endRange = Math.min((i + 1) * batchSize, totalParts);
-      sitemapIndexUrls.push(`https://skywardparts.com/sitemap/${startRange}/${endRange}.xml`);
-    }
-    
-    const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${sitemapIndexUrls.map(url => `  <sitemap>
-    <loc>${url}</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
-  </sitemap>`).join("\n")}
-</sitemapindex>`;
-    
-    fs.writeFileSync(path.join(publicDir, 'sitemap.xml'), sitemapIndex);
-    console.log('✅ Generated sitemap index');
+    const lastmod = new Date().toISOString();
     
     // Generate individual sitemap files
     for (let i = 0; i < totalBatches; i++) {
@@ -141,20 +133,20 @@ ${sitemapIndexUrls.map(url => `  <sitemap>
       console.log(`📄 Generating sitemap ${i + 1}/${totalBatches} (${startRange}-${endRange})`);
       
       const query = `
-        SELECT 
+        SELECT DISTINCT
           pi.fsg,
           pi.fsc,
-          fm.fsg_title,
-          fc.fsc_title,
+          fsgs.fsg_title,
+          fsgs.fsc_title,
           pi.nsn
         FROM part_info pi
-        JOIN fsg_mapping fm ON pi.fsg = fm.fsg 
-        JOIN fsc_mapping fc ON pi.fsc = fc.fsc
+        JOIN wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg AND pi.fsc = fsgs.fsc
         WHERE pi.nsn IS NOT NULL 
           AND pi.fsg IS NOT NULL 
           AND pi.fsc IS NOT NULL
-          AND fm.fsg_title IS NOT NULL 
-          AND fc.fsc_title IS NOT NULL
+          AND fsgs.fsg_title IS NOT NULL 
+          AND fsgs.fsc_title IS NOT NULL
+          AND LENGTH(TRIM(pi.nsn)) = 13
         ORDER BY pi.nsn
         LIMIT $1 OFFSET $2
       `;
@@ -166,6 +158,10 @@ ${sitemapIndexUrls.map(url => `  <sitemap>
         const sitemap = generateSiteMap(parts);
         const filename = `sitemap-${startRange}-${endRange}.xml`;
         fs.writeFileSync(path.join(publicDir, filename), sitemap);
+        
+        // Add to sitemap index
+        sitemapIndexUrls.push(`https://skywardparts.com/${filename}`);
+        
         console.log(`   ✅ Generated ${filename} with ${parts.length} parts`);
       } else {
         console.log(`   📭 Skipped empty range ${startRange}-${endRange}`);
@@ -175,14 +171,65 @@ ${sitemapIndexUrls.map(url => `  <sitemap>
       await new Promise(resolve => setTimeout(resolve, 100));
     }
     
+    // Generate sitemap index file
+    const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${sitemapIndexUrls.map(url => `  <sitemap>
+    <loc>${url}</loc>
+    <lastmod>${lastmod}</lastmod>
+  </sitemap>`).join("\n")}
+</sitemapindex>`;
+    
+    fs.writeFileSync(path.join(publicDir, 'sitemap.xml'), sitemapIndex);
+    console.log(`✅ Generated sitemap index with ${sitemapIndexUrls.length} sitemap files`);
+    
     console.log('🎉 Static sitemap generation complete!');
+    console.log(`📊 Generated ${sitemapIndexUrls.length} sitemap files with ${totalParts.toLocaleString()} total parts`);
     
   } catch (error) {
     console.error('❌ Error generating sitemaps:', error);
+    
+    // Provide more specific error messages
+    if (error.code === '28000') {
+      console.error('   🔐 Database authentication failed - check credentials');
+    } else if (error.code === 'ENOTFOUND') {
+      console.error('   🌐 Database host not found - check network/hostname');
+    } else if (error.code === 'ECONNREFUSED') {
+      console.error('   🚫 Database connection refused - check if database is running');
+    } else if (error.code === '42P01') {
+      console.error('   📋 Database table not found - check table names');
+    }
+    
     process.exit(1);
   } finally {
-    await pool.end();
+    try {
+      await pool.end();
+      console.log('🔌 Database connection pool closed');
+    } catch (error) {
+      console.warn('⚠️ Error closing database pool:', error.message);
+    }
   }
 }
+
+// Handle process signals for graceful shutdown
+process.on('SIGINT', async () => {
+  console.log('\n🛑 Received SIGINT, shutting down gracefully...');
+  try {
+    await pool.end();
+  } catch (error) {
+    console.warn('⚠️ Error during shutdown:', error.message);
+  }
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  console.log('\n🛑 Received SIGTERM, shutting down gracefully...');
+  try {
+    await pool.end();
+  } catch (error) {
+    console.warn('⚠️ Error during shutdown:', error.message);
+  }
+  process.exit(0);
+});
 
 generateStaticSitemaps();
