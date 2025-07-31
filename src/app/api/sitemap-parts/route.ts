@@ -135,7 +135,7 @@ export async function GET(request: Request) {
     const result = await client.query(query, [startId, endId, limit]);
     
     // Enrich with FSG/FSC titles from cache
-    const parts = result.rows.map(row => {
+    const parts = result.rows.map((row: { fsg: string; fsc: string; nsn: string }) => {
       const key = `${row.fsg}-${row.fsc}`;
       const titles = cache.get(key) || { fsg_title: '', fsc_title: '' };
       
