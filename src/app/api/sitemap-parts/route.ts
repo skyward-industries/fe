@@ -4,10 +4,6 @@ import { pool } from "@/lib/db";
 const TIMEOUT_MS = 25000; // 25 seconds
 const MAX_PARTS = 2000; // Optimized for fast loading
 const QUERY_TIMEOUT_MS = 20000; // 20 seconds for query
-const HIGH_ID_THRESHOLD = 1000000; // IDs above this use different strategy
-const VERY_HIGH_ID_THRESHOLD = 2500000; // IDs above this get special treatment
-const PRIORITY_ID_THRESHOLD = 4000000; // IDs above this are high-priority, most 
-
 
 // Known empty ranges based on data analysis
 const KNOWN_EMPTY_RANGES = [
@@ -30,49 +26,69 @@ function isInKnownEmptyRange(startId: number, endId: number): boolean {
   );
 }
 
+// Pre-cache FSG/FSC data to avoid joins
+let fsgFscCache: Map<string, { fsg_title: string; fsc_title: string }> | null = null;
+let cacheExpiry = 0;
+
+async function getFsgFscCache(client: any) {
+  const now = Date.now();
+  
+  if (!fsgFscCache || now > cacheExpiry) {
+    console.log('🔄 Refreshing FSG/FSC cache...');
+    const result = await client.query(`
+      SELECT DISTINCT fsg, fsc, fsg_title, fsc_title 
+      FROM wp_fsgs_new 
+      WHERE fsg_title IS NOT NULL AND fsc_title IS NOT NULL
+    `);
+    
+    fsgFscCache = new Map();
+    for (const row of result.rows) {
+      const key = `${row.fsg}-${row.fsc}`;
+      fsgFscCache.set(key, {
+        fsg_title: row.fsg_title,
+        fsc_title: row.fsc_title
+      });
+    }
+    
+    // Cache for 1 hour
+    cacheExpiry = now + (60 * 60 * 1000);
+    console.log(`✅ Cached ${fsgFscCache.size} FSG/FSC combinations`);
+  }
+  
+  return fsgFscCache;
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const limit = Math.min(parseInt(searchParams.get("limit") || "3000"),
-MAX_PARTS);
+  const limit = Math.min(parseInt(searchParams.get("limit") || "3000"), MAX_PARTS);
   const offset = parseInt(searchParams.get("offset") || "0");
 
   // Calculate the actual ID range from offset
   const startId = offset + 1;
   const endId = offset + limit;
 
-  console.log(`📥 Sitemap API request: offset=${offset}, limit=${limit} (ID 
-range: ${startId.toLocaleString()}-${endId.toLocaleString()})`);
+  console.log(`📥 Sitemap API request: offset=${offset}, limit=${limit} (ID range: ${startId.toLocaleString()}-${endId.toLocaleString()})`);
 
-  // Simple rate limiting - allow more concurrent requests for Google
+  // Simple rate limiting
   const currentRequests = parseInt(process.env.CONCURRENT_REQUESTS || '0');
-  if (currentRequests > 10) { // Increased to allow more concurrent requests
-    console.log(`🚫 Rate limited: too many concurrent requests 
-(${currentRequests})`);
+  if (currentRequests > 10) {
+    console.log(`🚫 Rate limited: too many concurrent requests (${currentRequests})`);
     return NextResponse.json([], {
-      status: 429, // Too Many Requests
+      status: 429,
       headers: {
-        'Retry-After': '5', // Reduced retry time
-        'Cache-Control': 'public, max-age=300' // 5 minute cache
+        'Retry-After': '5',
+        'Cache-Control': 'public, max-age=300'
       }
     });
   }
 
-  // Add small delay for high-load periods
-  if (currentRequests > 1) {
-    await new Promise(resolve => setTimeout(resolve, 100)); // 100ms delay
-  }
-
-  // Increment request counter
-  process.env.CONCURRENT_REQUESTS = (currentRequests + 1).toString();
-
   // Check if this is a known empty range
   if (isInKnownEmptyRange(startId, endId)) {
-    console.log(`📭 Known empty range ${startId}-${endId}, returning empty 
-immediately`);
+    console.log(`📭 Known empty range ${startId}-${endId}, returning empty immediately`);
     return NextResponse.json([], {
       status: 200,
       headers: {
-        'Cache-Control': 'public, max-age=604800, immutable', // Cache for 1 week
+        'Cache-Control': 'public, max-age=604800, immutable',
         'X-Parts-Count': '0',
         'X-Query-Time': '0',
         'X-Range': `${startId}-${endId}`,
@@ -81,42 +97,33 @@ immediately`);
     });
   }
 
-  // Set up timeout for the entire request
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  // Increment request counter
+  process.env.CONCURRENT_REQUESTS = (currentRequests + 1).toString();
 
   let client;
   try {
     const startTime = Date.now();
 
-    // Wait for available connection with timeout
-    client = await Promise.race([
-      pool.connect(),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Connection timeout')), 5000)
-      )
-    ]);
+    // Get database connection
+    client = await pool.connect();
 
     // Set aggressive timeout for ultra-fast response
-    await client.query(`SET statement_timeout = 3000`); // Further reduced to 3 
+    await client.query(`SET statement_timeout = ${QUERY_TIMEOUT_MS}`);
+    await client.query(`SET work_mem = '256MB'`); // Increased for better sorting
+    await client.query(`SET enable_seqscan = OFF`); // Force index usage
 
-    await client.query(`SET work_mem = '64MB'`); // Reduced to prevent memory 
+    // Get FSG/FSC cache
+    const cache = await getFsgFscCache(client);
 
-    await client.query(`SET effective_cache_size = '1GB'`); // Conservative cache
+    console.log(`🚀 Optimized query for range ${startId}-${endId}`);
 
-
-    console.log(`🚀 Ultra-fast query for range ${startId}-${endId}`);
-
-    // Ultra-fast query strategy - fetch only what we need
+    // OPTIMIZED QUERY: Remove the JOIN and do in-memory lookup
     const query = `
       SELECT 
         pi.fsg,
         pi.fsc,
-        pi.nsn,
-        COALESCE(fsgs.fsg_title, '') as fsg_title,
-        COALESCE(fsgs.fsc_title, '') as fsc_title
+        pi.nsn
       FROM part_info pi
-      LEFT JOIN wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg AND pi.fsc = fsgs.fsc
       WHERE pi.id >= $1 
         AND pi.id <= $2
         AND pi.nsn IS NOT NULL 
@@ -126,44 +133,45 @@ immediately`);
     `;
 
     const result = await client.query(query, [startId, endId, limit]);
-    const parts = result.rows;
+    
+    // Enrich with FSG/FSC titles from cache
+    const parts = result.rows.map(row => {
+      const key = `${row.fsg}-${row.fsc}`;
+      const titles = cache.get(key) || { fsg_title: '', fsc_title: '' };
+      
+      return {
+        ...row,
+        fsg_title: titles.fsg_title,
+        fsc_title: titles.fsc_title
+      };
+    });
 
     const queryTime = Date.now() - startTime;
-    console.log(`✅ Retrieved ${parts.length} parts in ${queryTime}ms for range 
-${startId}-${endId}`);
-
-    clearTimeout(timeoutId);
+    console.log(`✅ Retrieved ${parts.length} parts in ${queryTime}ms for range ${startId}-${endId}`);
 
     return NextResponse.json(parts, {
       status: 200,
       headers: {
         'Cache-Control': parts.length === 0
           ? 'public, max-age=604800' // Cache empty results for 1 week
-          : 'public, max-age=3600, stale-while-revalidate=7200', // 1h cache, 2h 
-
+          : 'public, max-age=3600, stale-while-revalidate=7200', // 1h cache, 2h stale
         'X-Parts-Count': parts.length.toString(),
         'X-Query-Time': queryTime.toString(),
         'X-Range': `${startId}-${endId}`,
-        'X-Query-Strategy': startId > VERY_HIGH_ID_THRESHOLD ? 'very-high-id' :
-                          startId > HIGH_ID_THRESHOLD * 10 ? 'high-id' :
-'standard'
+        'X-Optimized': 'true'
       }
     });
 
   } catch (error: any) {
-    clearTimeout(timeoutId);
-
-    console.error(`❌ Sitemap API failed for range ${startId}-${endId}:`,
-error.message);
+    console.error(`❌ Sitemap API failed for range ${startId}-${endId}:`, error.message);
 
     // For any error in high ranges, return empty result
-    if (startId > HIGH_ID_THRESHOLD || error.message.includes('aborted')) {
-      console.log(`⏱️ Error in high range ${startId}-${endId}, returning empty 
-result`);
+    if (startId > 1000000 || error.message.includes('timeout')) {
+      console.log(`⏱️ Error in range ${startId}-${endId}, returning empty result`);
       return NextResponse.json([], {
         status: 200,
         headers: {
-          'Cache-Control': 'public, max-age=604800', // Cache for 1 week
+          'Cache-Control': 'public, max-age=604800',
           'X-Parts-Count': '0',
           'X-Range': `${startId}-${endId}`,
           'X-Error-Fallback': 'true'
@@ -185,7 +193,6 @@ result`);
     }
     // Decrement request counter
     const currentRequests = parseInt(process.env.CONCURRENT_REQUESTS || '0');
-    process.env.CONCURRENT_REQUESTS = Math.max(0, currentRequests -
-1).toString();
+    process.env.CONCURRENT_REQUESTS = Math.max(0, currentRequests - 1).toString();
   }
 }
