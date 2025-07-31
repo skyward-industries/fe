@@ -3,20 +3,30 @@
 import fs from 'fs';
 import path from 'path';
 import pg from 'pg';
+import { config } from 'dotenv';
+
+// Load environment variables
+config();
 
 const { Pool } = pg;
 
-// Database configuration
+// Database configuration - match the same config as src/lib/db.js
+const isProduction = process.env.NODE_ENV === 'production';
+const isRds = (process.env.PGHOST || '').includes('amazonaws.com');
+
 const pool = new Pool({
   host: process.env.PGHOST,
-  port: process.env.PGPORT,
+  port: parseInt(process.env.PGPORT || '5432', 10),
   database: process.env.PGDATABASE,
   user: process.env.PGUSER,
   password: process.env.PGPASSWORD,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  ssl: isRds ? { rejectUnauthorized: false } : (isProduction ? { rejectUnauthorized: false } : false),
   max: 5,
+  min: 1,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 30000,
+  acquireTimeoutMillis: 10000,
+  statement_timeout: 10000,
 });
 
 function slugify(text) {
