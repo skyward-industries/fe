@@ -29,12 +29,12 @@ const pool = new Pool({
   user: process.env.PGUSER,
   password: process.env.PGPASSWORD,
   ssl: isRds ? { rejectUnauthorized: false } : (isProduction ? { rejectUnauthorized: false } : false),
-  max: 5,
+  max: 3,
   min: 1,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 30000,
-  acquireTimeoutMillis: 10000,
-  statement_timeout: 10000,
+  idleTimeoutMillis: 60000,
+  connectionTimeoutMillis: 60000,
+  acquireTimeoutMillis: 30000,
+  statement_timeout: 120000, // 2 minutes for sitemap generation
 });
 
 function slugify(text) {
@@ -78,7 +78,7 @@ ${parts
 
 async function generateStaticSitemaps() {
   const publicDir = path.join(process.cwd(), 'public');
-  const batchSize = 2000;
+  const batchSize = 1000; // Smaller batches for faster queries
   
   console.log('🚀 Starting static sitemap generation...');
   console.log('📋 Database config:', {
@@ -118,51 +118,64 @@ async function generateStaticSitemaps() {
       console.log(`📄 Generating sitemap batch ${batchIndex + 1} (offset ${offset})`);
       
       const query = `
-        SELECT DISTINCT
+        SELECT 
           pi.fsg,
           pi.fsc,
           fsgs.fsg_title,
           fsgs.fsc_title,
           pi.nsn
         FROM part_info pi
-        JOIN wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg AND pi.fsc = fsgs.fsc
+        LEFT JOIN wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg AND pi.fsc = fsgs.fsc
         WHERE pi.nsn IS NOT NULL 
           AND pi.fsg IS NOT NULL 
           AND pi.fsc IS NOT NULL
-          AND fsgs.fsg_title IS NOT NULL 
-          AND fsgs.fsc_title IS NOT NULL
           AND LENGTH(TRIM(pi.nsn)) = 16
         ORDER BY pi.nsn
         LIMIT $1 OFFSET $2
       `;
       
-      const result = await pool.query(query, [batchSize, offset]);
-      const parts = result.rows;
+      // Set aggressive timeout for this specific query
+      const client = await pool.connect();
       
-      if (parts.length > 0) {
-        const sitemap = generateSiteMap(parts);
-        const filename = `sitemap-${startRange}-${endRange}.xml`;
-        fs.writeFileSync(path.join(publicDir, filename), sitemap);
+      try {
+        await client.query('SET statement_timeout = 120000'); // 2 minutes
+        const result = await client.query(query, [batchSize, offset]);
+        const parts = result.rows;
         
-        // Add to sitemap index
-        sitemapIndexUrls.push(`https://skywardparts.com/${filename}`);
-        
-        console.log(`   ✅ Generated ${filename} with ${parts.length} parts`);
-        
-        // If we got fewer parts than requested, we've reached the end
-        if (parts.length < batchSize) {
+        if (parts.length > 0) {
+          // Filter out parts without valid titles, provide defaults if needed
+          const validParts = parts.map(part => ({
+            ...part,
+            fsg_title: part.fsg_title || `Group ${part.fsg}`,
+            fsc_title: part.fsc_title || `Subgroup ${part.fsc}`
+          }));
+          
+          const sitemap = generateSiteMap(validParts);
+          const filename = `sitemap-${startRange}-${endRange}.xml`;
+          fs.writeFileSync(path.join(publicDir, filename), sitemap);
+          
+          // Add to sitemap index
+          sitemapIndexUrls.push(`https://skywardparts.com/${filename}`);
+          
+          console.log(`   ✅ Generated ${filename} with ${parts.length} parts (${validParts.length} valid)`);
+          
+          // If we got fewer parts than requested, we've reached the end
+          if (parts.length < batchSize) {
+            hasMoreData = false;
+          }
+        } else {
+          // No more data
           hasMoreData = false;
+          console.log(`   📭 No more data - stopping at batch ${batchIndex + 1}`);
         }
-      } else {
-        // No more data
-        hasMoreData = false;
-        console.log(`   📭 No more data - stopping at batch ${batchIndex + 1}`);
+      } finally {
+        client.release();
       }
       
       batchIndex++;
       
       // Small delay to avoid overwhelming the database
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
     
     // Generate sitemap index file
