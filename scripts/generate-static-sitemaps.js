@@ -3,10 +3,6 @@
 import fs from 'fs';
 import path from 'path';
 import pg from 'pg';
-import { config } from 'dotenv';
-
-// Load environment variables
-config();
 
 const { Pool } = pg;
 
@@ -73,6 +69,16 @@ async function generateStaticSitemaps() {
   const batchSize = 2000;
   
   console.log('🚀 Starting static sitemap generation...');
+  console.log('📋 Database config:', {
+    host: process.env.PGHOST,
+    port: process.env.PGPORT,
+    database: process.env.PGDATABASE,
+    user: process.env.PGUSER,
+    hasPassword: !!process.env.PGPASSWORD,
+    isProduction,
+    isRds,
+    sslConfig: isRds ? { rejectUnauthorized: false } : (isProduction ? { rejectUnauthorized: false } : false)
+  });
   
   try {
     // Get total count of parts
