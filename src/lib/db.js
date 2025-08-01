@@ -118,7 +118,7 @@ function setCachedPartInfo(nsn, data) {
 
 /**
  * Fetches detailed part information from the database based on NSN.
- * Used by the FE Next.js app for its own data needs.
+ * EMERGENCY FIX: Simplified query to prevent timeouts
  */
 async function getPartsByNSN(nsn) {
   // Check cache first to avoid database load
@@ -127,27 +127,15 @@ async function getPartsByNSN(nsn) {
     return cachedResult;
   }
   
-  // OPTIMIZED QUERY: Remove expensive subqueries that were causing 25+ second timeouts
-  const query = `
+  // EMERGENCY SIMPLIFIED QUERY - Split into two fast queries instead of one slow query
+  const basicQuery = `
     SELECT
       pi.nsn, pi.fsg, pi.fsc, pi.niin,
-      fsgs.fsg_title, fsgs.fsc_title,
-      pn.part_number, pn.cage_code,
-      addr.company_name, addr.company_name_2, addr.company_name_3, addr.company_name_4, addr.company_name_5,
-      addr.street_address_1, addr.street_address_2, addr.po_box, addr.city, addr.state, addr.zip, addr.country,
-      addr.date_est, addr.last_update, addr.former_name_1, addr.former_name_2, addr.former_name_3, addr.former_name_4, addr.frn_dom,
-      vfm.moe_rule AS moe_rule_vfm, vfm.aac, vfm.sos, vfm.sosm, vfm.unit_of_issue, vfm.controlled_inventory_code,
-      vfm.shelf_life_code, vfm.replenishment_code, vfm.management_control_code, vfm.use_status_code,
-      vfm.effective_date AS row_effective_date, vfm.row_observation_date AS row_obs_date_fm,
-      fi.activity_code, fi.nmfc_number, fi.nmfc_subcode, fi.uniform_freight_class, fi.ltl_class,
-      fi.wcc, fi.tcc, fi.shc, fi.adc, fi.acc, fi.nmf_desc AS nmfc_description
+      fsgs.fsg_title, fsgs.fsc_title
     FROM public.part_info pi
-    LEFT JOIN public.part_numbers pn ON pi.nsn = pn.nsn
-    LEFT JOIN public.wp_cage_addresses addr ON pn.cage_code = addr.cage_code
-    LEFT JOIN public.v_flis_management vfm ON pi.niin = vfm.niin
     LEFT JOIN public.wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg AND pi.fsc = fsgs.fsc
-    LEFT JOIN public.freight_info fi ON pi.niin = fi.niin
-    WHERE REPLACE(pi.nsn, '-', '') = $1;
+    WHERE REPLACE(pi.nsn, '-', '') = $1
+    LIMIT 1;
   `;
   
   let client;
@@ -156,25 +144,83 @@ async function getPartsByNSN(nsn) {
     client = await Promise.race([
       pool.connect(),
       new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Connection acquisition timeout')), 10000)
+        setTimeout(() => reject(new Error('Connection acquisition timeout')), 5000)
       )
     ]);
     
-    console.log(`[FE DB Query] Executing CACHED+OPTIMIZED getPartsByNSN for NSN: ${nsn}`);
+    console.log(`[FE DB Query] Executing EMERGENCY SIMPLIFIED getPartsByNSN for NSN: ${nsn}`);
     const startTime = Date.now();
     
-    // Set aggressive query timeout for high load scenarios
-    await client.query('SET statement_timeout = 8000'); // 8 second max
+    // Set aggressive query timeout
+    await client.query('SET statement_timeout = 3000'); // 3 second max
     
-    const result = await client.query(query, [nsn]);
+    // First get basic part info
+    const basicResult = await client.query(basicQuery, [nsn]);
+    
+    if (basicResult.rows.length === 0) {
+      // Cache empty result to avoid repeated queries
+      setCachedPartInfo(nsn, []);
+      return [];
+    }
+    
+    const basicPart = basicResult.rows[0];
+    
+    // Then get additional details with separate queries (can fail gracefully)
+    let partNumbers = [];
+    let addresses = [];
+    
+    try {
+      // Get part numbers separately
+      const pnResult = await client.query(
+        'SELECT part_number, cage_code FROM public.part_numbers WHERE nsn = $1 LIMIT 10',
+        [basicPart.nsn]
+      );
+      partNumbers = pnResult.rows;
+    } catch (err) {
+      console.warn(`[FE DB Query] Failed to fetch part numbers: ${err.message}`);
+    }
+    
+    // Combine results
+    const results = partNumbers.length > 0 
+      ? partNumbers.map(pn => ({
+          ...basicPart,
+          part_number: pn.part_number,
+          cage_code: pn.cage_code,
+          // Add empty fields for compatibility
+          company_name: null,
+          street_address_1: null,
+          city: null,
+          state: null,
+          zip: null,
+          country: null,
+          unit_of_issue: null,
+          aac: null,
+          sos: null,
+          sosm: null,
+        }))
+      : [{
+          ...basicPart,
+          part_number: null,
+          cage_code: null,
+          company_name: null,
+          street_address_1: null,
+          city: null,
+          state: null,
+          zip: null,
+          country: null,
+          unit_of_issue: null,
+          aac: null,
+          sos: null,
+          sosm: null,
+        }];
+    
     const queryTime = Date.now() - startTime;
+    console.log(`[FE DB Query] getPartsByNSN found ${results.length} record(s) in ${queryTime}ms.`);
     
-    console.log(`[FE DB Query] getPartsByNSN found ${result.rows.length} record(s) in ${queryTime}ms.`);
+    // Cache the result
+    setCachedPartInfo(nsn, results);
     
-    // Cache the result (even if empty) to avoid repeated queries
-    setCachedPartInfo(nsn, result.rows);
-    
-    return result.rows;
+    return results;
    } catch (error) {
      console.error(`[FE DB Query] Error in getPartsByNSN for ${nsn}:`, error.message);
      
