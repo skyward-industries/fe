@@ -11,6 +11,7 @@
     "start:prod": "npm run build && next start",
     "generate-sitemaps": "node scripts/generate-static-sitemaps.js",
     "generate-sitemaps:resume": "node scripts/generate-static-sitemaps.js",
+    "generate-sitemaps:optimized": "node scripts/generate-static-sitemaps-optimized.js",
     "build:with-sitemaps": "npm run generate-sitemaps && npm run build"
   },
   "dependencies": {
