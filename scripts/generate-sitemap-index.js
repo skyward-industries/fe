@@ -8,11 +8,21 @@ function generateSitemapIndex() {
   
   console.log('🚀 Generating sitemap index...');
   
-  // Find all sitemap files in public directory
-  const sitemapFiles = fs.readdirSync(publicDir)
-    .filter(file => file.startsWith('sitemap-') && file.endsWith('.xml'))
+  // Find OLD format sitemap files (sitemap-index-1.xml, etc.)
+  const oldFormatFiles = fs.readdirSync(publicDir)
+    .filter(file => file.match(/^sitemap-index-\d+\.xml$/))
     .sort((a, b) => {
-      // Extract numbers from filenames like "sitemap-1-2000.xml"
+      const aNum = parseInt(a.match(/sitemap-index-(\d+)\.xml/)?.[1] || '0');
+      const bNum = parseInt(b.match(/sitemap-index-(\d+)\.xml/)?.[1] || '0');
+      return aNum - bNum;
+    });
+  
+  console.log(`📁 Found ${oldFormatFiles.length} OLD format files (sitemap-index-N.xml)`);
+  
+  // Find NEW format sitemap files (sitemap-1-2000.xml, etc.)
+  const newFormatFiles = fs.readdirSync(publicDir)
+    .filter(file => file.match(/^sitemap-\d+-\d+\.xml$/))
+    .sort((a, b) => {
       const aMatch = a.match(/sitemap-(\d+)-(\d+)\.xml/);
       const bMatch = b.match(/sitemap-(\d+)-(\d+)\.xml/);
       
@@ -24,16 +34,30 @@ function generateSitemapIndex() {
       return 0;
     });
   
-  console.log(`📁 Found ${sitemapFiles.length} sitemap files`);
+  console.log(`📁 Found ${newFormatFiles.length} NEW format files (sitemap-N-N.xml)`);
   
-  if (sitemapFiles.length === 0) {
+  // Combine both formats
+  const allSitemapFiles = [...oldFormatFiles, ...newFormatFiles];
+  
+  console.log(`📁 Total: ${allSitemapFiles.length} sitemap files`);
+  
+  if (allSitemapFiles.length === 0) {
     console.log('⚠️ No sitemap files found. Run generate-sitemaps first.');
     return;
   }
   
-  // Show first and last few files for verification
-  console.log('First files:', sitemapFiles.slice(0, 3));
-  console.log('Last files:', sitemapFiles.slice(-3));
+  // Show sample files for verification
+  if (oldFormatFiles.length > 0) {
+    console.log('\nOLD format samples:');
+    console.log('  First:', oldFormatFiles.slice(0, 2));
+    console.log('  Last:', oldFormatFiles.slice(-2));
+  }
+  
+  if (newFormatFiles.length > 0) {
+    console.log('\nNEW format samples:');
+    console.log('  First:', newFormatFiles.slice(0, 2));
+    console.log('  Last:', newFormatFiles.slice(-2));
+  }
   
   const lastmod = new Date().toISOString();
   
@@ -48,7 +72,7 @@ function generateSitemapIndex() {
     <loc>https://skywardparts.com/sitemap-groups.xml</loc>
     <lastmod>${lastmod}</lastmod>
   </sitemap>
-${sitemapFiles.map(file => `  <sitemap>
+${allSitemapFiles.map(file => `  <sitemap>
     <loc>https://skywardparts.com/${file}</loc>
     <lastmod>${lastmod}</lastmod>
   </sitemap>`).join('\n')}
@@ -58,7 +82,7 @@ ${sitemapFiles.map(file => `  <sitemap>
   const indexPath = path.join(publicDir, 'sitemap.xml');
   fs.writeFileSync(indexPath, sitemapIndex);
   
-  console.log(`✅ Generated sitemap.xml with ${sitemapFiles.length + 2} sitemaps`);
+  console.log(`✅ Generated sitemap.xml with ${allSitemapFiles.length + 2} sitemaps`);
   console.log(`📄 File saved to: ${indexPath}`);
   
   // Also create a sitemap_index.xml for compatibility
@@ -66,10 +90,15 @@ ${sitemapFiles.map(file => `  <sitemap>
   console.log(`✅ Also created sitemap_index.xml for compatibility`);
   
   // Show summary
-  const totalUrls = sitemapFiles.length * 2000; // Approximate
+  const oldFormatUrls = oldFormatFiles.length * 3000; // Old format had 3000 per file
+  const newFormatUrls = newFormatFiles.length * 2000; // New format has 2000 per file
+  const totalUrls = oldFormatUrls + newFormatUrls;
+  
   console.log(`\n📊 Summary:`);
   console.log(`   - Static sitemaps: 2 (priority, groups)`);
-  console.log(`   - Part sitemaps: ${sitemapFiles.length}`);
+  console.log(`   - OLD format sitemaps: ${oldFormatFiles.length} (sitemap-index-N.xml)`);
+  console.log(`   - NEW format sitemaps: ${newFormatFiles.length} (sitemap-N-N.xml)`);
+  console.log(`   - Total part sitemaps: ${allSitemapFiles.length}`);
   console.log(`   - Estimated total URLs: ${totalUrls.toLocaleString()}`);
 }
 
