@@ -13,6 +13,7 @@
     "generate-sitemaps:resume": "node scripts/generate-static-sitemaps.js",
     "generate-sitemaps:optimized": "node scripts/generate-static-sitemaps-optimized.js",
     "generate-sitemap-index": "node scripts/generate-sitemap-index.js",
+    "regenerate-sitemap-indexes": "node scripts/regenerate-sitemap-indexes.js",
     "verify-sitemaps": "node scripts/verify-sitemaps.js",
     "build:with-sitemaps": "npm run generate-sitemaps && npm run build"
   },
