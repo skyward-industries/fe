@@ -5,23 +5,29 @@ import path from 'path';
 
 function generateSiteMapIndexContent(fileNumber, urlsPerFile) {
   // Each sitemap-index file should reference the new sitemap-start-end.xml files
-  // Old format: sitemap-index-1.xml covered URLs 1-3000
-  // New format: sitemap-1-2000.xml, sitemap-2001-4000.xml, etc.
+  // Old format: sitemap-index-1.xml covered URLs 1-3000 (3000 URLs per file)
+  // New format: sitemap-1-2000.xml, sitemap-2001-4000.xml, etc. (2000 URLs per file)
   
   const startNum = (fileNumber - 1) * urlsPerFile + 1;
   const endNum = fileNumber * urlsPerFile;
   
   // Calculate which new format files this range covers
-  // New format has 2000 URLs per file
-  const startFileNum = Math.floor((startNum - 1) / 2000) * 2000 + 1;
-  const endFileNum = Math.ceil(endNum / 2000) * 2000;
-  
+  // New format has exactly 2000 URLs per file
   const sitemapRefs = [];
-  for (let i = startFileNum; i <= endFileNum; i += 2000) {
-    const rangeEnd = Math.min(i + 1999, endNum);
-    if (i <= endNum) {
-      sitemapRefs.push(`https://skywardparts.com/sitemap-${i}-${rangeEnd}.xml`);
+  
+  // Find the first sitemap file that starts at or before our range
+  let currentStart = Math.floor((startNum - 1) / 2000) * 2000 + 1;
+  
+  // Generate all sitemap files that overlap with our range
+  while (currentStart <= endNum) {
+    const currentEnd = currentStart + 1999; // Always 2000 URLs (1999 + 1)
+    
+    // Only include if this sitemap overlaps with our range
+    if (currentEnd >= startNum && currentStart <= endNum) {
+      sitemapRefs.push(`https://skywardparts.com/sitemap-${currentStart}-${currentEnd}.xml`);
     }
+    
+    currentStart += 2000; // Move to next sitemap file
   }
   
   const lastmod = new Date().toISOString();
