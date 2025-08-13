@@ -28,18 +28,7 @@ const nextConfig = {
   // Redirects for old URL structure to maintain SEO rankings
   async redirects() {
     return [
-      // Redirect old URLs with 'nsn-' prefix in subgroup names and NSN
-      {
-        source: '/catalog/:groupId/:groupName/:subgroupId/nsn-:subgroupName/nsn-:nsn',
-        destination: '/catalog/:groupId/:groupName/:subgroupId/:subgroupName/:nsn',
-        permanent: true,
-      },
-      // Redirect old URLs with just 'nsn-' prefix in NSN
-      {
-        source: '/catalog/:groupId/:groupName/:subgroupId/:subgroupName/nsn-:nsn',
-        destination: '/catalog/:groupId/:groupName/:subgroupId/:subgroupName/:nsn',
-        permanent: true,
-      },
+
     ];
   },
 };

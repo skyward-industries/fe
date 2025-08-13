@@ -9,7 +9,6 @@ User-agent: MJ12bot
 Disallow: /
 User-agent: *
 Disallow: /?s=
-Crawl-delay: 10
 Disallow: /cage-code
 Disallow: /cage-code/
 Disallow: /cage-code-details

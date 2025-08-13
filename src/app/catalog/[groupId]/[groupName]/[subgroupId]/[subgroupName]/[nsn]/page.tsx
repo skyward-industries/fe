@@ -156,7 +156,7 @@ type PageProps = {
 // --- SEO: Dynamic Metadata Function ---
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { nsn, subgroupName, groupId, groupName, subgroupId } = params;
-  const cleanNSN = nsn;
+  const cleanNSN = nsn.replace(/^nsn-/, '');
   
   let sharedPartData: Part | null = null;
   try {
@@ -272,7 +272,7 @@ export const dynamic = 'force-static';
 // --- Main Page Component ---
 export default async function PartInfoPage({ params }: PageProps) {
   const { nsn, groupId, groupName, subgroupId, subgroupName } = params;
-  const cleanNSN = nsn;
+  const cleanNSN = nsn.replace(/^nsn-/, '');
 
   let parts: Part[] = [];
   try {
