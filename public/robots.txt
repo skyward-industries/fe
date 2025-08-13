@@ -22,10 +22,10 @@ Disallow: /api/
 # Host
 Host: https://skywardparts.com
 
-# Optimized Sitemap Index (2,840 valid ranges with 7.1M NSNs)
-# Replaces the old sitemap.xml with targeted, working sitemaps only
-Sitemap: https://skywardparts.com/sitemap_index.xml
+# Main Sitemap (references all 180 sitemap-index files)
+Sitemap: https://skywardparts.com/sitemap.xml
 
-# Individual sitemaps available at:
-# https://skywardparts.com/sitemap/{start}/{end}.xml
-# All ranges guaranteed to contain valid NSN data
+# Individual sitemap indexes and sitemaps available at:
+# https://skywardparts.com/sitemap-index-{X}.xml (index files)
+# https://skywardparts.com/sitemap-{start}-{end}.xml (individual sitemaps)
+# All ranges contain valid NSN data with fresh lastmod dates
