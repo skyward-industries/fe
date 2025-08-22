@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'; // ✅ Generate fresh with new batch size
 
 export async function GET() {
-  const totalParts = 7200000;
+  const totalParts = 1000000; // Updated to match actual sitemap count
   const batchSize = 2000; // Must match the sitemap route batch size
   const totalSitemaps = Math.ceil(totalParts / batchSize);
   const today = new Date().toISOString();
@@ -24,7 +24,7 @@ export async function GET() {
 
     sitemapIndex += `
   <sitemap>
-    <loc>https://skywardparts.com/sitemap/${startRange}/${endRange}.xml</loc>
+    <loc>https://skywardparts.com/sitemap-${startRange}-${endRange}.xml</loc>
     <lastmod>${today}</lastmod>
   </sitemap>\n`;
   }
