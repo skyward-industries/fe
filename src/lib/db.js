@@ -127,14 +127,19 @@ async function getPartsByNSN(nsn) {
     return cachedResult;
   }
   
-  // EMERGENCY SIMPLIFIED QUERY - Split into two fast queries instead of one slow query
+  // Format NSN with hyphens for direct index usage
+  const formattedNsn = nsn.length === 13 
+    ? `${nsn.slice(0, 4)}-${nsn.slice(4, 6)}-${nsn.slice(6, 9)}-${nsn.slice(9)}`
+    : nsn;
+  
+  // OPTIMIZED QUERY - Use direct NSN comparison to leverage index
   const basicQuery = `
     SELECT
       pi.nsn, pi.fsg, pi.fsc, pi.niin,
       fsgs.fsg_title, fsgs.fsc_title
     FROM public.part_info pi
     LEFT JOIN public.wp_fsgs_new fsgs ON pi.fsg = fsgs.fsg AND pi.fsc = fsgs.fsc
-    WHERE REPLACE(pi.nsn, '-', '') = $1
+    WHERE pi.nsn = $1
     LIMIT 1;
   `;
   
@@ -148,14 +153,14 @@ async function getPartsByNSN(nsn) {
       )
     ]);
     
-    console.log(`[FE DB Query] Executing EMERGENCY SIMPLIFIED getPartsByNSN for NSN: ${nsn}`);
+    console.log(`[FE DB Query] Executing OPTIMIZED getPartsByNSN for NSN: ${formattedNsn}`);
     const startTime = Date.now();
     
-    // Set aggressive query timeout
-    await client.query('SET statement_timeout = 3000'); // 3 second max
+    // Set reasonable query timeout (indexed queries should be fast)
+    await client.query('SET statement_timeout = 10000'); // 10 second max
     
     // First get basic part info
-    const basicResult = await client.query(basicQuery, [nsn]);
+    const basicResult = await client.query(basicQuery, [formattedNsn]);
     
     if (basicResult.rows.length === 0) {
       // Cache empty result to avoid repeated queries
@@ -170,10 +175,10 @@ async function getPartsByNSN(nsn) {
     let addresses = [];
     
     try {
-      // Get part numbers separately
+      // Get part numbers separately using indexed query
       const pnResult = await client.query(
         'SELECT part_number, cage_code FROM public.part_numbers WHERE nsn = $1 LIMIT 10',
-        [basicPart.nsn]
+        [formattedNsn]
       );
       partNumbers = pnResult.rows;
     } catch (err) {
