@@ -1,5 +1,7 @@
 // src/services/fetchPartInfo.ts
 
+import { getPartsByNSN } from '@/lib/db';
+
 export interface Part {
   // Core Identifiers (from part_info, part_numbers)
   id?: string | null; // Assuming part_info.id is also selected, it's bigserial
@@ -86,25 +88,8 @@ export interface Part {
 // Function to fetch part information for a given NSN
 export async function fetchPartInfo(nsn: string): Promise<Part[]> {
   try {
-    const res = await fetch(`${process.env.INTERNAL_API_URL || 'http://localhost:3000'}/api/partInfo/${nsn}`);
-
-    // --- NEW DEBUGGING CODE ---
-    // Get the raw text of the response, no matter what it is
-    const rawText = await res.text();
-
-    // Log the raw response to the console. This is the crucial step.
-    console.log('--- RAW API RESPONSE FOR /api/partInfo ---');
-    console.log(rawText);
-    console.log('------------------------------------------');
-    // --- END DEBUGGING CODE ---
-
-    if (!res.ok) {
-      // We already have the text, so we don't need to fetch it again.
-      throw new Error(`API responded with status ${res.status}. Response: ${rawText}`);
-    }
-
-    // Now, try to parse the text we already received
-    const data: Part[] = JSON.parse(rawText);
+    // FIXED: Call database directly instead of going through API
+    const data = await getPartsByNSN(nsn);
     return data;
   } catch (error: any) {
       console.error("Error fetching part info in service:", error);
