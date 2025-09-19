@@ -172,7 +172,7 @@ async function generateSitemaps() {
       const endNum = Math.min(offset + PARTS_PER_SITEMAP, totalParts);
 
       // Query parts for this sitemap
-      const query = 'SELECT nsn, item_name as part_name, fsc, fsg FROM public.nsn_with_inc WHERE nsn IS NOT NULL ORDER BY nsn LIMIT $1 OFFSET $2';
+      const query = 'SELECT nsn, item_name as part_name, fsc, SUBSTRING(fsc FROM 1 FOR 2) as fsg FROM public.nsn_with_inc WHERE nsn IS NOT NULL ORDER BY nsn LIMIT $1 OFFSET $2';
 
       console.log('Generating sitemap ' + (i + 1) + '/' + totalSitemaps + ': parts ' + startNum + '-' + endNum);
 
