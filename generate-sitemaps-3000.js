@@ -125,7 +125,7 @@ const FSG_NAMES = {
 function getFscName(fsc) {
   // Your URLs use the pattern "nsn-" followed by category name
   // Since we don't have all FSC names, we'll use a generic pattern
-  return `nsn-category-${fsc}`;
+  return 'nsn-category-' + fsc;
 }
 
 function generateSitemapXML(parts) {
@@ -139,8 +139,8 @@ function generateSitemapXML(parts) {
     const groupName = FSG_NAMES[fsg] || 'miscellaneous';
 
     xml += '  <url>\n';
-    xml += `    <loc>${DOMAIN}/catalog/${fsg}/${groupName}/${fsc}/${getFscName(fsc)}/nsn-${nsn}</loc>\n`;
-    xml += `    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n';
+    xml += '    <loc>' + DOMAIN + '/catalog/' + fsg + '/' + groupName + '/' + fsc + '/' + getFscName(fsc) + '/nsn-' + nsn + '</loc>\n';
+    xml += '    <lastmod>' + new Date().toISOString().split('T')[0] + '</lastmod>\n';
     xml += '    <changefreq>weekly</changefreq>\n';
     xml += '    <priority>0.8</priority>\n';
     xml += '  </url>\n';
@@ -172,39 +172,29 @@ async function generateSitemaps() {
       const endNum = Math.min(offset + PARTS_PER_SITEMAP, totalParts);
 
       // Query parts for this sitemap
-      const query = `
-        SELECT
-          nsn,
-          item_name as part_name,
-          fsc,
-          fsg
-        FROM public.nsn_with_inc
-        WHERE nsn IS NOT NULL
-        ORDER BY nsn
-        LIMIT $1 OFFSET $2
-      `;
+      const query = 'SELECT nsn, item_name as part_name, fsc, fsg FROM public.nsn_with_inc WHERE nsn IS NOT NULL ORDER BY nsn LIMIT $1 OFFSET $2';
 
       console.log('Generating sitemap ' + (i + 1) + '/' + totalSitemaps + ': parts ' + startNum + '-' + endNum);
 
       const result = await pool.query(query, [PARTS_PER_SITEMAP, offset]);
 
       if (result.rows.length > 0) {
-        const filename = `${startNum}/${endNum}.xml`;
-        const filepath = path.join(SITEMAP_DIR, `${startNum}`);
+        const filename = startNum + '/' + endNum + '.xml';
+        const filepath = path.join(SITEMAP_DIR, String(startNum));
 
         // Create directory if it doesn't exist
         if (!fs.existsSync(filepath)) {
           fs.mkdirSync(filepath, { recursive: true });
         }
 
-        const fullPath = path.join(filepath, `${endNum}.xml`);
+        const fullPath = path.join(filepath, endNum + '.xml');
         const xml = generateSitemapXML(result.rows);
 
         fs.writeFileSync(fullPath, xml);
         console.log('Written: ' + filename + ' (' + result.rows.length + ' parts)');
 
         sitemapFiles.push({
-          loc: `${DOMAIN}/sitemap/${filename}`,
+          loc: DOMAIN + '/sitemap/' + filename,
           lastmod: new Date().toISOString()
         });
       }
@@ -217,8 +207,8 @@ async function generateSitemaps() {
 
     for (const sitemap of sitemapFiles) {
       indexXml += '  <sitemap>\n';
-      indexXml += `    <loc>${sitemap.loc}</loc>\n`;
-      indexXml += `    <lastmod>${sitemap.lastmod.split('T')[0]}</lastmod>\n`;
+      indexXml += '    <loc>' + sitemap.loc + '</loc>\n';
+      indexXml += '    <lastmod>' + sitemap.lastmod.split('T')[0] + '</lastmod>\n';
       indexXml += '  </sitemap>\n';
     }
 
@@ -231,14 +221,14 @@ async function generateSitemaps() {
     // Summary
     console.log('\nSitemap generation complete!');
     console.log('Summary:');
-    console.log(`   - Total parts: ${totalParts.toLocaleString()}`);
-    console.log(`   - Sitemap files: ${sitemapFiles.length}`);
-    console.log(`   - Parts per file: ${PARTS_PER_SITEMAP}`);
-    console.log(`   - Output directory: ${SITEMAP_DIR}`);
+    console.log('   - Total parts: ' + totalParts.toLocaleString());
+    console.log('   - Sitemap files: ' + sitemapFiles.length);
+    console.log('   - Parts per file: ' + PARTS_PER_SITEMAP);
+    console.log('   - Output directory: ' + SITEMAP_DIR);
 
     // Update robots.txt reminder
     console.log('\nRemember to ensure your robots.txt includes:');
-    console.log(`   Sitemap: ${DOMAIN}/sitemap_index.xml`);
+    console.log('   Sitemap: ' + DOMAIN + '/sitemap_index.xml');
 
   } catch (error) {
     console.error('Error generating sitemaps:', error);
