@@ -151,17 +151,17 @@ function generateSitemapXML(parts) {
 }
 
 async function generateSitemaps() {
-  console.log('🚀 Starting sitemap generation with 3000 parts per file...');
-  console.log(`📁 Output directory: ${SITEMAP_DIR}`);
+  console.log('Starting sitemap generation with 3000 parts per file...');
+  console.log(`Output directory: ${SITEMAP_DIR}`);
 
   try {
     // Get total count of parts
     const countResult = await pool.query('SELECT COUNT(*) FROM public.nsn_with_inc WHERE nsn IS NOT NULL');
     const totalParts = parseInt(countResult.rows[0].count);
-    console.log(`📊 Total parts in database: ${totalParts.toLocaleString()}`);
+    console.log(`Total parts in database: ${totalParts.toLocaleString()}`);
 
     const totalSitemaps = Math.ceil(totalParts / PARTS_PER_SITEMAP);
-    console.log(`📝 Will generate ${totalSitemaps} sitemap files`);
+    console.log(`Will generate ${totalSitemaps} sitemap files`);
 
     const sitemapFiles = [];
 
@@ -184,7 +184,7 @@ async function generateSitemaps() {
         LIMIT $1 OFFSET $2
       `;
 
-      console.log(`⚙️  Generating sitemap ${i + 1}/${totalSitemaps}: parts ${startNum}-${endNum}`);
+      console.log(`Generating sitemap ${i + 1}/${totalSitemaps}: parts ${startNum}-${endNum}`);
 
       const result = await pool.query(query, [PARTS_PER_SITEMAP, offset]);
 
@@ -201,7 +201,7 @@ async function generateSitemaps() {
         const xml = generateSitemapXML(result.rows);
 
         fs.writeFileSync(fullPath, xml);
-        console.log(`✅ Written: ${filename} (${result.rows.length} parts)`);
+        console.log(`Written: ${filename} (${result.rows.length} parts)`);
 
         sitemapFiles.push({
           loc: `${DOMAIN}/sitemap/${filename}`,
@@ -211,7 +211,7 @@ async function generateSitemaps() {
     }
 
     // Generate sitemap index
-    console.log('\n📋 Generating sitemap index...');
+    console.log('\nGenerating sitemap index...');
     let indexXml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     indexXml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
 
@@ -226,22 +226,22 @@ async function generateSitemaps() {
 
     const indexPath = path.join(__dirname, 'public', 'sitemap_index.xml');
     fs.writeFileSync(indexPath, indexXml);
-    console.log(`✅ Sitemap index written to: ${indexPath}`);
+    console.log(`Sitemap index written to: ${indexPath}`);
 
     // Summary
-    console.log('\n🎉 Sitemap generation complete!');
-    console.log(`📊 Summary:`);
+    console.log('\nSitemap generation complete!');
+    console.log(`Summary:`);
     console.log(`   - Total parts: ${totalParts.toLocaleString()}`);
     console.log(`   - Sitemap files: ${sitemapFiles.length}`);
     console.log(`   - Parts per file: ${PARTS_PER_SITEMAP}`);
     console.log(`   - Output directory: ${SITEMAP_DIR}`);
 
     // Update robots.txt reminder
-    console.log('\n📌 Remember to ensure your robots.txt includes:');
+    console.log('\nRemember to ensure your robots.txt includes:');
     console.log(`   Sitemap: ${DOMAIN}/sitemap_index.xml`);
 
   } catch (error) {
-    console.error('❌ Error generating sitemaps:', error);
+    console.error('Error generating sitemaps:', error);
     process.exit(1);
   } finally {
     await pool.end();
