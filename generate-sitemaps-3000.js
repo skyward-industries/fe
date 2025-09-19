@@ -39,18 +39,108 @@ if (!fs.existsSync(SITEMAP_DIR)) {
   fs.mkdirSync(SITEMAP_DIR, { recursive: true });
 }
 
+// FSG to name mapping (based on your actual URL structure)
+const FSG_NAMES = {
+  '10': 'weapons',
+  '11': 'nuclear-ordnance',
+  '12': 'fire-control-equipment',
+  '13': 'ammunition-and-explosives',
+  '14': 'guided-missiles',
+  '15': 'aircraft-and-airframe-structural-components',
+  '16': 'aircraft-components-and-accessories',
+  '17': 'aircraft-launching-landing-and-ground-handling-equipment',
+  '18': 'space-vehicles',
+  '19': 'ships-small-craft-pontoons-and-floating-docks',
+  '20': 'ship-and-marine-equipment',
+  '22': 'railway-equipment',
+  '23': 'ground-effect-vehicles-motor-vehicles-trailers-and-cycles',
+  '24': 'tractors',
+  '25': 'vehicular-equipment-components',
+  '26': 'tires-and-tubes',
+  '28': 'engines-turbines-and-components',
+  '29': 'engine-accessories',
+  '30': 'mechanical-power-transmission-equipment',
+  '31': 'bearings',
+  '32': 'woodworking-machinery-and-equipment',
+  '34': 'metalworking-machinery',
+  '35': 'service-and-trade-equipment',
+  '36': 'special-industry-machinery',
+  '37': 'agricultural-machinery-and-equipment',
+  '38': 'construction-mining-excavating-and-highway-maintenance-equipment',
+  '39': 'materials-handling-equipment',
+  '40': 'rope-cable-chain-and-fittings',
+  '41': 'refrigeration-air-conditioning-and-air-circulating-equipment',
+  '42': 'fire-fighting-rescue-and-safety-equipment-and-environmental-protection-equipment-and-materials',
+  '43': 'pumps-and-compressors',
+  '44': 'furnace-steam-plant-and-drying-equipment-and-nuclear-reactors',
+  '45': 'plumbing-heating-and-waste-disposal-equipment',
+  '46': 'water-purification-and-sewage-treatment-equipment',
+  '47': 'pipe-tubing-hose-and-fittings',
+  '48': 'valves',
+  '49': 'maintenance-and-repair-shop-equipment',
+  '51': 'hand-tools',
+  '52': 'measuring-tools',
+  '53': 'hardware-and-abrasives',
+  '54': 'prefabricated-structures-and-scaffolding',
+  '55': 'lumber-millwork-plywood-and-veneer',
+  '56': 'construction-and-building-materials',
+  '58': 'communication-detection-and-coherent-radiation-equipment',
+  '59': 'electrical-and-electronic-equipment-components',
+  '60': 'fiber-optics-materials-components-assemblies-and-accessories',
+  '61': 'electric-wire-and-power-and-distribution-equipment',
+  '62': 'lighting-fixtures-and-lamps',
+  '63': 'alarm-signal-and-security-detection-systems',
+  '65': 'medical-hospital-dental-and-veterinary-equipment-and-supplies',
+  '66': 'instruments-and-laboratory-equipment',
+  '67': 'photographic-equipment',
+  '68': 'chemicals-and-chemical-products',
+  '69': 'training-aids-and-devices',
+  '70': 'general-purpose-information-technology-equipment',
+  '71': 'furniture',
+  '72': 'household-and-commercial-furnishings-and-appliances',
+  '73': 'food-preparation-and-serving-equipment',
+  '74': 'office-machines-text-processing-systems-and-visible-record-equipment',
+  '75': 'office-supplies-and-devices',
+  '76': 'books-maps-and-other-publications',
+  '77': 'musical-instruments-phonographs-and-home-type-radios',
+  '78': 'recreational-and-athletic-equipment',
+  '79': 'cleaning-equipment-and-supplies',
+  '80': 'brushes-paints-sealers-and-adhesives',
+  '81': 'containers-packaging-and-packing-supplies',
+  '83': 'textiles-leather-furs-apparel-and-shoe-findings-tents-and-flags',
+  '84': 'clothing-individual-equipment-and-insignia',
+  '85': 'toiletries',
+  '87': 'agricultural-supplies',
+  '88': 'live-animals',
+  '89': 'subsistence',
+  '91': 'fuels-lubricants-oils-and-waxes',
+  '93': 'nonmetallic-fabricated-materials',
+  '94': 'nonmetallic-crude-materials',
+  '95': 'metal-bars-sheets-and-shapes',
+  '96': 'ores-minerals-and-their-primary-products',
+  '99': 'miscellaneous'
+};
+
+// FSC names - using the pattern from your actual URLs
+function getFscName(fsc) {
+  // Your URLs use the pattern "nsn-" followed by category name
+  // Since we don't have all FSC names, we'll use a generic pattern
+  return `nsn-category-${fsc}`;
+}
+
 function generateSitemapXML(parts) {
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
   xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
 
   for (const part of parts) {
     const nsn = part.nsn.replace(/\s+/g, '-');
-    const groupName = (part.group_name || 'uncategorized').toLowerCase().replace(/\s+/g, '-');
-    const subgroupName = (part.subgroup_name || 'uncategorized').toLowerCase().replace(/\s+/g, '-');
+    const fsg = part.fsg || '99'; // Default to miscellaneous if no FSG
+    const fsc = part.fsc || '9999'; // Default FSC if missing
+    const groupName = FSG_NAMES[fsg] || 'miscellaneous';
 
     xml += '  <url>\n';
-    xml += `    <loc>${DOMAIN}/catalog/${part.group_id}/${groupName}/${part.subgroup_id}/${subgroupName}/nsn-${nsn}</loc>\n`;
-    xml += `    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n`;
+    xml += `    <loc>${DOMAIN}/catalog/${fsg}/${groupName}/${fsc}/${getFscName(fsc)}/nsn-${nsn}</loc>\n`;
+    xml += `    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n';
     xml += '    <changefreq>weekly</changefreq>\n';
     xml += '    <priority>0.8</priority>\n';
     xml += '  </url>\n';
@@ -66,7 +156,7 @@ async function generateSitemaps() {
 
   try {
     // Get total count of parts
-    const countResult = await pool.query('SELECT COUNT(*) FROM parts WHERE nsn IS NOT NULL');
+    const countResult = await pool.query('SELECT COUNT(*) FROM public.nsn_with_inc WHERE nsn IS NOT NULL');
     const totalParts = parseInt(countResult.rows[0].count);
     console.log(`📊 Total parts in database: ${totalParts.toLocaleString()}`);
 
@@ -84,18 +174,13 @@ async function generateSitemaps() {
       // Query parts for this sitemap
       const query = `
         SELECT
-          p.nsn,
-          p.part_number,
-          p.part_name,
-          g.id as group_id,
-          g.name as group_name,
-          sg.id as subgroup_id,
-          sg.name as subgroup_name
-        FROM parts p
-        LEFT JOIN subgroups sg ON p.subgroup = sg.id
-        LEFT JOIN groups g ON sg.group_id = g.id
-        WHERE p.nsn IS NOT NULL
-        ORDER BY p.nsn
+          nsn,
+          item_name as part_name,
+          fsc,
+          fsg
+        FROM public.nsn_with_inc
+        WHERE nsn IS NOT NULL
+        ORDER BY nsn
         LIMIT $1 OFFSET $2
       `;
 
