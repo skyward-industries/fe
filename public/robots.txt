@@ -21,11 +21,11 @@ Disallow: /api/
 Disallow: /catalog/nsn*
 
 # Host
-Host: https://skywardindustries.com
+Host: https://skywardparts.com
 
 # Main Sitemap
-Sitemap: https://skywardindustries.com/sitemap_index.xml
+Sitemap: https://skywardparts.com/sitemap_index.xml
 
 # Individual sitemaps available at:
-# https://skywardindustries.com/sitemap/{start}/{end}.xml
+# https://skywardparts.com/sitemap/{start}/{end}.xml
 # All ranges contain valid NSN data with 3000 parts per file
