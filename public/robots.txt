@@ -18,14 +18,14 @@ Disallow: */undefined/
 Disallow: /_next/static/
 Disallow: /_next/image/
 Disallow: /api/
+Disallow: /catalog/nsn*
 
 # Host
-Host: https://skywardparts.com
+Host: https://skywardindustries.com
 
-# Main Sitemap (references all 180 sitemap-index files)
-Sitemap: https://skywardparts.com/sitemap.xml
+# Main Sitemap
+Sitemap: https://skywardindustries.com/sitemap_index.xml
 
-# Individual sitemap indexes and sitemaps available at:
-# https://skywardparts.com/sitemap-index-{X}.xml (index files)
-# https://skywardparts.com/sitemap-{start}-{end}.xml (individual sitemaps)
-# All ranges contain valid NSN data with fresh lastmod dates
+# Individual sitemaps available at:
+# https://skywardindustries.com/sitemap/{start}/{end}.xml
+# All ranges contain valid NSN data with 3000 parts per file
