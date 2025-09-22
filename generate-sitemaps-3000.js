@@ -179,15 +179,19 @@ async function generateSitemaps() {
       const result = await pool.query(query, [PARTS_PER_SITEMAP, offset]);
 
       if (result.rows.length > 0) {
-        const filename = startNum + '/' + endNum + '.xml';
-        const filepath = path.join(SITEMAP_DIR, String(startNum));
+        // For range 1-3000: directory "1", file "3000.xml"
+        // For range 3001-6000: directory "3001", file "6000.xml"
+        const dirName = String(startNum);
+        const fileName = endNum + '.xml';
+        const filename = dirName + '/' + fileName;
+        const filepath = path.join(SITEMAP_DIR, dirName);
 
         // Create directory if it doesn't exist
         if (!fs.existsSync(filepath)) {
           fs.mkdirSync(filepath, { recursive: true });
         }
 
-        const fullPath = path.join(filepath, endNum + '.xml');
+        const fullPath = path.join(filepath, fileName);
         const xml = generateSitemapXML(result.rows);
 
         fs.writeFileSync(fullPath, xml);
