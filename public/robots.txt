@@ -1,4 +1,4 @@
-#Block aggressive bots
+# Block aggressive bots
 User-agent: AhrefsBot
 Disallow: /
 User-agent: SemrushBot
@@ -7,7 +7,10 @@ User-agent: DotBot
 Disallow: /
 User-agent: MJ12bot
 Disallow: /
+
+# Main crawlers - optimized settings
 User-agent: *
+Crawl-delay: 1
 Disallow: /?s=
 Disallow: /cage-code
 Disallow: /cage-code/
@@ -18,14 +21,11 @@ Disallow: */undefined/
 Disallow: /_next/static/
 Disallow: /_next/image/
 Disallow: /api/
-Disallow: /catalog/nsn*
+# Allow important catalog pages
+Allow: /catalog/
 
 # Host
 Host: https://skywardparts.com
 
-# Main Sitemap
+# Optimized Sitemap (much smaller)
 Sitemap: https://skywardparts.com/sitemap_index.xml
-
-# Individual sitemaps available at:
-# https://skywardparts.com/sitemap/{start}/{end}.xml
-# All ranges contain valid NSN data with 3000 parts per file
