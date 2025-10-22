@@ -196,8 +196,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (metaDescription.length > 160) {
     metaDescription = metaDescription.slice(0, 157) + '...';
   }
-  // --- Canonical URL ---
-  const canonicalUrl = `https://skywardparts.com/catalog/${groupId}/${groupName}/${subgroupId}/${subgroupName}/${nsn}`;
+  // --- Canonical URL (always use format without nsn- prefix) ---
+  const cleanSubgroupName = decodeURIComponent(subgroupName).replace(/^nsn-/i, '');
+  const canonicalUrl = `https://skywardparts.com/catalog/${groupId}/${groupName}/${subgroupId}/${encodeURIComponent(cleanSubgroupName)}/${cleanNSN}`;
 
   // Build keywords array from available data
   const keywords = [
@@ -338,7 +339,8 @@ export default async function PartInfoPage({ params }: PageProps) {
         <meta name="technical_characteristics" content={Array.isArray(sharedPartData?.characteristics) ? sharedPartData.characteristics.map(c => `${c.requirements_statement}: ${c.clear_text_reply}`).join('; ') : ''} />
       </Head>
       <main>
-        {/* JSON-LD Structured Data */}
+        {/* JSON-LD Structured Data - RFQ Product Schema */}
+        {/* Using price="0" for RFQ items - Google accepts this for quote-based pricing */}
         {sharedPartData && (
           <Script
             id="product-structured-data"
@@ -349,15 +351,43 @@ export default async function PartInfoPage({ params }: PageProps) {
                 "@type": "Product",
                 "name": sharedPartData.item_name || 'Product Details',
                 "sku": sharedPartData.nsn,
+                "mpn": sharedPartData.part_number,
                 "description": sharedPartData.definition || sharedPartData.item_name || 'Product Details',
                 "brand": {
+                  "@type": "Brand",
+                  "name": sharedPartData.company_name || 'Skyward Industries'
+                },
+                "manufacturer": {
                   "@type": "Organization",
                   "name": sharedPartData.company_name || 'Skyward Industries'
                 },
+                "category": sharedPartData.fsc_title || sharedPartData.fsg_title,
                 "offers": {
                   "@type": "Offer",
-                  "availability": "https://schema.org/InStock"
-                }
+                  "price": "0",
+                  "priceCurrency": "USD",
+                  "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+                  "availability": "https://schema.org/InStock",
+                  "url": `https://skywardparts.com/catalog/${params.groupId}/${params.groupName}/${params.subgroupId}/${params.subgroupName}/${cleanNSN}`,
+                  "seller": {
+                    "@type": "Organization",
+                    "name": "Skyward Industries"
+                  },
+                  "priceSpecification": {
+                    "@type": "PriceSpecification",
+                    "price": "0",
+                    "priceCurrency": "USD",
+                    "valueAddedTaxIncluded": false
+                  },
+                  "itemCondition": "https://schema.org/NewCondition",
+                  "businessFunction": "http://purl.org/goodrelations/v1#ProvideService"
+                },
+                // Optional: Add aggregateRating when you have reviews
+                // "aggregateRating": {
+                //   "@type": "AggregateRating",
+                //   "ratingValue": "4.5",
+                //   "reviewCount": "10"
+                // }
               })
             }}
           />
