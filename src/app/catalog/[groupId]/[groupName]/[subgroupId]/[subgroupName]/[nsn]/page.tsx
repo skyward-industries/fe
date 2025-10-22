@@ -362,6 +362,7 @@ export default async function PartInfoPage({ params }: PageProps) {
                   "name": sharedPartData.company_name || 'Skyward Industries'
                 },
                 "category": sharedPartData.fsc_title || sharedPartData.fsg_title,
+                "image": "https://skywardparts.com/logo.png",
                 "offers": {
                   "@type": "Offer",
                   "price": "0",
@@ -380,7 +381,22 @@ export default async function PartInfoPage({ params }: PageProps) {
                     "valueAddedTaxIncluded": false
                   },
                   "itemCondition": "https://schema.org/NewCondition",
-                  "businessFunction": "http://purl.org/goodrelations/v1#ProvideService"
+                  "businessFunction": "http://purl.org/goodrelations/v1#ProvideService",
+                  "shippingDetails": {
+                    "@type": "OfferShippingDetails",
+                    "shippingDestination": {
+                      "@type": "DefinedRegion",
+                      "addressCountry": "US"
+                    }
+                  },
+                  "hasMerchantReturnPolicy": {
+                    "@type": "MerchantReturnPolicy",
+                    "applicableCountry": "US",
+                    "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+                    "merchantReturnDays": 30,
+                    "returnMethod": "https://schema.org/ReturnByMail",
+                    "returnFees": "https://schema.org/FreeReturn"
+                  }
                 },
                 // Optional: Add aggregateRating when you have reviews
                 // "aggregateRating": {
