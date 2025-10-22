@@ -28,7 +28,20 @@ const nextConfig = {
   // Redirects for old URL structure to maintain SEO rankings
   async redirects() {
     return [
-
+      // Redirect old nsn- prefix format to new format
+      // Pattern: /catalog/:groupId/:groupName/:subgroupId/nsn-:subgroupName/nsn-:nsn
+      // To: /catalog/:groupId/:groupName/:subgroupId/:subgroupName/:nsn
+      {
+        source: '/catalog/:groupId/:groupName/:subgroupId/nsn-:subgroupName/nsn-:nsn',
+        destination: '/catalog/:groupId/:groupName/:subgroupId/:subgroupName/:nsn',
+        permanent: true, // 301 redirect
+      },
+      // Also handle case where only NSN has prefix
+      {
+        source: '/catalog/:groupId/:groupName/:subgroupId/:subgroupName/nsn-:nsn',
+        destination: '/catalog/:groupId/:groupName/:subgroupId/:subgroupName/:nsn',
+        permanent: true, // 301 redirect
+      },
     ];
   },
 };
