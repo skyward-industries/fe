@@ -5,6 +5,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from "next/link";
 import moment from "moment";
+import { permanentRedirect } from 'next/navigation';
 import { fetchPartInfo, Part } from "@/services/fetchPartInfo";
 import { fetchParts } from '@/services/fetchParts';
 import {
@@ -273,6 +274,16 @@ export const dynamic = 'force-static';
 // --- Main Page Component ---
 export default async function PartInfoPage({ params }: PageProps) {
   const { nsn, groupId, groupName, subgroupId, subgroupName } = params;
+
+  // ✅ 301 Permanent Redirect if URL contains old nsn- prefix format
+  const hasNsnPrefix = nsn.startsWith('nsn-') || subgroupName.startsWith('nsn-');
+  if (hasNsnPrefix) {
+    const cleanSubgroupName = subgroupName.replace(/^nsn-/i, '');
+    const cleanNSN = nsn.replace(/^nsn-/i, '');
+    const newPath = `/catalog/${groupId}/${groupName}/${subgroupId}/${cleanSubgroupName}/${cleanNSN}`;
+    permanentRedirect(newPath); // 301 redirect
+  }
+
   const cleanNSN = nsn.replace(/^nsn-/, '');
 
   let parts: Part[] = [];
