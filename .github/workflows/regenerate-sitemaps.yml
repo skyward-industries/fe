@@ -1,0 +1,117 @@
+name: Regenerate Sitemaps Daily
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC (low traffic time)
+    - cron: '0 2 * * *'
+
+  # Allow manual trigger from GitHub UI
+  workflow_dispatch:
+    inputs:
+      notify_search_engines:
+        description: 'Notify search engines after regeneration'
+        required: false
+        default: 'true'
+        type: boolean
+
+jobs:
+  regenerate-sitemaps:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'GitHub Actions Bot'
+          git config --global user.email 'actions@github.com'
+
+      - name: Regenerate sitemaps
+        env:
+          NODE_ENV: production
+          PGHOST: ${{ secrets.PGHOST }}
+          PGPORT: ${{ secrets.PGPORT }}
+          PGDATABASE: ${{ secrets.PGDATABASE }}
+          PGUSER: ${{ secrets.PGUSER }}
+          PGPASSWORD: ${{ secrets.PGPASSWORD }}
+          PGSSLMODE: require
+        run: |
+          echo "🚀 Starting sitemap regeneration..."
+          npm run generate-sitemaps
+          echo "✅ Sitemap regeneration complete"
+
+      - name: Check for changes
+        id: git-check
+        run: |
+          git add public/sitemap*.xml
+          if git diff --staged --quiet; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "📭 No changes detected in sitemaps"
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "📝 Changes detected in sitemaps"
+          fi
+
+      - name: Commit and push changes
+        if: steps.git-check.outputs.changes == 'true'
+        run: |
+          git commit -m "chore: regenerate sitemaps with fresh timestamps [skip ci]
+
+          - Updated lastmod timestamps to $(date -u +%Y-%m-%d)
+          - Automated regeneration via GitHub Actions
+          - Ensures Google sees fresh content signals"
+
+          git push
+          echo "✅ Changes pushed to repository"
+
+      - name: Notify search engines via IndexNow
+        if: steps.git-check.outputs.changes == 'true' && (github.event_name == 'schedule' || github.event.inputs.notify_search_engines == 'true')
+        env:
+          INDEXNOW_API_KEY: ${{ secrets.INDEXNOW_API_KEY }}
+        run: |
+          echo "📢 Notifying search engines via IndexNow..."
+          node scripts/notify-search-engines.js
+
+      - name: Verify sitemap accessibility
+        run: |
+          echo "🔍 Verifying sitemap accessibility..."
+          node scripts/verify-sitemaps.js
+
+      - name: Generate summary
+        if: always()
+        run: |
+          echo "## Sitemap Regeneration Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Date**: $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Changes**: ${{ steps.git-check.outputs.changes }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workflow**: ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+
+          # Count sitemap files
+          SITEMAP_COUNT=$(ls -1 public/sitemap-*.xml 2>/dev/null | wc -l)
+          echo "- **Total Sitemaps**: $SITEMAP_COUNT" >> $GITHUB_STEP_SUMMARY
+
+          # Get sitemap index lastmod
+          if [ -f "public/sitemap.xml" ]; then
+            LASTMOD=$(grep -oP '(?<=<lastmod>)[^<]+' public/sitemap.xml | head -1)
+            echo "- **Index Lastmod**: $LASTMOD" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Sitemap regeneration failed!" >> $GITHUB_STEP_SUMMARY
+          echo "Please check the workflow logs for details." >> $GITHUB_STEP_SUMMARY
+

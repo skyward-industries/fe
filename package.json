@@ -12,9 +12,13 @@
     "generate-sitemaps": "node scripts/generate-static-sitemaps.js",
     "generate-sitemaps:resume": "node scripts/generate-static-sitemaps.js",
     "generate-sitemaps:optimized": "node scripts/generate-static-sitemaps-optimized.js",
+    "generate-sitemaps:safe": "node scripts/regenerate-sitemaps-safe.js",
     "generate-sitemap-index": "node scripts/generate-sitemap-index.js",
     "regenerate-sitemap-indexes": "node scripts/regenerate-sitemap-indexes.js",
     "verify-sitemaps": "node scripts/verify-sitemaps.js",
+    "monitor-sitemaps": "node scripts/monitor-sitemap-health.js",
+    "notify-search-engines": "node scripts/notify-search-engines.js",
+    "purge-sitemap-cache": "node scripts/purge-sitemap-cache.js",
     "build:with-sitemaps": "npm run generate-sitemaps && npm run build"
   },
   "dependencies": {
