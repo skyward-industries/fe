@@ -1,31 +1,6 @@
-# Block aggressive bots
-User-agent: AhrefsBot
-Disallow: /
-User-agent: SemrushBot
-Disallow: /
-User-agent: DotBot
-Disallow: /
-User-agent: MJ12bot
-Disallow: /
-
-# Main crawlers - optimized settings
 User-agent: *
-Crawl-delay: 1
-Disallow: /?s=
-Disallow: /cage-code
-Disallow: /cage-code/
-Disallow: /cage-code-details
-Disallow: /cage-code-details/
-Disallow: /product/
-Disallow: */undefined/
-Disallow: /_next/static/
-Disallow: /_next/image/
-Disallow: /api/
-# Allow important catalog pages
-Allow: /catalog/
-
-# Host
+Allow: /
+Disallow: /catalog/nsn-*
+Disallow: /catalog/nsn*
 Host: https://skywardparts.com
-
-# Optimized Sitemap (much smaller)
 Sitemap: https://skywardparts.com/sitemap_index.xml
