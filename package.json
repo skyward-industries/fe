@@ -19,6 +19,7 @@
     "monitor-sitemaps": "node scripts/monitor-sitemap-health.js",
     "notify-search-engines": "node scripts/notify-search-engines.js",
     "purge-sitemap-cache": "node scripts/purge-sitemap-cache.js",
+    "refresh-sitemap-dates": "node scripts/refresh-sitemap-dates.js",
     "build:with-sitemaps": "npm run generate-sitemaps && npm run build"
   },
   "dependencies": {
