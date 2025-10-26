@@ -144,8 +144,14 @@ export default function HomePageClient({ groups }: HomePageClientProps) {
           textAlign: "center", color: "white", position: "relative", // For overlay
         }}
       >
-        {/* Dark overlay for better text readability */}
-        <Box sx={{ position: "absolute", inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.4)' }}/>
+        {/* Gradient overlay for better text readability and smooth transition */}
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            background: 'linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.6) 70%, rgba(209, 213, 219, 0.9) 100%)'
+          }}
+        />
         <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
           <Typography variant="h2" fontWeight="bold" gutterBottom>
             Welcome to Skyward Industries
@@ -163,7 +169,7 @@ export default function HomePageClient({ groups }: HomePageClientProps) {
             <Button variant="contained" color="primary" size="large" component={NextLink} href="/catalog">
               Browse Products
             </Button>
-            <Button variant="outlined" color="primary" size="large" component={NextLink} href="/cart">
+            <Button variant="outlined" sx={{ borderColor: 'white', color: 'white', '&:hover': { borderColor: 'primary.main', bgcolor: 'rgba(255,255,255,0.1)' } }} size="large" component={NextLink} href="/cart">
               View Cart
             </Button>
             {/* Button that scrolls to contact section */}
@@ -175,7 +181,7 @@ export default function HomePageClient({ groups }: HomePageClientProps) {
       </Box>
 
       {/* About Section - Wrapped in ScrollableSection for scrolling */}
-      <Box sx={{ background: '#d1d5db', borderBottom: '1px solid #b0b6be' }}>
+      <Box sx={{ background: 'linear-gradient(180deg, #d1d5db 0%, #e5e7eb 100%)', borderBottom: '1px solid #b0b6be' }}>
         <ScrollableSection id="section-about" title="About Skyward Industries">
           <FadeInSection delay={0.1}>
             <Typography variant="body1" color="textSecondary" textAlign="center" sx={{ maxWidth: 800, mx: "auto", mb: 4 }}>
@@ -192,13 +198,13 @@ export default function HomePageClient({ groups }: HomePageClientProps) {
       <Divider />
 
       {/* Featured Product Categories Section */}
-      <Box sx={{ background: '#d1d5db', borderBottom: '1px solid #b0b6be' }}>
+      <Box sx={{ background: 'linear-gradient(180deg, #e5e7eb 0%, #f3f4f6 100%)', py: 2 }}>
         <ScrollableSection id="section-featured-categories" title="Featured Product Categories">
           <FadeInSection delay={0.2}>
             <Container maxWidth="lg">
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' }, gap: 4 }}>
                 {/* Category 1 */}
-                <Card component={NextLink} href="/catalog/61/Electrical%20Wire%20and%20Cable" sx={{ textDecoration: 'none', ':hover': { boxShadow: 6 } }}>
+                <Card component={NextLink} href="/catalog/61/Electrical%20Wire%20and%20Cable" sx={{ textDecoration: 'none', transition: 'all 0.3s ease', ':hover': { boxShadow: 6, transform: 'translateY(-8px)' } }}>
                   <CardMedia component="img" height="140" image="/category-images/61/1.png" alt="Electrical Wire and Cable" />
                   <CardContent>
                     <Typography variant="h6" fontWeight="bold">Electrical Wire & Cable</Typography>
@@ -206,7 +212,7 @@ export default function HomePageClient({ groups }: HomePageClientProps) {
                   </CardContent>
                 </Card>
                 {/* Category 2 */}
-                <Card component={NextLink} href="/catalog/31/Bearings" sx={{ textDecoration: 'none', ':hover': { boxShadow: 6 } }}>
+                <Card component={NextLink} href="/catalog/31/Bearings" sx={{ textDecoration: 'none', transition: 'all 0.3s ease', ':hover': { boxShadow: 6, transform: 'translateY(-8px)' } }}>
                   <CardMedia component="img" height="140" image="/category-images/31/1.png" alt="Bearings" />
                   <CardContent>
                     <Typography variant="h6" fontWeight="bold">Bearings</Typography>
@@ -214,7 +220,7 @@ export default function HomePageClient({ groups }: HomePageClientProps) {
                   </CardContent>
                 </Card>
                 {/* Category 3 */}
-                <Card component={NextLink} href="/catalog/43/Pumps%20and%20Compressors" sx={{ textDecoration: 'none', ':hover': { boxShadow: 6 } }}>
+                <Card component={NextLink} href="/catalog/43/Pumps%20and%20Compressors" sx={{ textDecoration: 'none', transition: 'all 0.3s ease', ':hover': { boxShadow: 6, transform: 'translateY(-8px)' } }}>
                   <CardMedia component="img" height="140" image="/category-images/43/1.png" alt="Pumps and Compressors" />
                   <CardContent>
                     <Typography variant="h6" fontWeight="bold">Pumps & Compressors</Typography>
@@ -222,7 +228,7 @@ export default function HomePageClient({ groups }: HomePageClientProps) {
                   </CardContent>
                 </Card>
                 {/* Category 4 */}
-                <Card component={NextLink} href="/catalog/60/Fittings" sx={{ textDecoration: 'none', ':hover': { boxShadow: 6 } }}>
+                <Card component={NextLink} href="/catalog/60/Fittings" sx={{ textDecoration: 'none', transition: 'all 0.3s ease', ':hover': { boxShadow: 6, transform: 'translateY(-8px)' } }}>
                   <CardMedia component="img" height="140" image="/category-images/60/1.png" alt="Fittings" />
                   <CardContent>
                     <Typography variant="h6" fontWeight="bold">Fittings</Typography>
@@ -237,7 +243,7 @@ export default function HomePageClient({ groups }: HomePageClientProps) {
       <Divider />
 
       {/* Why Choose Us Section */}
-      <Box sx={{ background: '#d1d5db', borderBottom: '1px solid #b0b6be' }}>
+      <Box sx={{ background: 'linear-gradient(180deg, #f3f4f6 0%, #ffffff 100%)', py: 2 }}>
         <ScrollableSection id="section-why-choose-us" title="Why Choose Us?">
           <FadeInSection delay={0.3}>
             <Container maxWidth="lg">
@@ -341,13 +347,19 @@ export default function HomePageClient({ groups }: HomePageClientProps) {
         ))} */}
 
       {/* Contact Section - Wrapped in ScrollableSection for scrolling */}
-      <ScrollableSection id="section-contact" title="Contact Us">
-        <FadeInSection delay={0.4}>
-          <Typography variant="body1" color="textSecondary" textAlign="center">📍 980 Rockledge Blvd, Rockledge FL, 32955</Typography>
-          <Typography variant="body1" color="textSecondary" textAlign="center">✉️ Email: admin@skywardparts.com</Typography>
-          <Typography variant="body1" color="textSecondary" textAlign="center">📞 Phone: +1 (321) 351-2875</Typography>
-        </FadeInSection>
-      </ScrollableSection>
+      <Box sx={{ background: 'linear-gradient(180deg, #ffffff 0%, #f9fafb 100%)' }}>
+        <ScrollableSection id="section-contact" title="Contact Us">
+          <FadeInSection delay={0.4}>
+            <Container maxWidth="sm">
+              <Box sx={{ bgcolor: 'white', p: 4, borderRadius: 2, boxShadow: 1 }}>
+                <Typography variant="body1" color="textSecondary" textAlign="center" sx={{ mb: 2 }}>📍 980 Rockledge Blvd, Rockledge FL, 32955</Typography>
+                <Typography variant="body1" color="textSecondary" textAlign="center" sx={{ mb: 2 }}>✉️ Email: admin@skywardparts.com</Typography>
+                <Typography variant="body1" color="textSecondary" textAlign="center">📞 Phone: +1 (321) 351-2875</Typography>
+              </Box>
+            </Container>
+          </FadeInSection>
+        </ScrollableSection>
+      </Box>
     </Box>
   );
 }
